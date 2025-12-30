@@ -18,6 +18,11 @@ type ConfirmPaymentInput struct {
 }
 
 func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) (bool, error) {
+	l := logger.Get(ctx).With().
+		Str("order", in.OrderID).
+		Str("external_payment_id", in.ExternalPaymentID).
+		Logger()
+
 	session := app_context.GetSession(ctx)
 	if !session.Role.IsSystem() {
 		return false, errs.ErrForbidden
@@ -44,44 +49,45 @@ func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) 
 		return true, nil
 	}
 
-	logger.L().Warn().Str("order", in.OrderID).Msg("payment confirmation not updated, checking order status")
+	l.Warn().Msg("payment confirmation not updated, checking order status")
 	return c.handleNotConfirmedPayment(ctx, in)
 }
 
 func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPaymentInput) (bool, error) {
+	l := logger.Get(ctx).
+		With().
+		Str("order", in.OrderID).
+		Str("external_payment_id", in.ExternalPaymentID).
+		Logger()
+
 	orderFound, err := c.gateway.GetByID(g.GetByIDFilter{ID: in.OrderID})
 	if err != nil {
 		return false, err
 	}
 
 	if orderFound == nil {
-		logger.L().Error().Str("order", in.OrderID).Msg("order not found when confirming payment")
+		l.Error().Msg("order not found when confirming payment")
 		return false, nil
 	}
 
 	if orderFound.PaymentStatus == order.PaymentPaid {
 		if orderFound.ExternalPaymentID != nil && *orderFound.ExternalPaymentID == in.ExternalPaymentID {
-			logger.L().Info().Str("order", in.OrderID).
-				Str("external_payment_id", in.ExternalPaymentID).
-				Msg("payment already confirmed for this order")
+			l.Info().Msg("payment already confirmed for this order")
+
 			return true, nil
 		}
 
-		logger.L().Error().
-			Str("order", in.OrderID).
-			Str("external_payment_id", in.ExternalPaymentID).
-			Msg("conflict on confirming payment, external_payment_id already used")
+		logger.L().Error().Msg("conflict on confirming payment, external_payment_id already used")
 		return false, errs.ErrConflict
 	}
 
 	if orderFound.PaymentStatus != order.PaymentPending {
-		logger.L().Error().
-			Str("order", in.OrderID).
+		l.Error().
 			Str("current_status", string(orderFound.PaymentStatus)).
 			Msg("invalid transition when confirming payment")
 		return false, errs.InvalidTranstion(orderFound.PaymentStatus, order.PaymentPaid)
 	}
 
-	logger.L().Error().Str("order", in.OrderID).Msg("payment confirmation not updated due to unknown reason")
+	l.Error().Msg("payment confirmation not updated due to unknown reason")
 	return false, nil
 }
