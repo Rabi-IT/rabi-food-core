@@ -344,7 +344,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
 		orderID := fixtures.Order.Create(t.T(), nil, token)
-		systemToken := fixtures.Auth.SystemToken(t.T(), tenant.UserID)
+		systemToken := fixtures.Auth.SystemToken(t.T())
 
 		body := order_case.ConfirmPaymentInput{
 			OrderID:           orderID,
@@ -369,7 +369,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
 		orderID := fixtures.Order.Create(t.T(), nil, token)
-		systemToken := fixtures.Auth.SystemToken(t.T(), tenant.UserID)
+		systemToken := fixtures.Auth.SystemToken(t.T())
 
 		body := order_case.ConfirmPaymentInput{
 			OrderID:           orderID,
@@ -410,7 +410,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
 		orderID := fixtures.Order.Create(t.T(), nil, token)
-		systemToken := fixtures.Auth.SystemToken(t.T(), tenant.UserID)
+		systemToken := fixtures.Auth.SystemToken(t.T())
 		body := order_case.ConfirmPaymentInput{
 			OrderID:           orderID,
 			ExternalPaymentID: "any-id",
@@ -432,7 +432,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
 		orderID1 := fixtures.Order.Create(t.T(), nil, token)
 		orderID2 := fixtures.Order.Create(t.T(), nil, token)
-		systemToken := fixtures.Auth.SystemToken(t.T(), tenant.UserID)
+		systemToken := fixtures.Auth.SystemToken(t.T())
 
 		body1 := order_case.ConfirmPaymentInput{
 			OrderID:           orderID1,
@@ -458,8 +458,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 	})
 
 	t.Run("should return not found when order does not exist", func() {
-		tenant := fixtures.Tenant.Create(t.T(), nil)
-		systemToken := fixtures.Auth.SystemToken(t.T(), tenant.UserID)
+		systemToken := fixtures.Auth.SystemToken(t.T())
 		NON_EXISTING_ORDER_ID := uuid.NewString()
 
 		body := order_case.ConfirmPaymentInput{
