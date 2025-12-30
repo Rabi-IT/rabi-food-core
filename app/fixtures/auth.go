@@ -77,3 +77,22 @@ func (auth *authFixture) StaffToken(t *testing.T, id string) string {
 
 	return tk
 }
+
+func (auth *authFixture) SystemToken(t *testing.T, tenantID string) string {
+	t.Helper()
+
+	claims := jwt.MapClaims{
+		"user_id":   "system",
+		"name":      "system",
+		"email":     "system@system.com",
+		"role":      domain.SystemRole,
+		"tenant_id": tenantID,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tk, err := token.SignedString([]byte(config.AuthSecret))
+	require.NoError(t, err)
+
+	return tk
+}
