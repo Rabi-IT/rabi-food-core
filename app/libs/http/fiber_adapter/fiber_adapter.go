@@ -10,7 +10,6 @@ import (
 	"rabi-food-core/libs/http/controllers/user_controller"
 	"rabi-food-core/libs/http/fiber_adapter/middlewares"
 	"rabi-food-core/libs/http/routes"
-	"rabi-food-core/libs/logger"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -41,16 +40,15 @@ func New(
 		SigningKey: jwtware.SigningKey{Key: []byte(config.AuthSecret)},
 	})
 
-	requestIDMiddleware := requestid.New(requestid.Config{
-		ContextKey: logger.LoggerKey,
-	})
+	requestIDMiddleware := requestid.New()
 
 	app.
 		Use(cors.New()).
 		Use(requestIDMiddleware).
 		Post("/tenant", tenantController.Create).
 		Use(jwtMiddleware).
-		Use(middlewares.Session)
+		Use(middlewares.Session).
+		Use(middlewares.Logging())
 
 	routes.User(app, userController)
 	routes.Tenant(app, tenantController)

@@ -11,7 +11,7 @@ import (
 
 var (
 	base      zerolog.Logger
-	LoggerKey = "loggerKey"
+	loggerKey = "loggerKey"
 )
 
 func init() {
@@ -28,7 +28,7 @@ func init() {
 
 // Get retrieves the logger from the given context.
 func Get(c context.Context) *zerolog.Logger {
-	v := c.Value(LoggerKey)
+	v := c.Value(loggerKey)
 	if l, ok := v.(*zerolog.Logger); ok {
 		return l
 	}
@@ -39,4 +39,8 @@ func Get(c context.Context) *zerolog.Logger {
 // L returns the base logger instance.
 func L() *zerolog.Logger {
 	return &base
+}
+
+func WithContext(c context.Context, logger zerolog.Logger) context.Context {
+	return context.WithValue(c, loggerKey, &logger)
 }
