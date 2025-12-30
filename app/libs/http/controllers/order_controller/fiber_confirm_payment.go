@@ -21,7 +21,7 @@ func (c *OrderController) ConfirmPayment(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	ok, err := c.usecase.ConfirmPayment(ctx.Context(), order_case.ConfirmPaymentInput{
+	ok, err := c.usecase.ConfirmPayment(ctx.UserContext(), order_case.ConfirmPaymentInput{
 		OrderID:           orderID,
 		ExternalPaymentID: body.ExternalPaymentID,
 		Provider:          body.Provider,

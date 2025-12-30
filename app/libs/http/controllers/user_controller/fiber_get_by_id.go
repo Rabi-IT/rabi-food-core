@@ -17,7 +17,7 @@ func (c *UserController) GetByID(ctx *fiber.Ctx) error {
 	}
 
 	filter.ID = ctx.Params("id")
-	data, err := c.usecase.GetByID(ctx.Context(), filter)
+	data, err := c.usecase.GetByID(ctx.UserContext(), filter)
 
 	if err != nil {
 		return err

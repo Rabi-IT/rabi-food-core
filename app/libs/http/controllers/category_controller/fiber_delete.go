@@ -17,7 +17,7 @@ func (c *CategoryController) Delete(ctx *fiber.Ctx) error {
 	}
 
 	filter.ID = ctx.Params("id")
-	deleted, err := c.usecase.Delete(ctx.Context(), filter)
+	deleted, err := c.usecase.Delete(ctx.UserContext(), filter)
 
 	if err != nil {
 		return err

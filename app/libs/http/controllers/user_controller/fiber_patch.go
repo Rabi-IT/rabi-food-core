@@ -21,7 +21,7 @@ func (c *UserController) Patch(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	updated, err := c.usecase.Patch(ctx.Context(), ctx.Params("id"), data)
+	updated, err := c.usecase.Patch(ctx.UserContext(), ctx.Params("id"), data)
 
 	if err != nil {
 		return err

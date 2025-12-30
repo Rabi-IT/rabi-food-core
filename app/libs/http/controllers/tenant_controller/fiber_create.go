@@ -20,7 +20,7 @@ func (c *TenantController) Create(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	output, err := c.usecase.Create(ctx.Context(), data)
+	output, err := c.usecase.Create(ctx.UserContext(), data)
 
 	if err != nil {
 		return err

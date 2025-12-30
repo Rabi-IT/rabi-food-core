@@ -8,7 +8,7 @@ import (
 
 func (c *UserController) Delete(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
-	deleted, err := c.usecase.Delete(ctx.Context(), id)
+	deleted, err := c.usecase.Delete(ctx.UserContext(), id)
 
 	if err != nil {
 		return err

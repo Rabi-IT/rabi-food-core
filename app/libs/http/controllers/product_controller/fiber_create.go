@@ -20,7 +20,7 @@ func (c *ProductController) Create(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	id, err := c.usecase.Create(ctx.Context(), data)
+	id, err := c.usecase.Create(ctx.UserContext(), data)
 
 	if err != nil {
 		return err

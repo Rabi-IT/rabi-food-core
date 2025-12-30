@@ -30,7 +30,7 @@ func (c *CategoryController) Paginate(ctx *fiber.Ctx) error {
 		PageSize: pageSize,
 	}
 
-	result, err := c.usecase.Paginate(ctx.Context(), filter, paginate)
+	result, err := c.usecase.Paginate(ctx.UserContext(), filter, paginate)
 
 	if err != nil {
 		return err

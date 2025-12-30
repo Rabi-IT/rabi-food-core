@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"rabi-food-core/app_context"
@@ -36,7 +37,8 @@ func Session(c *fiber.Ctx) error {
 		Role:           domain.Role(fmt.Sprint(claims["role"])),
 	}
 
-	c.Context().SetUserValue(app_context.SessionKey, session)
+	ctx := context.WithValue(c.Context(), app_context.SessionKey, session)
+	c.SetUserContext(ctx)
 
 	return c.Next()
 }

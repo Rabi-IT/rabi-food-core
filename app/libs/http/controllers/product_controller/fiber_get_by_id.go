@@ -9,7 +9,7 @@ import (
 func (c *ProductController) GetByID(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 
-	data, err := c.usecase.GetByID(ctx.Context(), id)
+	data, err := c.usecase.GetByID(ctx.UserContext(), id)
 
 	if err != nil {
 		return err

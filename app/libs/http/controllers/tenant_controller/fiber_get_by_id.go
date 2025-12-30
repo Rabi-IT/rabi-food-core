@@ -7,7 +7,7 @@ import (
 )
 
 func (c *TenantController) GetByID(ctx *fiber.Ctx) error {
-	data, err := c.usecase.GetByID(ctx.Context(), ctx.Params("id"))
+	data, err := c.usecase.GetByID(ctx.UserContext(), ctx.Params("id"))
 
 	if err != nil {
 		return err
