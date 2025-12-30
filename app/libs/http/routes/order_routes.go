@@ -9,7 +9,6 @@ import (
 func Order(app *fiber.App, c *order_controller.OrderController) {
 	route := app.Group("/order")
 	route.Post("/", c.Create)
-	route.Patch("/:id", c.Patch)
 	route.Delete("/:id", c.Delete)
 	route.Get("/:id", c.GetByID)
 	route.Get("/", c.Paginate)
