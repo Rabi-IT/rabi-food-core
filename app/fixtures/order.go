@@ -95,3 +95,29 @@ func (orderFixture) Patch(t *testing.T, id string, input *order_gateway.PatchVal
 
 	return nil
 }
+
+func (orderFixture) ConfirmPayment(t *testing.T, orderID string, input *order_case.ConfirmPaymentInput, token string) *errs.AppError {
+	t.Helper()
+
+	obj := httpexpect.Default(t, AppURL).
+		Request(http.MethodPost, Order.URI+orderID+"/payments/confirm").
+		WithHeader("Authorization", "Bearer "+token).
+		WithJSON(input).
+		Expect()
+
+	raw := obj.Raw()
+
+	if raw.StatusCode == http.StatusNotFound {
+		return &errs.AppError{Status: raw.StatusCode}
+	}
+
+	if raw.StatusCode != http.StatusOK {
+		appErr := errs.AppError{}
+		obj.JSON().Object().Decode(&appErr)
+		err := raw.Body.Close()
+		require.NoError(t, err)
+		return &appErr
+	}
+
+	return nil
+}

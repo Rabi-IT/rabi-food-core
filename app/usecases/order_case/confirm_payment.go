@@ -1,0 +1,87 @@
+package order_case
+
+import (
+	"context"
+	"rabi-food-core/app_context"
+	"rabi-food-core/domain/order"
+	g "rabi-food-core/libs/database/gateways/order_gateway"
+	"rabi-food-core/libs/errs"
+	"rabi-food-core/libs/logger"
+	"time"
+)
+
+type ConfirmPaymentInput struct {
+	OrderID           string
+	ExternalPaymentID string    `json:"external_payment_id" validate:"required"`
+	Provider          string    `json:"provider" validate:"required"`
+	PaidAt            time.Time `json:"paid_at" validate:"required"`
+}
+
+func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) (bool, error) {
+	session := app_context.GetSession(ctx)
+	if !session.Role.IsSystem() {
+		return false, errs.ErrForbidden
+	}
+
+	updated, err := c.gateway.Patch(g.PatchFilter{
+		ID:            in.OrderID,
+		PaymentStatus: order.PaymentPending,
+	}, g.PatchValues{
+		ExternalPaymentID: in.ExternalPaymentID,
+		PaymentStatus:     order.PaymentPaid,
+		Provider:          in.Provider,
+		PaidAt:            in.PaidAt,
+	})
+
+	if err != nil {
+		if errs.IsUniqueViolation(err) {
+			return false, errs.ErrConflict
+		}
+		return false, err
+	}
+
+	if updated {
+		return true, nil
+	}
+
+	logger.L().Warn().Str("order", in.OrderID).Msg("payment confirmation not updated, checking order status")
+	return c.handleNotConfirmedPayment(ctx, in)
+}
+
+func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPaymentInput) (bool, error) {
+	orderFound, err := c.gateway.GetByID(g.GetByIDFilter{ID: in.OrderID})
+	if err != nil {
+		return false, err
+	}
+
+	if orderFound == nil {
+		logger.L().Error().Str("order", in.OrderID).Msg("order not found when confirming payment")
+		return false, nil
+	}
+
+	if orderFound.PaymentStatus == order.PaymentPaid {
+		if orderFound.ExternalPaymentID != nil && *orderFound.ExternalPaymentID == in.ExternalPaymentID {
+			logger.L().Info().Str("order", in.OrderID).
+				Str("external_payment_id", in.ExternalPaymentID).
+				Msg("payment already confirmed for this order")
+			return true, nil
+		}
+
+		logger.L().Error().
+			Str("order", in.OrderID).
+			Str("external_payment_id", in.ExternalPaymentID).
+			Msg("conflict on confirming payment, external_payment_id already used")
+		return false, errs.ErrConflict
+	}
+
+	if orderFound.PaymentStatus != order.PaymentPending {
+		logger.L().Error().
+			Str("order", in.OrderID).
+			Str("current_status", string(orderFound.PaymentStatus)).
+			Msg("invalid transition when confirming payment")
+		return false, errs.InvalidTranstion(orderFound.PaymentStatus, order.PaymentPaid)
+	}
+
+	logger.L().Error().Str("order", in.OrderID).Msg("payment confirmation not updated due to unknown reason")
+	return false, nil
+}

@@ -42,6 +42,8 @@ func (g *GormOrderGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutput,
 		TotalPrice:        output.TotalPrice,
 		Items:             items,
 		CreatedAt:         output.CreatedAt,
+		PaidAt:            output.PaidAt,
+		ExternalPaymentID: output.ExternalPaymentID,
 	}
 
 	return &adapted, nil

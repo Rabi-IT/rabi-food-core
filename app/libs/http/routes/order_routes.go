@@ -12,4 +12,5 @@ func Order(app *fiber.App, c *order_controller.OrderController) {
 	route.Delete("/:id", c.Delete)
 	route.Get("/:id", c.GetByID)
 	route.Get("/", c.Paginate)
+	route.Post("/:id/payments/confirm", c.ConfirmPayment)
 }

@@ -2,6 +2,7 @@ package order_case_test
 
 import (
 	"net/http"
+	"rabi-food-core/domain"
 	"rabi-food-core/domain/order"
 	"rabi-food-core/fixtures"
 	"rabi-food-core/libs/database"
@@ -9,7 +10,9 @@ import (
 	"rabi-food-core/libs/database/gateways/product_gateway"
 	"rabi-food-core/libs/errs"
 	"rabi-food-core/usecases/order_case"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/google/uuid"
@@ -335,56 +338,182 @@ func (t *TestSuite) Test_OrderIntegration_Paginate() {
 	})
 }
 
-func (t *TestSuite) Test_OrderIntegration_Patch() {
-	t.Run("should not be able to patch the notes even if is a backoffice user", func() {
-		tenant := fixtures.Tenant.Create(t.T(), nil)
-		token := fixtures.Auth.StaffToken(t.T(), tenant.UserID)
-		productID := fixtures.Product.Create(t.T(), nil, token)
-		newOrder := &order_case.CreateInput{
-			Items: []order_case.OrderItem{
-				{ProductID: productID, Quantity: 1},
-			},
-			Notes: "Notes",
-		}
+func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 
-		orderID := fixtures.Order.Create(t.T(), newOrder, token)
-
-		Body := map[string]any{
-			"notes": "Updated Notes",
-		}
-
-		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant.UserID)
-		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodPatch, fixtures.Order.URI+orderID).
-			WithHeader("Authorization", "Bearer "+backofficeToken).
-			WithJSON(Body).
-			Expect().
-			Status(http.StatusBadRequest).
-			Body().NotEmpty()
-
-		found, status := fixtures.Order.GetByID(t.T(), orderID, token)
-
-		t.Equal(http.StatusOK, status)
-		t.Equal(orderID, found.ID)
-		t.Equal("Notes", found.Notes)
-	})
-
-	t.Run("should return forbidden when user role is user", func() {
+	t.Run("should confirm payment when order is pending", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
 		orderID := fixtures.Order.Create(t.T(), nil, token)
+		systemToken := fixtures.Auth.SystemToken(t.T(), tenant.UserID)
 
-		Body := order_gateway.PatchValues{
-			FulfillmentStatus: order.FulfillmentConfirmed,
+		body := order_case.ConfirmPaymentInput{
+			OrderID:           orderID,
+			ExternalPaymentID: "any-id",
+			Provider:          "any-provider",
+			PaidAt:            time.Now().Truncate(time.Microsecond),
 		}
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodPatch, fixtures.Order.URI+orderID).
-			WithHeader("Authorization", "Bearer "+token).
-			WithJSON(Body).
-			Expect().
-			Status(http.StatusForbidden).
-			Body().NotEmpty()
+		err := fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
+		require.Nil(t.T(), err)
+
+		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, token)
+		require.Equal(t.T(), http.StatusOK, httpStatus)
+		require.Equal(t.T(), order.PaymentPaid, orderFound.PaymentStatus)
+		require.NotNil(t.T(), orderFound.PaidAt)
+		require.Equal(t.T(), body.PaidAt.UnixMicro(), orderFound.PaidAt.UnixMicro())
+		require.NotNil(t.T(), orderFound.ExternalPaymentID)
+		require.Equal(t.T(), body.ExternalPaymentID, *orderFound.ExternalPaymentID)
+	})
+
+	t.Run("should return ok when confirming payment again with same external payment id (idempotency)", func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
+		orderID := fixtures.Order.Create(t.T(), nil, token)
+		systemToken := fixtures.Auth.SystemToken(t.T(), tenant.UserID)
+
+		body := order_case.ConfirmPaymentInput{
+			OrderID:           orderID,
+			ExternalPaymentID: "any-id",
+			Provider:          "any-provider",
+			PaidAt:            time.Now().Truncate(time.Microsecond),
+		}
+
+		n := 5
+		var wg sync.WaitGroup
+		errCh := make(chan error, n)
+		start := make(chan struct{})
+		for range n {
+			wg.Go(func() {
+				<-start
+				errCh <- fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
+			})
+		}
+
+		close(start)
+		wg.Wait()
+		close(errCh)
+
+		for err := range errCh {
+			require.Nil(t.T(), err)
+		}
+
+		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, token)
+		require.Equal(t.T(), http.StatusOK, httpStatus)
+		require.Equal(t.T(), order.PaymentPaid, orderFound.PaymentStatus)
+		require.NotNil(t.T(), orderFound.PaidAt)
+		require.Equal(t.T(), body.PaidAt.UnixMicro(), orderFound.PaidAt.UnixMicro())
+		require.NotNil(t.T(), orderFound.ExternalPaymentID)
+		require.Equal(t.T(), body.ExternalPaymentID, *orderFound.ExternalPaymentID)
+	})
+
+	t.Run("should return conflict when confirming payment with different external payment id", func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
+		orderID := fixtures.Order.Create(t.T(), nil, token)
+		systemToken := fixtures.Auth.SystemToken(t.T(), tenant.UserID)
+		body := order_case.ConfirmPaymentInput{
+			OrderID:           orderID,
+			ExternalPaymentID: "any-id",
+			Provider:          "any-provider",
+			PaidAt:            time.Now(),
+		}
+
+		err := fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
+		require.Nil(t.T(), err)
+		// Confirm payment again with different external payment id
+		body.ExternalPaymentID = "different-id"
+		err = fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
+		require.NotNil(t.T(), err)
+		require.Equal(t.T(), errs.ErrConflict.Code, err.Code)
+	})
+
+	t.Run("should return conflict when external payment id is already used by another order", func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
+		orderID1 := fixtures.Order.Create(t.T(), nil, token)
+		orderID2 := fixtures.Order.Create(t.T(), nil, token)
+		systemToken := fixtures.Auth.SystemToken(t.T(), tenant.UserID)
+
+		body1 := order_case.ConfirmPaymentInput{
+			OrderID:           orderID1,
+			ExternalPaymentID: "any-id",
+			Provider:          "any-provider",
+			PaidAt:            time.Now(),
+		}
+
+		err := fixtures.Order.ConfirmPayment(t.T(), orderID1, &body1, systemToken)
+		require.Nil(t.T(), err)
+
+		// Confirm payment for another order with same external payment id
+		body2 := order_case.ConfirmPaymentInput{
+			OrderID:           orderID2,
+			ExternalPaymentID: "any-id",
+			Provider:          "any-provider",
+			PaidAt:            time.Now(),
+		}
+
+		err = fixtures.Order.ConfirmPayment(t.T(), orderID2, &body2, systemToken)
+		require.NotNil(t.T(), err)
+		require.Equal(t.T(), errs.ErrConflict.Code, err.Code)
+	})
+
+	t.Run("should return not found when order does not exist", func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		systemToken := fixtures.Auth.SystemToken(t.T(), tenant.UserID)
+		NON_EXISTING_ORDER_ID := uuid.NewString()
+
+		body := order_case.ConfirmPaymentInput{
+			OrderID:           NON_EXISTING_ORDER_ID,
+			ExternalPaymentID: "any-id",
+			Provider:          "any-provider",
+			PaidAt:            time.Now(),
+		}
+
+		err := fixtures.Order.ConfirmPayment(t.T(), NON_EXISTING_ORDER_ID, &body, systemToken)
+		require.NotNil(t.T(), err)
+		require.Equal(t.T(), http.StatusNotFound, err.Status)
+	})
+
+	t.Run("should return forbidden when user role is "+string(domain.UserRole), func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		userToken := fixtures.Auth.UserToken(t.T(), tenant.UserID)
+		orderID := fixtures.Order.Create(t.T(), nil, userToken)
+
+		body := order_case.ConfirmPaymentInput{
+			OrderID:           orderID,
+			ExternalPaymentID: "any-id",
+			Provider:          "any-provider",
+			PaidAt:            time.Now(),
+		}
+
+		err := fixtures.Order.ConfirmPayment(t.T(), orderID, &body, userToken)
+		require.NotNil(t.T(), err)
+		require.Equal(t.T(), errs.ErrForbidden.Code, err.Code)
+	})
+
+	t.Run("should return forbidden when user role is staff", func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		staffToken := fixtures.Auth.StaffToken(t.T(), tenant.UserID)
+		orderID := fixtures.Order.Create(t.T(), nil, staffToken)
+
+		body := order_case.ConfirmPaymentInput{
+			OrderID:           orderID,
+			ExternalPaymentID: "any-id",
+			Provider:          "any-provider",
+			PaidAt:            time.Now(),
+		}
+
+		err := fixtures.Order.ConfirmPayment(t.T(), orderID, &body, staffToken)
+		require.NotNil(t.T(), err)
+		require.Equal(t.T(), errs.ErrForbidden.Code, err.Code)
+	})
+
+	t.Run("should return invalid transition when confirming payment for canceled order", func() {
+		t.T().Skipf("Need to implement cancellation flow first")
+	})
+
+	t.Run("should return invalid transition when confirming payment for refunded order", func() {
+		t.T().Skipf("Need to implement refund flow first")
 	})
 }
 

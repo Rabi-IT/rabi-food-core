@@ -49,19 +49,22 @@ type GetByIDOutput struct {
 	Notes             string                  `json:"notes"`
 	TotalPrice        uint                    `json:"totalPrice"`
 	Items             []OrderItem             `json:"items"`
+	PaidAt            *time.Time              `json:"paidAt"`
 	CreatedAt         time.Time               `json:"createdAt"`
+	ExternalPaymentID *string                 `json:"externalPaymentId"`
 }
 
 type PatchFilter struct {
-	ID                  string
-	TenantID            string
-	DeliveryStatusIn    []order.DeliveryStatus
-	FulfillmentStatusIn []order.FulfillmentStatus
-	PaymentStatusIn     []order.PaymentStatus
+	ID            string
+	TenantID      string
+	PaymentStatus order.PaymentStatus
 }
 
 type PatchValues struct {
+	PaidAt            time.Time               `json:"paidAt"`
+	Provider          string                  `json:"provider"`
 	PaymentStatus     order.PaymentStatus     `json:"paymentStatus"`
+	ExternalPaymentID string                  `json:"externalPaymentId"`
 	FulfillmentStatus order.FulfillmentStatus `json:"fulfillmentStatus"`
 	DeliveryStatus    order.DeliveryStatus    `json:"deliveryStatus"`
 }
