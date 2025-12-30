@@ -1,13 +1,18 @@
 package errs
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/lib/pq"
 )
 
 var (
 	ErrForbidden        = newErr("forbidden", http.StatusForbidden)
 	ErrNoValuesToUpdate = newErr("NO_VALUES_TO_UPDATE", http.StatusBadRequest)
+	ErrConflict         = newErr("CONFLICT", http.StatusConflict)
 )
 
 type AppError struct {
@@ -34,4 +39,22 @@ func (e *AppError) Unwrap() error {
 
 func (e *AppError) MarshalJSON() ([]byte, error) {
 	return fmt.Appendf(nil, `{"code":"%s","status":%d}`, e.Code, e.Status), nil
+}
+
+func IsUniqueViolation(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23505"
+	}
+
+	var pqErr *pq.Error
+	if errors.As(err, &pqErr) {
+		return string(pqErr.Code) == "23505"
+	}
+
+	return false
 }
