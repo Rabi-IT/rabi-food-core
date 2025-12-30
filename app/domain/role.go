@@ -24,3 +24,7 @@ func (r Role) IsStaff() bool {
 func (r Role) IsSystem() bool {
 	return r == SystemRole
 }
+
+func (r Role) String() string {
+	return string(r)
+}
