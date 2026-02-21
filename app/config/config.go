@@ -23,7 +23,8 @@ var (
 type DatabaseConfig struct {
 	Host         string
 	User         string
-	Password     string
+	// Password contains database password - gosec ignore
+	Password     string // #nosec G117
 	DatabaseName string
 	Port         string
 	LogLevel     logger.LogLevel

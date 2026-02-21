@@ -1,6 +1,7 @@
 package order_controller
 
 import (
+	"net/http"
 	"rabi-food-core/libs/http/fiber_adapter/parser"
 	"rabi-food-core/libs/validator"
 	"rabi-food-core/usecases/order_case"
@@ -13,11 +14,13 @@ func (c *OrderController) ConfirmPayment(ctx *fiber.Ctx) error {
 
 	body := order_case.ConfirmPaymentInput{}
 
-	if err := parser.ParseBody(ctx, &body); err != nil {
+	err := parser.ParseBody(ctx, &body)
+	if err != nil {
 		return ctx.JSON(err)
 	}
 
-	if err := validator.V.Struct(body); err != nil {
+	err = validator.V.Struct(body)
+	if err != nil {
 		return err
 	}
 
@@ -33,8 +36,8 @@ func (c *OrderController) ConfirmPayment(ctx *fiber.Ctx) error {
 	}
 
 	if !ok {
-		return ctx.SendStatus(404)
+		return ctx.SendStatus(http.StatusNotFound)
 	}
 
-	return ctx.SendStatus(200)
+	return ctx.SendStatus(http.StatusOK)
 }

@@ -30,6 +30,7 @@ func Logging() fiber.Handler {
 
 		log := b.Logger()
 		c.SetUserContext(logger.WithContext(uctx, log))
+
 		return c.Next()
 	}
 }

@@ -90,7 +90,11 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 	return id, nil
 }
 
-func (c *OrderCase) handleMissingProducts(ctx context.Context, requestedItems []OrderItem, foundProducts []product_gateway.ListOutput) (string, error) {
+func (c *OrderCase) handleMissingProducts(
+	ctx context.Context,
+	requestedItems []OrderItem,
+	foundProducts []product_gateway.ListOutput,
+) (string, error) {
 	foundProductIDs := make(map[string]struct{})
 	for _, product := range foundProducts {
 		foundProductIDs[product.ID] = struct{}{}

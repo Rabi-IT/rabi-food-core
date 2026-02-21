@@ -29,6 +29,7 @@ func (p PaymentStatus) GetPrerequisites() []PaymentStatus {
 
 func (p PaymentStatus) CanTransitionTo(target PaymentStatus) bool {
 	prerequisites := target.GetPrerequisites()
+
 	return slices.Contains(prerequisites, p)
 }
 

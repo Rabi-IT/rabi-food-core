@@ -66,7 +66,12 @@ func (orderFixture) GetByID(t *testing.T, id string, token string) (order_gatewa
 	return found, response.StatusCode
 }
 
-func (orderFixture) ExpectFulfillmentStatus(t *testing.T, id string, expectedStatus order.FulfillmentStatus, token string) {
+func (orderFixture) ExpectFulfillmentStatus(
+	t *testing.T,
+	id string,
+	expectedStatus order.FulfillmentStatus,
+	token string,
+) {
 	t.Helper()
 	found, httpStatus := Order.GetByID(t, id, token)
 	require.Equal(t, http.StatusOK, httpStatus)
@@ -90,13 +95,19 @@ func (orderFixture) Patch(t *testing.T, id string, input *order_gateway.PatchVal
 		obj.JSON().Object().Decode(&appErr)
 		err := raw.Body.Close()
 		require.NoError(t, err)
+
 		return &appErr
 	}
 
 	return nil
 }
 
-func (orderFixture) ConfirmPayment(t *testing.T, orderID string, input *order_case.ConfirmPaymentInput, token string) *errs.AppError {
+func (orderFixture) ConfirmPayment(
+	t *testing.T,
+	orderID string,
+	input *order_case.ConfirmPaymentInput,
+	token string,
+) *errs.AppError {
 	t.Helper()
 
 	obj := httpexpect.Default(t, AppURL).
@@ -116,6 +127,7 @@ func (orderFixture) ConfirmPayment(t *testing.T, orderID string, input *order_ca
 		obj.JSON().Object().Decode(&appErr)
 		err := raw.Body.Close()
 		require.NoError(t, err)
+
 		return &appErr
 	}
 

@@ -12,9 +12,9 @@ import (
 
 type ConfirmPaymentInput struct {
 	OrderID           string
-	ExternalPaymentID string    `json:"external_payment_id" validate:"required"`
-	Provider          string    `json:"provider" validate:"required"`
-	PaidAt            time.Time `json:"paid_at" validate:"required"`
+	ExternalPaymentID string    `json:"externalPaymentId" validate:"required"`
+	Provider          string    `json:"provider"          validate:"required"`
+	PaidAt            time.Time `json:"paidAt"            validate:"required"`
 }
 
 func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) (bool, error) {
@@ -42,6 +42,7 @@ func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) 
 		if errs.IsUniqueViolation(err) {
 			return false, errs.ErrConflict
 		}
+
 		return false, err
 	}
 
@@ -50,6 +51,7 @@ func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) 
 	}
 
 	l.Warn().Msg("payment confirmation not updated, checking order status")
+
 	return c.handleNotConfirmedPayment(ctx, in)
 }
 
@@ -67,6 +69,7 @@ func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPay
 
 	if orderFound == nil {
 		l.Error().Msg("order not found when confirming payment")
+
 		return false, nil
 	}
 
@@ -78,6 +81,7 @@ func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPay
 		}
 
 		logger.L().Error().Msg("conflict on confirming payment, external_payment_id already used")
+
 		return false, errs.ErrConflict
 	}
 
@@ -85,9 +89,11 @@ func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPay
 		l.Error().
 			Str("current_status", string(orderFound.PaymentStatus)).
 			Msg("invalid transition when confirming payment")
+
 		return false, errs.InvalidTranstion(orderFound.PaymentStatus, order.PaymentPaid)
 	}
 
 	l.Error().Msg("payment confirmation not updated due to unknown reason")
+
 	return false, nil
 }

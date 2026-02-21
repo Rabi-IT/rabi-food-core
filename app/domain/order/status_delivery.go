@@ -32,6 +32,7 @@ func (d DeliveryStatus) GetPrerequisites() []DeliveryStatus {
 
 func (d DeliveryStatus) CanTransitionTo(target DeliveryStatus) bool {
 	prerequisites := target.GetPrerequisites()
+
 	return slices.Contains(prerequisites, d)
 }
 

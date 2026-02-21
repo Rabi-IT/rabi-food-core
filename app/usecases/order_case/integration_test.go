@@ -16,7 +16,6 @@ import (
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -146,7 +145,6 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 			Status(http.StatusNotFound).
 			JSON().Object().
 			Value("code").IsEqual(expectedError.Code)
-
 	})
 
 	t.Run("should fail when some product IDs are missing in the database", func() {
@@ -339,7 +337,6 @@ func (t *TestSuite) Test_OrderIntegration_Paginate() {
 }
 
 func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
-
 	t.Run("should confirm payment when order is pending", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
@@ -354,15 +351,15 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		}
 
 		err := fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
-		require.Nil(t.T(), err)
+		t.Require().NoError(err)
 
 		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, token)
-		require.Equal(t.T(), http.StatusOK, httpStatus)
-		require.Equal(t.T(), order.PaymentPaid, orderFound.PaymentStatus)
-		require.NotNil(t.T(), orderFound.PaidAt)
-		require.Equal(t.T(), body.PaidAt.UnixMicro(), orderFound.PaidAt.UnixMicro())
-		require.NotNil(t.T(), orderFound.ExternalPaymentID)
-		require.Equal(t.T(), body.ExternalPaymentID, *orderFound.ExternalPaymentID)
+		t.Require().Equal(http.StatusOK, httpStatus)
+		t.Require().Equal(order.PaymentPaid, orderFound.PaymentStatus)
+		t.Require().NotNil(orderFound.PaidAt)
+		t.Require().Equal(body.PaidAt.UnixMicro(), orderFound.PaidAt.UnixMicro())
+		t.Require().NotNil(orderFound.ExternalPaymentID)
+		t.Require().Equal(body.ExternalPaymentID, *orderFound.ExternalPaymentID)
 	})
 
 	t.Run("should return ok when confirming payment again with same external payment id (idempotency)", func() {
@@ -394,16 +391,16 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		close(errCh)
 
 		for err := range errCh {
-			require.Nil(t.T(), err)
+			t.Require().NoError(err)
 		}
 
 		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, token)
-		require.Equal(t.T(), http.StatusOK, httpStatus)
-		require.Equal(t.T(), order.PaymentPaid, orderFound.PaymentStatus)
-		require.NotNil(t.T(), orderFound.PaidAt)
-		require.Equal(t.T(), body.PaidAt.UnixMicro(), orderFound.PaidAt.UnixMicro())
-		require.NotNil(t.T(), orderFound.ExternalPaymentID)
-		require.Equal(t.T(), body.ExternalPaymentID, *orderFound.ExternalPaymentID)
+		t.Require().Equal(http.StatusOK, httpStatus)
+		t.Require().Equal(order.PaymentPaid, orderFound.PaymentStatus)
+		t.Require().NotNil(orderFound.PaidAt)
+		t.Require().Equal(body.PaidAt.UnixMicro(), orderFound.PaidAt.UnixMicro())
+		t.Require().NotNil(orderFound.ExternalPaymentID)
+		t.Require().Equal(body.ExternalPaymentID, *orderFound.ExternalPaymentID)
 	})
 
 	t.Run("should return conflict when confirming payment with different external payment id", func() {
@@ -419,12 +416,12 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		}
 
 		err := fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
-		require.Nil(t.T(), err)
+		t.Require().NoError(err)
 		// Confirm payment again with different external payment id
 		body.ExternalPaymentID = "different-id"
 		err = fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
-		require.NotNil(t.T(), err)
-		require.Equal(t.T(), errs.ErrConflict.Code, err.Code)
+		t.Require().NotNil(err)
+		t.Require().Equal(errs.ErrConflict.Code, err.Code)
 	})
 
 	t.Run("should return conflict when external payment id is already used by another order", func() {
@@ -442,7 +439,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		}
 
 		err := fixtures.Order.ConfirmPayment(t.T(), orderID1, &body1, systemToken)
-		require.Nil(t.T(), err)
+		t.Require().NoError(err)
 
 		// Confirm payment for another order with same external payment id
 		body2 := order_case.ConfirmPaymentInput{
@@ -453,8 +450,8 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		}
 
 		err = fixtures.Order.ConfirmPayment(t.T(), orderID2, &body2, systemToken)
-		require.NotNil(t.T(), err)
-		require.Equal(t.T(), errs.ErrConflict.Code, err.Code)
+		t.Require().NotNil(err)
+		t.Require().Equal(errs.ErrConflict.Code, err.Code)
 	})
 
 	t.Run("should return not found when order does not exist", func() {
@@ -469,8 +466,8 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		}
 
 		err := fixtures.Order.ConfirmPayment(t.T(), NON_EXISTING_ORDER_ID, &body, systemToken)
-		require.NotNil(t.T(), err)
-		require.Equal(t.T(), http.StatusNotFound, err.Status)
+		t.Require().NotNil(err)
+		t.Require().Equal(http.StatusNotFound, err.Status)
 	})
 
 	t.Run("should return forbidden when user role is "+string(domain.UserRole), func() {
@@ -486,8 +483,8 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		}
 
 		err := fixtures.Order.ConfirmPayment(t.T(), orderID, &body, userToken)
-		require.NotNil(t.T(), err)
-		require.Equal(t.T(), errs.ErrForbidden.Code, err.Code)
+		t.Require().NotNil(err)
+		t.Require().Equal(errs.ErrForbidden.Code, err.Code)
 	})
 
 	t.Run("should return forbidden when user role is staff", func() {
@@ -503,8 +500,8 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		}
 
 		err := fixtures.Order.ConfirmPayment(t.T(), orderID, &body, staffToken)
-		require.NotNil(t.T(), err)
-		require.Equal(t.T(), errs.ErrForbidden.Code, err.Code)
+		t.Require().NotNil(err)
+		t.Require().Equal(errs.ErrForbidden.Code, err.Code)
 	})
 
 	t.Run("should return invalid transition when confirming payment for canceled order", func() {
@@ -583,8 +580,9 @@ func (t *TestSuite) Test_OrderIntegration_Patch_status() {
 				isLast := i == len(tt.flow)-1
 
 				if isLast && tt.err != nil {
-					require.NotNil(t.T(), appErr)
-					require.Equal(t.T(), tt.err.Code, appErr.Code)
+					t.Require().NotNil(appErr)
+					t.Require().Equal(tt.err.Code, appErr.Code)
+
 					return
 				}
 
@@ -593,7 +591,6 @@ func (t *TestSuite) Test_OrderIntegration_Patch_status() {
 			}
 		})
 	}
-
 }
 
 func (t *TestSuite) Test_OrderIntegration_Delete() {

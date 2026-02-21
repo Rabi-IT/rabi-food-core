@@ -27,6 +27,7 @@ func (f FulfillmentStatus) GetPrerequisites() []FulfillmentStatus {
 
 func (f FulfillmentStatus) CanTransitionTo(target FulfillmentStatus) bool {
 	prerequisites := target.GetPrerequisites()
+
 	return slices.Contains(prerequisites, f)
 }
 

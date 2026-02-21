@@ -9,9 +9,11 @@ import (
 	"github.com/rs/zerolog"
 )
 
+type contextKey string
+
 var (
 	base      zerolog.Logger
-	loggerKey = "loggerKey"
+	loggerKey = contextKey("loggerKey")
 )
 
 func init() {
@@ -20,7 +22,11 @@ func init() {
 
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if config.Env != "production" {
-		base = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339, NoColor: true}).With().Timestamp().Logger()
+		base = zerolog.New(zerolog.ConsoleWriter{
+			Out:        os.Stdout,
+			TimeFormat: time.RFC3339,
+			NoColor:    true,
+		}).With().Timestamp().Logger()
 	} else {
 		base = zerolog.New(os.Stdout).With().Timestamp().Logger()
 	}
