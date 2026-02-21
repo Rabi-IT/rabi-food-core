@@ -1,6 +1,6 @@
 module rabi-food-core
 
-go 1.25.3
+go 1.26.0
 
 require (
 	github.com/gavv/httpexpect/v2 v2.17.0
