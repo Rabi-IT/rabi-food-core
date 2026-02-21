@@ -10,7 +10,7 @@ Rabi Food Core is the backend service for the Rabi Food application, responsible
 
 Ensure you have the following installed and configured:
 
-* [Go](https://go.dev/dl/) **v1.25.3**
+* [Go](https://go.dev/dl/) **v1.26.0**
 * [Docker](https://docs.docker.com/get-docker/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 * [Task](https://taskfile.dev/installation/)
