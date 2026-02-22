@@ -19,8 +19,8 @@ type ConfirmPaymentInput struct {
 
 func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) (bool, error) {
 	l := logger.Get(ctx).With().
-		Str("order", in.OrderID).
-		Str("external_payment_id", in.ExternalPaymentID).
+		Str(logger.OrderID, in.OrderID).
+		Str(logger.PaymentID, in.ExternalPaymentID).
 		Logger()
 
 	session := app_context.GetSession(ctx)
@@ -52,15 +52,12 @@ func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) 
 
 	l.Warn().Msg("payment confirmation not updated, checking order status")
 
+	ctx = logger.WithContext(ctx, l)
 	return c.handleNotConfirmedPayment(ctx, in)
 }
 
 func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPaymentInput) (bool, error) {
-	l := logger.Get(ctx).
-		With().
-		Str("order", in.OrderID).
-		Str("external_payment_id", in.ExternalPaymentID).
-		Logger()
+	l := logger.Get(ctx)
 
 	orderFound, err := c.gateway.GetByID(g.GetByIDFilter{ID: in.OrderID})
 	if err != nil {
@@ -80,7 +77,7 @@ func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPay
 			return true, nil
 		}
 
-		logger.L().Error().Msg("conflict on confirming payment, external_payment_id already used")
+		l.Error().Msg("conflict on confirming payment, external_payment_id already used")
 
 		return false, errs.ErrConflict
 	}

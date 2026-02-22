@@ -39,11 +39,6 @@ func Get(c context.Context) *zerolog.Logger {
 		return l
 	}
 
-	return L()
-}
-
-// L returns the base logger instance.
-func L() *zerolog.Logger {
 	return &base
 }
 
