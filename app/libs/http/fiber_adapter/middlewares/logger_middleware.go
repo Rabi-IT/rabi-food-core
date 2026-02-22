@@ -20,8 +20,6 @@ func Logging() fiber.Handler {
 		l := logger.Get(uctx).
 			With().
 			Str(logger.RequestID, requestID).
-			Str(logger.Path, c.Path()).
-			Str(logger.Method, c.Method()).
 			Str(logger.UserID, userID)
 
 		if isBackoffice {
@@ -34,6 +32,11 @@ func Logging() fiber.Handler {
 
 		log := l.Logger()
 		c.SetUserContext(logger.WithContext(uctx, log))
+
+		log.Info().
+			Str(logger.Path, c.Path()).
+			Str(logger.Method, c.Method()).
+			Msg("Incoming request")
 
 		return c.Next()
 	}
