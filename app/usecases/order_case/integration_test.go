@@ -377,7 +377,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 
 		n := 5
 		var wg sync.WaitGroup
-		errCh := make(chan error, n)
+		errCh := make(chan *errs.AppError, n)
 		start := make(chan struct{})
 		for range n {
 			wg.Go(func() {
