@@ -28,12 +28,24 @@
 
 - **[Go](https://go.dev/dl/)** v1.26.0+
 - **[Docker](https://docs.docker.com/get-docker/)** & **[Docker Compose](https://docs.docker.com/compose/install/)**
-- **[Task](https://taskfile.dev/installation/)** - Task runner
+
+### ⚙️ Install Dependencies
 
 ```bash
-# Install Task
-go install github.com/go-task/task/v3/cmd/task@latest
+# Clone repository
+git clone https://github.com/kelvinfloresta/rabi-food-core.git
+cd rabi-food-core
+
+# Install all required dependencies (Windows, Linux and macOS)
+go run setup.go
 ```
+
+This will install:
+- **Task** - Task runner for automation
+- **golangci-lint** - Go linter for code quality
+- **gotestsum** - Enhanced test runner
+- **mockery** - Mock generator
+- All Go module dependencies
 
 ### ⚡ Run the Project
 
@@ -41,6 +53,9 @@ go install github.com/go-task/task/v3/cmd/task@latest
 # Clone repository
 git clone https://github.com/kelvinfloresta/rabi-food-core.git
 cd rabi-food-core
+
+# Install all dependencies (Windows, Linux and macOS)
+go run setup.go
 
 # Start development environment
 task dev
@@ -151,7 +166,7 @@ task test
 # Tests with observability
 task test-with-logs
 
-# Linting
+# Linting and code quality
 task lint
 
 # Generate mocks
