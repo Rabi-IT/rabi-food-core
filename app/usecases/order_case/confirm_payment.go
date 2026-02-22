@@ -53,6 +53,7 @@ func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) 
 	l.Warn().Msg("payment confirmation not updated, checking order status")
 
 	ctx = logger.WithContext(ctx, l)
+
 	return c.handleNotConfirmedPayment(ctx, in)
 }
 
