@@ -18,12 +18,12 @@ type UserSession struct {
 	Role           domain.Role
 }
 
-func (u *UserSession) GetOriginalUser() string {
+func (u *UserSession) GetOriginalUserID() (string, bool) {
 	if u.Role.IsBackoffice() {
-		return u.OriginalUserID
+		return u.OriginalUserID, true
 	}
 
-	return u.UserID
+	return u.UserID, false
 }
 
 func GetSession(ctx context.Context) UserSession {

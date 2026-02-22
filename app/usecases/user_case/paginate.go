@@ -7,30 +7,15 @@ import (
 	g "rabi-food-core/libs/database/gateways/user_gateway"
 )
 
-type PaginateFilter struct {
-	State *string
-	City  *string
-	Name  *string
-}
-
-var EMPTY_PAGINATION = g.PaginateOutput{
-	Data:     []g.PaginateData{},
-	MaxPages: 0,
-}
-
 func (c *UserCase) Paginate(
 	ctx context.Context,
-	input PaginateFilter,
+	filter g.PaginateFilter,
 	paginate database.PaginateInput,
 ) (g.PaginateOutput, error) {
 	session := app_context.GetSession(ctx)
 	if session.Role.IsUser() {
-		return EMPTY_PAGINATION, nil
+		filter.TenantID = &session.TenantID
 	}
 
-	return c.gateway.Paginate(g.PaginateFilter{
-		City:  input.City,
-		State: input.State,
-		Name:  input.Name,
-	}, paginate)
+	return c.gateway.Paginate(filter, paginate)
 }

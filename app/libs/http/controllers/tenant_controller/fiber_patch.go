@@ -20,7 +20,7 @@ func (c *TenantController) Patch(ctx *fiber.Ctx) error {
 		return ctx.JSON(err)
 	}
 
-	updated, err := c.usecase.Patch(ctx.Context(), filter, data)
+	updated, err := c.usecase.Patch(ctx.UserContext(), filter, data)
 
 	if err != nil {
 		return err

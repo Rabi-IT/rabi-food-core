@@ -3,11 +3,13 @@ package fiber_adapter
 import (
 	"rabi-food-core/config"
 	"rabi-food-core/libs/http"
+	"rabi-food-core/libs/http/controllers/category_controller"
+	"rabi-food-core/libs/http/controllers/order_controller"
+	"rabi-food-core/libs/http/controllers/product_controller"
 	"rabi-food-core/libs/http/controllers/tenant_controller"
 	"rabi-food-core/libs/http/controllers/user_controller"
 	"rabi-food-core/libs/http/fiber_adapter/middlewares"
 	"rabi-food-core/libs/http/routes"
-	"rabi-food-core/libs/logger"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -25,6 +27,9 @@ func New(
 	port string,
 	tenantController *tenant_controller.TenantController,
 	userController *user_controller.UserController,
+	productController *product_controller.ProductController,
+	categoryController *category_controller.CategoryController,
+	orderController *order_controller.OrderController,
 ) http.HTTPServer {
 	app := fiber.New(fiber.Config{
 		Immutable:    true,
@@ -35,19 +40,21 @@ func New(
 		SigningKey: jwtware.SigningKey{Key: []byte(config.AuthSecret)},
 	})
 
-	requestIDMiddleware := requestid.New(requestid.Config{
-		ContextKey: logger.LoggerKey,
-	})
+	requestIDMiddleware := requestid.New()
 
 	app.
 		Use(cors.New()).
 		Use(requestIDMiddleware).
 		Post("/tenant", tenantController.Create).
 		Use(jwtMiddleware).
-		Use(middlewares.Session)
+		Use(middlewares.Session).
+		Use(middlewares.Logging())
 
 	routes.User(app, userController)
 	routes.Tenant(app, tenantController)
+	routes.Product(app, productController)
+	routes.Category(app, categoryController)
+	routes.Order(app, orderController)
 
 	return &fiberAdapter{
 		app:  app,

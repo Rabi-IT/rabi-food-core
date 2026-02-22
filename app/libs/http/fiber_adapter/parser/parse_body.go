@@ -5,6 +5,10 @@ import (
 )
 
 func ParseBody(c *fiber.Ctx, data any) error {
+	if len(c.Body()) == 0 {
+		return nil
+	}
+
 	err := c.BodyParser(data)
 
 	if err != nil {

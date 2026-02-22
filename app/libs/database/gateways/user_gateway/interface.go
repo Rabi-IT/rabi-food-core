@@ -7,10 +7,10 @@ import (
 
 type UserGateway interface {
 	Create(input CreateInput) (string, error)
-	GetByID(id string) (*GetByIDOutput, error)
+	GetByID(filter GetByIDFilter) (*GetByIDOutput, error)
 	Patch(filter PatchFilter, values PatchValues) (bool, error)
 	Paginate(filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
-	Delete(id string) (bool, error)
+	Delete(filter DeleteFilter) (bool, error)
 }
 
 type CreateInput struct {
@@ -30,7 +30,13 @@ type CreateInput struct {
 	Role         domain.Role
 }
 
+type GetByIDFilter struct {
+	ID       string `json:"id"`
+	TenantID string `json:"tenantId"`
+}
+
 type GetByIDOutput struct {
+	ID         string `json:"id"`
 	TenantID   string `json:"tenantId"`
 	Phone      string `json:"phone"`
 	City       string `json:"city"`
@@ -46,27 +52,29 @@ type GetByIDOutput struct {
 }
 
 type PatchFilter struct {
-	ID string
+	ID       string `json:"id"`
+	TenantID string `json:"tenantId"`
 }
 
 type PatchValues struct {
-	ZIP        string
-	Phone      string
-	City       string
-	State      string
-	TaxID      string
-	SocialID   string
-	Street     string
-	Complement string
-	Name       string
-	Email      string
-	Photo      string
+	ZIP        string `json:"zip"`
+	Phone      string `json:"phone"`
+	City       string `json:"city"`
+	State      string `json:"state"`
+	TaxID      string `json:"taxId"`
+	SocialID   string `json:"socialId"`
+	Street     string `json:"street"`
+	Complement string `json:"complement"`
+	Name       string `json:"name"`
+	Email      string `validate:"omitempty,email"`
+	Photo      string `validate:"omitempty,url"`
 }
 
 type PaginateFilter struct {
-	State *string
-	City  *string
-	Name  *string
+	TenantID *string
+	State    *string
+	City     *string
+	Name     *string
 }
 
 type PaginateData struct {
@@ -80,4 +88,9 @@ type PaginateData struct {
 type PaginateOutput struct {
 	Data     []PaginateData `json:"data"`
 	MaxPages int            `json:"maxPages"`
+}
+
+type DeleteFilter struct {
+	ID       string `json:"id"`
+	TenantID string `json:"tenantId"`
 }

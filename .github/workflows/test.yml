@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     # We can't use actions/setup-go@v6 (or later) due to a known networking issue.
     # When using it, the Go process loses DNS access to service containers (like postgres).
-    container: golang:1.25.3
+    container: golang:1.26.0
 
     defaults:
       run:

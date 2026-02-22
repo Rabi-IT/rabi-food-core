@@ -55,3 +55,43 @@ func (auth *authFixture) UserToken(t *testing.T, id string) string {
 
 	return tk
 }
+
+func (auth *authFixture) StaffToken(t *testing.T, id string) string {
+	t.Helper()
+	backofficeTk := auth.BackofficeToken(t, id)
+	user, statusCode := User.GetByID(t, id, backofficeTk)
+	require.Equal(t, http.StatusOK, statusCode)
+
+	claims := jwt.MapClaims{
+		"user_id":   id,
+		"name":      user.Name,
+		"email":     user.Email,
+		"role":      domain.StaffRole,
+		"tenant_id": user.TenantID,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tk, err := token.SignedString([]byte(config.AuthSecret))
+	require.NoError(t, err)
+
+	return tk
+}
+
+func (auth *authFixture) SystemToken(t *testing.T) string {
+	t.Helper()
+
+	claims := jwt.MapClaims{
+		"user_id": "system",
+		"name":    "system",
+		"email":   "system@system.com",
+		"role":    domain.SystemRole,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tk, err := token.SignedString([]byte(config.AuthSecret))
+	require.NoError(t, err)
+
+	return tk
+}

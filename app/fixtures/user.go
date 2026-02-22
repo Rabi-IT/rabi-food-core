@@ -66,3 +66,22 @@ func (userFixture) GetByID(t *testing.T, id string, token string) (user_gateway.
 
 	return found, response.StatusCode
 }
+
+func (userFixture) GetMe(t *testing.T, token string) user_gateway.GetByIDOutput {
+	t.Helper()
+	found := user_gateway.GetByIDOutput{}
+
+	obj := httpexpect.Default(t, AppURL).
+		Request(http.MethodGet, User.URI+"me").
+		WithHeader("Authorization", "Bearer "+token).
+		Expect().Status(http.StatusOK)
+
+	response := obj.Raw()
+
+	obj.JSON().Object().Decode(&found)
+
+	err := response.Body.Close()
+	require.NoError(t, err)
+
+	return found
+}

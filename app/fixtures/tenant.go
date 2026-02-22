@@ -2,6 +2,7 @@ package fixtures
 
 import (
 	"net/http"
+	g "rabi-food-core/libs/database/gateways/tenant_gateway"
 	"rabi-food-core/usecases/tenant_case"
 	"testing"
 
@@ -38,4 +39,23 @@ func (tenantFixture) Create(t *testing.T, input *tenant_case.CreateInput) *tenan
 	require.NotEqual(t, &tenant_case.CreateOutput{}, output)
 
 	return output
+}
+
+func (tenantFixture) GetMe(t *testing.T, token string) g.GetByIDOutput {
+	t.Helper()
+	found := g.GetByIDOutput{}
+
+	obj := httpexpect.Default(t, AppURL).
+		Request(http.MethodGet, Tenant.URI+"me").
+		WithHeader("Authorization", "Bearer "+token).
+		Expect().Status(http.StatusOK)
+
+	response := obj.Raw()
+
+	obj.JSON().Object().Decode(&found)
+
+	err := response.Body.Close()
+	require.NoError(t, err)
+
+	return found
 }

@@ -10,8 +10,19 @@ tasks:
     desc: "Start the development environment"
     dir: app
     dotenv: ["../.env.test"]
+    deps: [infra-test]
     cmds:
       - go run main.go
+    silent: false
+
+  lint:
+    desc: "Run linters using golangci-lint with auto-fix"
+    dir: app
+    env:
+      GOROOT: /home/kelvin/go
+      GOPATH: /home/kelvin/workspace
+    cmds:
+      - golangci-lint run --fix --timeout 5m
     silent: false
 
   # =============================

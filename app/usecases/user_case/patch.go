@@ -2,42 +2,19 @@ package user_case
 
 import (
 	"context"
+	"rabi-food-core/app_context"
 	g "rabi-food-core/libs/database/gateways/user_gateway"
 )
 
-type PatchFilter struct {
-	ID string
-}
+func (c *UserCase) Patch(ctx context.Context, id string, values g.PatchValues) (bool, error) {
+	filter := g.PatchFilter{
+		ID: id,
+	}
 
-type PatchValues struct {
-	Phone      string
-	City       string
-	State      string
-	ZIP        string
-	SocialID   string
-	Street     string
-	Complement string
-	Name       string
-	Email      string `validate:"omitempty,email"`
-	Photo      string `validate:"omitempty,url"`
-	TaxID      string
-}
+	session := app_context.GetSession(ctx)
+	if session.Role.IsUser() {
+		filter.TenantID = session.TenantID
+	}
 
-func (c *UserCase) Patch(ctx context.Context, filter PatchFilter, values PatchValues) (bool, error) {
-	return c.gateway.Patch(
-		g.PatchFilter{
-			ID: filter.ID,
-		}, g.PatchValues{
-			Phone:      values.Phone,
-			City:       values.City,
-			State:      values.State,
-			ZIP:        values.ZIP,
-			SocialID:   values.SocialID,
-			Street:     values.Street,
-			Complement: values.Complement,
-			Name:       values.Name,
-			Email:      values.Email,
-			Photo:      values.Photo,
-			TaxID:      values.TaxID,
-		})
+	return c.gateway.Patch(filter, values)
 }

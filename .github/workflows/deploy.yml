@@ -8,7 +8,7 @@ on:
 jobs:
   Deploy:
     runs-on: ubuntu-24.04
-    container: golang:1.25.0
+    container: golang:1.26.0
     env:
       APP_PORT: 3000
       TEST_DATABASE_HOST: postgres

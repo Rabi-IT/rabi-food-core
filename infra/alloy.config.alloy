@@ -41,16 +41,15 @@ discovery.relabel "docker" {
   }
 }
 
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3200/loki/api/v1/push"
+  }
+}
+
 loki.source.docker "docker_containers" {
   host          = "unix:///var/run/docker.sock"
   targets       = discovery.docker.linux.targets
   relabel_rules = discovery.relabel.docker.rules
   forward_to    = [loki.write.local.receiver]
-  refresh_interval = "5s"
-}
-
-loki.write "local" {
-  endpoint {
-    url = "http://loki:3200/loki/api/v1/push"
-  }
 }

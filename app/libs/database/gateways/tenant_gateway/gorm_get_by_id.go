@@ -6,7 +6,9 @@ import (
 
 func (g *GormTenantGatewayAdapter) GetByID(id string) (*GetByIDOutput, error) {
 	output := &models.Tenant{}
-	result := g.DB.Conn.Limit(1).Find(output, "id = ?", id)
+	result := g.DB.Conn.Model(&models.Tenant{}).
+		Limit(1).
+		Find(output, "id = ?", id)
 
 	if result.Error != nil {
 		return nil, result.Error

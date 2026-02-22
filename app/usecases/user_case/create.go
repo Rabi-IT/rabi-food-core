@@ -51,7 +51,11 @@ func (c *UserCase) Create(ctx context.Context, input *CreateInput) (string, erro
 		Role:         domain.UserRole,
 	})
 
-	logger.L().Info().Str("tenant", tenantId).Str("user", session.UserID).Msg("user created")
+	if err != nil {
+		return "", err
+	}
 
-	return id, err
+	logger.Get(ctx).Info().Str(logger.TenantID, tenantId).Str("new_user_id", session.UserID).Msg("user created")
+
+	return id, nil
 }

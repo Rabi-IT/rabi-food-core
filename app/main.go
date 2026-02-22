@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"rabi-food-core/config"
 	"rabi-food-core/libs/database"
 	"rabi-food-core/libs/di"
@@ -17,10 +18,17 @@ func main() {
 
 	time.Local = time.UTC
 
-	injector := di.NewProduction()
+	var injector *do.Injector
+	if config.Env == "production" {
+		injector = di.NewProduction()
+	} else {
+		injector = di.NewTest()
+	}
+
 	db := do.MustInvoke[database.Database](injector)
 
-	err := db.Start()
+	ctx := context.Background()
+	err := db.Start(ctx)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to start database")
 	}

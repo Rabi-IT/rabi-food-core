@@ -25,14 +25,14 @@ jobs:
           go-version-file: 'app/go.mod' # Use the Go version specified in go.mod
           cache: true
 
-      - name: Install golangci-lint
-        uses: golangci/golangci-lint-action@v8.0.0
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9.2.0
         with:
           working-directory: app
-          version: v2.5.0
+          version: latest
 
-      - name: Run golangci-lint with Reviewdog
-        uses: reviewdog/action-golangci-lint@v2
+      - name: Run Reviewdog
+        uses: reviewdog/action-golangci-lint@v2.8.0
         with:
           workdir: app
           github_token: ${{ secrets.GITHUB_TOKEN }}

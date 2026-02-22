@@ -9,9 +9,11 @@ import (
 	"github.com/rs/zerolog"
 )
 
+type contextKey string
+
 var (
 	base      zerolog.Logger
-	LoggerKey = "loggerKey"
+	loggerKey = contextKey("loggerKey")
 )
 
 func init() {
@@ -20,7 +22,11 @@ func init() {
 
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if config.Env != "production" {
-		base = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
+		base = zerolog.New(zerolog.ConsoleWriter{
+			Out:        os.Stdout,
+			TimeFormat: time.RFC3339,
+			NoColor:    true,
+		}).With().Timestamp().Logger()
 	} else {
 		base = zerolog.New(os.Stdout).With().Timestamp().Logger()
 	}
@@ -28,15 +34,14 @@ func init() {
 
 // Get retrieves the logger from the given context.
 func Get(c context.Context) *zerolog.Logger {
-	v := c.Value(LoggerKey)
+	v := c.Value(loggerKey)
 	if l, ok := v.(*zerolog.Logger); ok {
 		return l
 	}
 
-	return L()
+	return &base
 }
 
-// L returns the base logger instance.
-func L() *zerolog.Logger {
-	return &base
+func WithContext(c context.Context, logger zerolog.Logger) context.Context {
+	return context.WithValue(c, loggerKey, &logger)
 }

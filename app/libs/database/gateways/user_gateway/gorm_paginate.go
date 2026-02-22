@@ -24,6 +24,10 @@ func (g *GormUserGatewayAdapter) Paginate(
 		query = query.Where("state = ?", filter.State)
 	}
 
+	if filter.TenantID != nil {
+		query = query.Where("tenant_id = ?", *filter.TenantID)
+	}
+
 	count := int64(0)
 	data := []PaginateData{}
 	err := gorm_adapter.Paginate(query, &count, &data, paginate)

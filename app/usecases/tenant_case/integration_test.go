@@ -22,7 +22,7 @@ func (t *TestSuite) SetupSuite() {
 	t.app.Start(t.T())
 }
 
-func (t *TestSuite) SetupTest() {
+func (t *TestSuite) SetupSubTest() {
 	fixtures.CleanDatabase(t.T())
 }
 

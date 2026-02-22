@@ -1,13 +1,31 @@
 package user_gateway
 
 import (
+	"errors"
 	"rabi-food-core/libs/database/gorm_adapter/models"
 )
 
-func (g *GormUserGatewayAdapter) GetByID(id string) (*GetByIDOutput, error) {
-	output := &models.User{}
-	result := g.DB.Conn.Limit(1).Find(output, "id = ?", id)
+var (
+	ErrMustFilterByIDOrTenantID = errors.New("must filter by either ID or TenantID")
+)
 
+func (g *GormUserGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutput, error) {
+	if filter.ID == "" && filter.TenantID == "" {
+		return nil, ErrMustFilterByIDOrTenantID
+	}
+
+	output := &models.User{}
+	query := g.DB.Conn.Limit(1)
+
+	if filter.ID != "" {
+		query = query.Where("id = ?", filter.ID)
+	}
+
+	if filter.TenantID != "" {
+		query = query.Where("tenant_id = ?", filter.TenantID)
+	}
+
+	result := query.Find(output)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -17,6 +35,7 @@ func (g *GormUserGatewayAdapter) GetByID(id string) (*GetByIDOutput, error) {
 	}
 
 	adapted := GetByIDOutput{
+		ID:         output.ID,
 		State:      output.State,
 		ZIP:        output.ZIP,
 		Phone:      output.Phone,

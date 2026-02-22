@@ -1,6 +1,7 @@
 package fixtures
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"rabi-food-core/config"
@@ -34,7 +35,8 @@ func NewApp() *App {
 func (a *App) Start(t *testing.T) {
 	t.Helper()
 
-	err := a.database.Start()
+	ctx := context.Background()
+	err := a.database.Start(ctx)
 	if err != nil {
 		require.NoError(t, err, "could not start the database")
 	}

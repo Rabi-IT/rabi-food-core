@@ -2,7 +2,7 @@ package user_controller
 
 import (
 	"rabi-food-core/libs/database"
-	"rabi-food-core/usecases/user_case"
+	g "rabi-food-core/libs/database/gateways/user_gateway"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,7 +19,7 @@ func (c *UserController) Paginate(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	filter := user_case.PaginateFilter{}
+	filter := g.PaginateFilter{}
 	err = ctx.QueryParser(&filter)
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func (c *UserController) Paginate(ctx *fiber.Ctx) error {
 		PageSize: pageSize,
 	}
 
-	result, err := c.usecase.Paginate(ctx.Context(), filter, paginate)
+	result, err := c.usecase.Paginate(ctx.UserContext(), filter, paginate)
 
 	if err != nil {
 		return err

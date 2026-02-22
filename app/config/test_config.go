@@ -2,6 +2,8 @@ package config
 
 import (
 	"os"
+
+	"gorm.io/gorm/logger"
 )
 
 var (
@@ -11,6 +13,7 @@ var (
 		Password:     testEnv("TEST_DATABASE_PASSWORD", "postgres"),
 		DatabaseName: testEnv("TEST_DATABASE_NAME", "rabi_food_test"),
 		Port:         testEnv("TEST_DATABASE_PORT", "5432"),
+		LogLevel:     logger.Warn,
 	}
 )
 
