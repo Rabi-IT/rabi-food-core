@@ -17,25 +17,26 @@ func Logging() fiber.Handler {
 		session := app_context.GetSession(uctx)
 		userID, isBackoffice := session.GetOriginalUserID()
 
-		l := logger.Get(uctx).
+		builder := logger.Get(uctx).
 			With().
 			Str(logger.RequestID, requestID).
 			Str(logger.UserID, userID)
 
 		if isBackoffice {
-			l = l.Bool(logger.IsBackoffice, isBackoffice)
+			builder = builder.Bool(logger.IsBackoffice, isBackoffice)
 		}
 
 		if session.TenantID != "" {
-			l = l.Str(logger.TenantID, session.TenantID)
+			builder = builder.Str(logger.TenantID, session.TenantID)
 		}
 
-		log := l.Logger()
-		c.SetUserContext(logger.WithContext(uctx, log))
+		l := builder.Logger()
+		c.SetUserContext(logger.WithContext(uctx, l))
 
-		log.Info().
+		l.Info().
 			Str(logger.Path, c.Path()).
 			Str(logger.Method, c.Method()).
+			Str(logger.Query, c.Context().QueryArgs().String()).
 			Msg("Incoming request")
 
 		return c.Next()

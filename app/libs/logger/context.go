@@ -16,4 +16,5 @@ const (
 	// HTTP
 	Path   = "path"
 	Method = "method"
+	Query  = "query"
 )
