@@ -351,7 +351,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		}
 
 		err := fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
-		t.Require().NoError(err)
+		t.Require().Nil(err)
 
 		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, token)
 		t.Require().Equal(http.StatusOK, httpStatus)
@@ -391,7 +391,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		close(errCh)
 
 		for err := range errCh {
-			t.Require().NoError(err)
+			t.Require().Nil(err)
 		}
 
 		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, token)
@@ -416,7 +416,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		}
 
 		err := fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
-		t.Require().NoError(err)
+		t.Require().Nil(err)
 		// Confirm payment again with different external payment id
 		body.ExternalPaymentID = "different-id"
 		err = fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
@@ -439,7 +439,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		}
 
 		err := fixtures.Order.ConfirmPayment(t.T(), orderID1, &body1, systemToken)
-		t.Require().NoError(err)
+		t.Require().Nil(err)
 
 		// Confirm payment for another order with same external payment id
 		body2 := order_case.ConfirmPaymentInput{
