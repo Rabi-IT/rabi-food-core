@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"rabi-food-core/config"
 	"rabi-food-core/libs/database"
 	"rabi-food-core/libs/di"
@@ -26,7 +27,8 @@ func main() {
 
 	db := do.MustInvoke[database.Database](injector)
 
-	err := db.Start()
+	ctx := context.Background()
+	err := db.Start(ctx)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to start database")
 	}

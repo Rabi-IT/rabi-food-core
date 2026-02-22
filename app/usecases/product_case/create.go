@@ -19,7 +19,7 @@ func (c *ProductCase) Create(ctx context.Context, input g.CreateInput) (string, 
 		return "", err
 	}
 
-	logger.L().Info().Str("tenant", session.TenantID).Str("product", id).Msg("product created")
+	logger.Get(ctx).Info().Str(logger.TenantID, session.TenantID).Str(logger.ProductID, id).Msg("product created")
 
 	return id, nil
 }

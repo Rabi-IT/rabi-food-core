@@ -1,6 +1,7 @@
 package gorm_adapter
 
 import (
+	"context"
 	"fmt"
 	"rabi-food-core/config"
 	"rabi-food-core/libs/database"
@@ -37,10 +38,10 @@ func (g *GormAdapter) Migrate() error {
 }
 
 // Connect establishes a connection to the database.
-func (g *GormAdapter) Connect() error {
+func (g *GormAdapter) Connect(ctx context.Context) error {
 	time.Local = time.UTC
 
-	logger.L().Info().Msg("Connecting to database with DSN: " + g.config.String())
+	logger.Get(ctx).Info().Msg("Connecting to database with DSN: " + g.config.String())
 	dsn := parseDSN(g.config)
 	db, err := gorm.Open(postgres.Open(dsn))
 
@@ -55,7 +56,7 @@ func (g *GormAdapter) Connect() error {
 }
 
 // CreateDatabase creates the database if it does not exist.
-func (g *GormAdapter) CreateDatabase() error {
+func (g *GormAdapter) CreateDatabase(ctx context.Context) error {
 	dbConfig := &config.DatabaseConfig{
 		Host:         g.config.Host,
 		User:         g.config.User,
@@ -64,7 +65,7 @@ func (g *GormAdapter) CreateDatabase() error {
 		DatabaseName: "postgres",
 	}
 
-	logger.L().Info().Msg("Creating database with DSN: " + dbConfig.String())
+	logger.Get(ctx).Info().Msg("Creating database with DSN: " + dbConfig.String())
 	var dsn = parseDSN(dbConfig)
 	conn, err := gorm.Open(postgres.Open(dsn))
 	if err != nil {
@@ -96,13 +97,13 @@ func (g *GormAdapter) CreateDatabase() error {
 }
 
 // Start initializes the database connection and performs migrations.
-func (g *GormAdapter) Start() error {
-	err := g.CreateDatabase()
+func (g *GormAdapter) Start(ctx context.Context) error {
+	err := g.CreateDatabase(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to create database: %w", err)
 	}
 
-	err = g.Connect()
+	err = g.Connect(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}

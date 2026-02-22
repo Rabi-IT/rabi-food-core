@@ -1,6 +1,7 @@
 package fixtures
 
 import (
+	"context"
 	"rabi-food-core/libs/database/gorm_adapter/models"
 	"testing"
 
@@ -17,8 +18,9 @@ var tables = []string{
 
 func CleanDatabase(t *testing.T) {
 	t.Helper()
+	ctx := context.Background()
 	if testDB.Conn == nil {
-		err := testDB.Connect()
+		err := testDB.Connect(ctx)
 		require.NoError(t, err)
 	}
 

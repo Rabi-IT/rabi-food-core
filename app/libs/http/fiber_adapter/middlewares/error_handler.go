@@ -31,7 +31,7 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 		return ctx.Status(appErr.Status).JSON(appErr)
 	}
 
-	logger.L().Error().Err(err).Msg("internal server error")
+	logger.Get(ctx.UserContext()).Error().Err(err).Msg("internal server error")
 
 	return err
 }

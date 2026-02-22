@@ -85,7 +85,7 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 		return "", err
 	}
 
-	logger.L().Info().Str("tenant", session.TenantID).Str("order", id).Msg("order created")
+	logger.Get(ctx).Info().Str(logger.TenantID, session.TenantID).Str(logger.OrderID, id).Msg("order created")
 
 	return id, nil
 }

@@ -1,10 +1,13 @@
 package database
 
-import "math"
+import (
+	"context"
+	"math"
+)
 
 // Database defines the interface for a database with start and stop capabilities.
 type Database interface {
-	Start() error
+	Start(ctx context.Context) error
 	Stop() error
 }
 
