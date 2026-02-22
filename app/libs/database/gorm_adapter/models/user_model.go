@@ -15,7 +15,7 @@ type User struct {
 	Phone        string `gorm:"not null"`
 	City         string
 	State        string
-	ZIP          string
+	ZIP          string `gorm:"column:zip"`
 	Neighborhood string
 	Role         domain.Role
 
