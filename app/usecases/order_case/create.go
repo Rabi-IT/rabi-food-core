@@ -70,9 +70,10 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 
 	session := app_context.GetSession(ctx)
 	id, err := c.gateway.Create(g.CreateInput{
-		UserID:            session.UserID,
-		TenantID:          session.TenantID,
-		Code:              uuid.NewString(),
+		UserID:   session.UserID,
+		TenantID: session.TenantID,
+		// TODO: generate a human-readable code
+		Code:              uuid.Must(uuid.NewV7()).String(),
 		PaymentStatus:     order.PaymentPending,
 		FulfillmentStatus: order.FulfillmentPending,
 		DeliveryStatus:    order.DeliveryPending,

@@ -9,7 +9,7 @@ import (
 )
 
 func (g *GormOrderGatewayAdapter) Create(input CreateInput) (string, error) {
-	id := uuid.NewString()
+	id := uuid.Must(uuid.NewV7()).String()
 
 	items, err := json.Marshal(input.Items)
 	if err != nil {

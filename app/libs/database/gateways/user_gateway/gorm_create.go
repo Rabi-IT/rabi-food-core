@@ -7,7 +7,7 @@ import (
 )
 
 func (g *GormUserGatewayAdapter) Create(input CreateInput) (string, error) {
-	id := uuid.NewString()
+	id := uuid.Must(uuid.NewV7()).String()
 
 	result := g.DB.Conn.Create(&models.User{
 		ID:           id,
