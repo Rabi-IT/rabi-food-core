@@ -7,7 +7,7 @@ import (
 )
 
 func (g *GormTenantGatewayAdapter) Create(input CreateInput) (string, error) {
-	id := uuid.NewString()
+	id := uuid.Must(uuid.NewV7()).String()
 
 	result := g.DB.Conn.Create(&models.Tenant{
 		ID:   id,
