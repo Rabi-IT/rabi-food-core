@@ -10,17 +10,12 @@ const (
 
 	// Domain context keys.
 
-	// OrderID represents the order identifier context key.
-	OrderID = "order_id"
-	// UserID represents the user identifier context key.
-	UserID = "user_id"
-	// TenantID represents the tenant identifier context key.
-	TenantID = "tenant_id"
-	// PaymentID represents the payment identifier context key.
-	PaymentID = "payment_id"
-	// ProductID represents the product identifier context key.
-	ProductID = "product_id"
-	// CategoryID represents the category identifier context key.
+	AppPlanID  = "app_plan_id"
+	OrderID    = "order_id"
+	UserID     = "user_id"
+	TenantID   = "tenant_id"
+	PaymentID  = "payment_id"
+	ProductID  = "product_id"
 	CategoryID = "category_id"
 
 	// HTTP context keys.

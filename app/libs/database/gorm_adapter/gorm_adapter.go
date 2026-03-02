@@ -34,6 +34,7 @@ func (g *GormAdapter) Migrate() error {
 		&models.Product{},
 		&models.Category{},
 		&models.Order{},
+		&models.AppPlan{},
 	)
 }
 

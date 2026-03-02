@@ -4,6 +4,7 @@ import (
 	"errors"
 	"rabi-food-core/config"
 	"rabi-food-core/libs/database"
+	"rabi-food-core/libs/database/gateways/app_plan_gateway"
 	"rabi-food-core/libs/database/gateways/category_gateway"
 	"rabi-food-core/libs/database/gateways/order_gateway"
 	"rabi-food-core/libs/database/gateways/product_gateway"
@@ -11,12 +12,14 @@ import (
 	"rabi-food-core/libs/database/gateways/user_gateway"
 	"rabi-food-core/libs/database/gorm_adapter"
 	"rabi-food-core/libs/http"
+	"rabi-food-core/libs/http/controllers/app_plan_controller"
 	"rabi-food-core/libs/http/controllers/category_controller"
 	"rabi-food-core/libs/http/controllers/order_controller"
 	"rabi-food-core/libs/http/controllers/product_controller"
 	"rabi-food-core/libs/http/controllers/tenant_controller"
 	"rabi-food-core/libs/http/controllers/user_controller"
 	"rabi-food-core/libs/http/fiber_adapter"
+	"rabi-food-core/usecases/app_plan_case"
 	"rabi-food-core/usecases/category_case"
 	"rabi-food-core/usecases/order_case"
 	"rabi-food-core/usecases/product_case"
@@ -56,6 +59,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		productController := do.MustInvoke[*product_controller.ProductController](i)
 		categoryController := do.MustInvoke[*category_controller.CategoryController](i)
 		orderController := do.MustInvoke[*order_controller.OrderController](i)
+		appPlanController := do.MustInvoke[*app_plan_controller.AppPlanController](i)
 
 		if config.AppPort == "" {
 			return nil, ErrHTTPPortNotConfigured
@@ -68,6 +72,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 			productController,
 			categoryController,
 			orderController,
+			appPlanController,
 		), nil
 	})
 
@@ -166,6 +171,25 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		productCase := do.MustInvoke[*product_case.ProductCase](i)
 
 		return order_case.New(gw, productCase), nil
+	})
+
+	// App plan dependencies
+	do.Provide(injector, func(i *do.Injector) (app_plan_gateway.AppPlanGateway, error) {
+		db := do.MustInvoke[*gorm_adapter.GormAdapter](i)
+
+		return &app_plan_gateway.GormAppPlanGatewayAdapter{DB: db}, nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (*app_plan_case.AppPlanCase, error) {
+		gw := do.MustInvoke[app_plan_gateway.AppPlanGateway](i)
+
+		return app_plan_case.New(gw), nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (*app_plan_controller.AppPlanController, error) {
+		c := do.MustInvoke[*app_plan_case.AppPlanCase](i)
+
+		return app_plan_controller.New(c), nil
 	})
 
 	return injector
