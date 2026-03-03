@@ -6,11 +6,25 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+type Environment string
+
+func (e Environment) IsDevelopment() bool {
+	return e == "development"
+}
+
+func (e Environment) IsProduction() bool {
+	return e == "production"
+}
+
+func (e Environment) IsTest() bool {
+	return e == "test"
+}
+
 var (
-	AppPort            = os.Getenv("APP_PORT")
-	AuthSecret         = os.Getenv("AUTH_SECRET")
-	Env                = os.Getenv("ENV")
-	ProductionDatabase = &DatabaseConfig{
+	AppPort                        = os.Getenv("APP_PORT")
+	AuthSecret                     = os.Getenv("AUTH_SECRET")
+	Env                Environment = Environment(os.Getenv("ENV"))
+	ProductionDatabase             = &DatabaseConfig{
 		Host:         os.Getenv("DATABASE_HOST"),
 		DatabaseName: os.Getenv("DATABASE_NAME"),
 		User:         os.Getenv("DATABASE_USER"),
@@ -21,8 +35,8 @@ var (
 )
 
 type DatabaseConfig struct {
-	Host         string
-	User         string
+	Host string
+	User string
 	// Password contains database password - gosec ignore
 	Password     string // #nosec G117
 	DatabaseName string

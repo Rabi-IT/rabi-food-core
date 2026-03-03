@@ -14,12 +14,12 @@ import (
 
 func main() {
 	log.Info().Msg("Starting Rabi Food Core Server...")
-	log.Info().Str("env", config.Env).Msg("Environment")
+	log.Info().Str("env", string(config.Env)).Msg("Environment")
 
 	time.Local = time.UTC
 
 	var injector *do.Injector
-	if config.Env == "production" {
+	if config.Env.IsProduction() {
 		injector = di.NewProduction()
 	} else {
 		injector = di.NewTest()

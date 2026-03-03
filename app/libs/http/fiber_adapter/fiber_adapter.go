@@ -10,8 +10,11 @@ import (
 	"rabi-food-core/libs/http/controllers/tenant_controller"
 	"rabi-food-core/libs/http/controllers/user_controller"
 	"rabi-food-core/libs/http/fiber_adapter/middlewares"
+	ui "rabi-food-core/libs/http/fiber_adapter/scalar"
 	"rabi-food-core/libs/http/routes"
 
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humafiber"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
@@ -37,6 +40,15 @@ func New(
 		Immutable:    true,
 		ErrorHandler: middlewares.ErrorHandler,
 	})
+
+	if !config.Env.IsProduction() {
+		docApi := humafiber.New(app, huma.DefaultConfig("Products API", "1.0.0"))
+
+		scalarUI := ui.NewScalarUI(docApi)
+		scalarUI.RegisterRoutes(app)
+
+		defer categoryController.RegisterRoutes(docApi)
+	}
 
 	jwtMiddleware := jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(config.AuthSecret)},
