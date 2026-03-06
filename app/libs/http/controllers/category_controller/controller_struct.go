@@ -40,12 +40,12 @@ func AdaptCreate[T any, R string](
 	}
 }
 
-func (ctrl *CategoryController) RegisterRoutes(api huma.API) {
+func (ctrl *CategoryController) AddDocRoute(api huma.API) {
 	huma.Register(api, huma.Operation{
 		OperationID: "create-category",
 		Method:      "POST",
 		Path:        "/category",
 		Summary:     "Criar categoria",
 		Tags:        []string{"Category"},
-	}, AdaptCreate(ctrl.usecase.Create))
+	}, AdaptCreate(ctrl.usecase.Create)) // TODO: Fazer chamar o endpoint, e não o usecase.
 }

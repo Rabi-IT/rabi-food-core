@@ -42,12 +42,21 @@ func New(
 	})
 
 	if !config.Env.IsProduction() {
-		docApi := humafiber.New(app, huma.DefaultConfig("Products API", "1.0.0"))
+		docApi := humafiber.New(app, huma.Config{
+			OpenAPI: &huma.OpenAPI{
+				OpenAPI: "3.1.0",
+				Info: &huma.Info{
+					Title:   "Products API",
+					Version: "1.0.0",
+				},
+			},
+			OpenAPIPath: "/openapi",
+		})
 
 		scalarUI := ui.NewScalarUI(docApi)
 		scalarUI.RegisterRoutes(app)
 
-		defer categoryController.RegisterRoutes(docApi)
+		defer categoryController.AddDocRoute(docApi)
 	}
 
 	jwtMiddleware := jwtware.New(jwtware.Config{

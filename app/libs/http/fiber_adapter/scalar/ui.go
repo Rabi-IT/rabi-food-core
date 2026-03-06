@@ -32,24 +32,29 @@ func (s *ScalarUI) serveSchema(c *fiber.Ctx) error {
 }
 
 func (s *ScalarUI) serveUI(c *fiber.Ctx) error {
-	html := `<!DOCTYPE html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Products API — Docs</title>
-    <style>body { margin: 0; }</style>
-  </head>
-  <body>
-    <script
-      id="api-reference"
-      data-url="/docs/openapi.json"
-      data-configuration='{"theme":"purple"}'
-    ></script>
-    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
-  </body>
-</html>`
+	html := `
+	<!doctype html>
+	<html>
+	<head>
+		<title>Scalar API Reference</title>
+		<meta charset="utf-8" />
+		<meta
+		name="viewport"
+		content="width=device-width, initial-scale=1" />
+	</head>
+	<body>
+		<div id="app"></div>
+		<script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+		<script>
+		Scalar.createApiReference('#app', {
+			url: '/docs/openapi.json',
+		})
+		</script>
+	</body>
+	</html>`
 
 	c.Set("Content-Type", "text/html")
+	c.Set("Cache-Control", "no-store, no-cache, must-revalidate")
+	c.Set("Pragma", "no-cache")
 	return c.SendString(html)
 }
