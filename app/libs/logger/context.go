@@ -22,6 +22,12 @@ const (
 	ProductID = "product_id"
 	// CategoryID represents the category identifier context key.
 	CategoryID = "category_id"
+	// SubscriptionID represents the subscription identifier context key.
+	SubscriptionID = "subscription_id"
+	// CurrentStatus represents the current status context key.
+	CurrentStatus = "current_status"
+	// TargetStatus represents the target status context key.
+	TargetStatus = "target_status"
 
 	// HTTP context keys.
 

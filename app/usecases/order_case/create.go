@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"rabi-food-core/app_context"
 	"rabi-food-core/domain/order"
+	"rabi-food-core/domain/payment"
 	g "rabi-food-core/libs/database/gateways/order_gateway"
 	"rabi-food-core/libs/database/gateways/product_gateway"
 	"rabi-food-core/libs/errs"
@@ -72,9 +73,9 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 	id, err := c.gateway.Create(g.CreateInput{
 		UserID:   session.UserID,
 		TenantID: session.TenantID,
-		// TODO: generate a human-readable code
+
 		Code:              uuid.Must(uuid.NewV7()).String(),
-		PaymentStatus:     order.PaymentPending,
+		PaymentStatus:     payment.StatusPending,
 		FulfillmentStatus: order.FulfillmentPending,
 		DeliveryStatus:    order.DeliveryPending,
 		Notes:             input.Notes,
