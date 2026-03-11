@@ -57,7 +57,7 @@ type PatchFilter struct {
 }
 
 type PatchValues struct {
-	ZIP        string `json:"zip" gorm:"column:zip"`
+	ZIP        string `gorm:"column:zip"          json:"zip"`
 	Phone      string `json:"phone"`
 	City       string `json:"city"`
 	State      string `json:"state"`

@@ -3,7 +3,7 @@ package order_case_test
 import (
 	"net/http"
 	"rabi-food-core/domain"
-	"rabi-food-core/domain/order"
+	"rabi-food-core/domain/payment"
 	"rabi-food-core/fixtures"
 	"rabi-food-core/libs/database"
 	"rabi-food-core/libs/database/gateways/order_gateway"
@@ -355,7 +355,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 
 		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, token)
 		t.Require().Equal(http.StatusOK, httpStatus)
-		t.Require().Equal(order.PaymentPaid, orderFound.PaymentStatus)
+		t.Require().Equal(payment.StatusPaid, orderFound.PaymentStatus)
 		t.Require().NotNil(orderFound.PaidAt)
 		t.Require().Equal(body.PaidAt.UnixMicro(), orderFound.PaidAt.UnixMicro())
 		t.Require().NotNil(orderFound.ExternalPaymentID)
@@ -396,7 +396,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 
 		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, token)
 		t.Require().Equal(http.StatusOK, httpStatus)
-		t.Require().Equal(order.PaymentPaid, orderFound.PaymentStatus)
+		t.Require().Equal(payment.StatusPaid, orderFound.PaymentStatus)
 		t.Require().NotNil(orderFound.PaidAt)
 		t.Require().Equal(body.PaidAt.UnixMicro(), orderFound.PaidAt.UnixMicro())
 		t.Require().NotNil(orderFound.ExternalPaymentID)

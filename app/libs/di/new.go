@@ -7,6 +7,7 @@ import (
 	"rabi-food-core/libs/database/gateways/category_gateway"
 	"rabi-food-core/libs/database/gateways/order_gateway"
 	"rabi-food-core/libs/database/gateways/product_gateway"
+	"rabi-food-core/libs/database/gateways/subscription_gateway"
 	"rabi-food-core/libs/database/gateways/tenant_gateway"
 	"rabi-food-core/libs/database/gateways/user_gateway"
 	"rabi-food-core/libs/database/gorm_adapter"
@@ -14,12 +15,14 @@ import (
 	"rabi-food-core/libs/http/controllers/category_controller"
 	"rabi-food-core/libs/http/controllers/order_controller"
 	"rabi-food-core/libs/http/controllers/product_controller"
+	"rabi-food-core/libs/http/controllers/subscription_controller"
 	"rabi-food-core/libs/http/controllers/tenant_controller"
 	"rabi-food-core/libs/http/controllers/user_controller"
 	"rabi-food-core/libs/http/fiber_adapter"
 	"rabi-food-core/usecases/category_case"
 	"rabi-food-core/usecases/order_case"
 	"rabi-food-core/usecases/product_case"
+	"rabi-food-core/usecases/subscription_case"
 	"rabi-food-core/usecases/tenant_case"
 	"rabi-food-core/usecases/user_case"
 
@@ -56,6 +59,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		productController := do.MustInvoke[*product_controller.ProductController](i)
 		categoryController := do.MustInvoke[*category_controller.CategoryController](i)
 		orderController := do.MustInvoke[*order_controller.OrderController](i)
+		subscriptionController := do.MustInvoke[*subscription_controller.SubscriptionController](i)
 
 		if config.AppPort == "" {
 			return nil, ErrHTTPPortNotConfigured
@@ -68,6 +72,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 			productController,
 			categoryController,
 			orderController,
+			subscriptionController,
 		), nil
 	})
 
@@ -166,6 +171,26 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		productCase := do.MustInvoke[*product_case.ProductCase](i)
 
 		return order_case.New(gw, productCase), nil
+	})
+
+	// Subscription dependencies
+	do.Provide(injector, func(i *do.Injector) (*subscription_controller.SubscriptionController, error) {
+		c := do.MustInvoke[*subscription_case.SubscriptionCase](i)
+
+		return subscription_controller.New(c), nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (subscription_gateway.SubscriptionGateway, error) {
+		db := do.MustInvoke[*gorm_adapter.GormAdapter](i)
+
+		return &subscription_gateway.GormSubscriptionGatewayAdapter{DB: db}, nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (*subscription_case.SubscriptionCase, error) {
+		gw := do.MustInvoke[subscription_gateway.SubscriptionGateway](i)
+		productCase := do.MustInvoke[*product_case.ProductCase](i)
+
+		return subscription_case.New(gw, productCase), nil
 	})
 
 	return injector

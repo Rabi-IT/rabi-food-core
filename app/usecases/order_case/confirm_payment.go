@@ -3,7 +3,7 @@ package order_case
 import (
 	"context"
 	"rabi-food-core/app_context"
-	"rabi-food-core/domain/order"
+	"rabi-food-core/domain/payment"
 	g "rabi-food-core/libs/database/gateways/order_gateway"
 	"rabi-food-core/libs/errs"
 	"rabi-food-core/libs/logger"
@@ -30,10 +30,10 @@ func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) 
 
 	updated, err := c.gateway.Patch(g.PatchFilter{
 		ID:            in.OrderID,
-		PaymentStatus: order.PaymentPending,
+		PaymentStatus: payment.StatusPending,
 	}, g.PatchValues{
 		ExternalPaymentID: in.ExternalPaymentID,
-		PaymentStatus:     order.PaymentPaid,
+		PaymentStatus:     payment.StatusPaid,
 		Provider:          in.Provider,
 		PaidAt:            in.PaidAt,
 	})
@@ -71,7 +71,7 @@ func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPay
 		return false, nil
 	}
 
-	if orderFound.PaymentStatus == order.PaymentPaid {
+	if orderFound.PaymentStatus == payment.StatusPaid {
 		if orderFound.ExternalPaymentID != nil && *orderFound.ExternalPaymentID == in.ExternalPaymentID {
 			l.Info().Msg("payment already confirmed for this order")
 
@@ -83,12 +83,12 @@ func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPay
 		return false, errs.ErrConflict
 	}
 
-	if orderFound.PaymentStatus != order.PaymentPending {
+	if orderFound.PaymentStatus != payment.StatusPending {
 		l.Error().
 			Str("current_status", string(orderFound.PaymentStatus)).
 			Msg("invalid transition when confirming payment")
 
-		return false, errs.InvalidTranstion(orderFound.PaymentStatus, order.PaymentPaid)
+		return false, errs.InvalidTranstion(orderFound.PaymentStatus, payment.StatusPaid)
 	}
 
 	l.Error().Msg("payment confirmation not updated due to unknown reason")

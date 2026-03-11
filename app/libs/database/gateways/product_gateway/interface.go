@@ -19,21 +19,28 @@ type ListFilter struct {
 	TenantID string   `json:"tenantId"`
 }
 
+type DiscountRule struct {
+	QuantityThreshold uint `json:"quantityThreshold"`
+	Discount          uint `json:"discount"`
+}
+
 type ListOutput struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Price uint   `json:"price"`
+	ID            string         `json:"id"`
+	Name          string         `json:"name"`
+	Price         uint           `json:"price"`
+	DiscountRules []DiscountRule `json:"discountRules"`
 }
 
 type CreateInput struct {
-	TenantID    string `json:"tenantId"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Photo       string `json:"photo"`
-	CategoryID  string `json:"categoryId"  validate:"required"`
-	Unit        string `json:"unit"`
-	Price       uint   `json:"price"`
-	IsActive    bool   `json:"isActive"`
+	TenantID      string         `json:"tenantId"`
+	Name          string         `json:"name"`
+	Description   string         `json:"description"`
+	Photo         string         `json:"photo"`
+	CategoryID    string         `json:"categoryId"    validate:"required"`
+	Unit          string         `json:"unit"`
+	Price         uint           `json:"price"`
+	IsActive      bool           `json:"isActive"`
+	DiscountRules []DiscountRule `json:"discountRules"`
 }
 
 type GetByIDFilter struct {

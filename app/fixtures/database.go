@@ -14,6 +14,9 @@ var tables = []string{
 	models.Category{}.TableName(),
 	models.Product{}.TableName(),
 	models.Order{}.TableName(),
+	models.SubscriptionDelivery{}.TableName(),
+	models.SubscriptionConfig{}.TableName(),
+	models.Subscription{}.TableName(),
 }
 
 func CleanDatabase(t *testing.T) {
