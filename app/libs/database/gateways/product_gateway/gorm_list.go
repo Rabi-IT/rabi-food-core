@@ -1,7 +1,9 @@
 package product_gateway
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"rabi-food-core/libs/database/gorm_adapter/models"
 )
 
@@ -14,7 +16,6 @@ func (g *GormProductGatewayAdapter) List(filter ListFilter) ([]ListOutput, error
 		return nil, ErrIDsRequired
 	}
 
-	var output []ListOutput
 	query := g.DB.Conn.Model(&models.Product{}).
 		Where("id IN ?", filter.IDs)
 
@@ -26,14 +27,31 @@ func (g *GormProductGatewayAdapter) List(filter ListFilter) ([]ListOutput, error
 		query = query.Where("is_active = ?", filter.IsActive)
 	}
 
+	output := &[]models.Product{}
 	result := query.Find(&output)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
 	if result.RowsAffected == 0 {
-		return nil, nil
+		return []ListOutput{}, nil
 	}
 
-	return output, nil
+	adapted := make([]ListOutput, len(*output))
+	for i, product := range *output {
+		discountRules := make([]DiscountRule, 0)
+		err := json.Unmarshal(product.DiscountRules, &discountRules)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal discount rules for product %s: %w", product.ID, err)
+		}
+
+		adapted[i] = ListOutput{
+			ID:            product.ID,
+			Name:          product.Name,
+			Price:         product.Price,
+			DiscountRules: discountRules,
+		}
+	}
+
+	return adapted, nil
 }

@@ -17,6 +17,12 @@ type PaginateInput struct {
 	PageSize int
 }
 
+const (
+	// DefaultPageSize is the default number of items per page for pagination.
+	DefaultPageSize = 10
+	DefaultPage     = 0
+)
+
 // CalcMaxPages calculates the maximum number of pages based on the total count of items.
 func (p *PaginateInput) CalcMaxPages(count int64) int {
 	total := float64(count) / float64(p.PageSize)

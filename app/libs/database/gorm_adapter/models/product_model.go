@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -18,6 +19,8 @@ type Product struct {
 
 	CategoryID string `gorm:"type:uuid"`
 	Category   Category
+
+	DiscountRules datatypes.JSON `gorm:"type:jsonb;default:'[]'"`
 
 	// Measurement and pricing details
 	// Unit of measurement (e.g., "kg", "liter", "piece")
