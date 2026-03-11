@@ -4,6 +4,7 @@ import (
 	"rabi-food-core/config"
 	"rabi-food-core/libs/http"
 	"rabi-food-core/libs/http/controllers/category_controller"
+	"rabi-food-core/libs/http/controllers/category_controller/docs"
 	"rabi-food-core/libs/http/controllers/order_controller"
 	"rabi-food-core/libs/http/controllers/product_controller"
 	"rabi-food-core/libs/http/controllers/subscription_controller"
@@ -56,7 +57,7 @@ func New(
 		scalarUI := ui.NewScalarUI(docApi)
 		scalarUI.RegisterRoutes(app)
 
-		defer categoryController.AddDocRoute(docApi)
+		defer docs.RegisterCategory(docApi)
 	}
 
 	jwtMiddleware := jwtware.New(jwtware.Config{

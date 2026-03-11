@@ -13,6 +13,7 @@ import (
 	"rabi-food-core/libs/database/gorm_adapter"
 	"rabi-food-core/libs/http"
 	"rabi-food-core/libs/http/controllers/category_controller"
+	category_docs "rabi-food-core/libs/http/controllers/category_controller/docs"
 	"rabi-food-core/libs/http/controllers/order_controller"
 	"rabi-food-core/libs/http/controllers/product_controller"
 	"rabi-food-core/libs/http/controllers/subscription_controller"
@@ -60,6 +61,9 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		categoryController := do.MustInvoke[*category_controller.CategoryController](i)
 		orderController := do.MustInvoke[*order_controller.OrderController](i)
 		subscriptionController := do.MustInvoke[*subscription_controller.SubscriptionController](i)
+		categoryCase := do.MustInvoke[*category_case.CategoryCase](i)
+
+		category_docs.SetCategoryCase(categoryCase)
 
 		if config.AppPort == "" {
 			return nil, ErrHTTPPortNotConfigured
