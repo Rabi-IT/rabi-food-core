@@ -154,7 +154,7 @@ func (SubscriptionDelivery) TableName() string {
 }
 
 type SubscriptionConfig struct {
-	TenantID string `gorm:"type:uuid;index;not null"`
+	TenantID string `gorm:"type:uuid;primaryKey;not null"`
 	Tenant   Tenant `gorm:"not null"`
 
 	MaxAttemptsPerOrder uint8
