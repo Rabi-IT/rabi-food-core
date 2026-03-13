@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"errors"
+	"net/http"
 	"rabi-food-core/libs/errs"
 	"rabi-food-core/libs/logger"
 	lib "rabi-food-core/libs/validator"
@@ -31,7 +32,13 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 		return ctx.Status(appErr.Status).JSON(appErr)
 	}
 
+	var e *fiber.Error
+	if errors.As(err, &e) {
+		ctx.Set(fiber.HeaderContentType, fiber.MIMETextPlainCharsetUTF8)
+		return ctx.Status(e.Code).SendString(err.Error())
+	}
+
 	logger.Get(ctx.UserContext()).Error().Err(err).Msg("internal server error")
 
-	return err
+	return ctx.Status(http.StatusInternalServerError).SendString("internal server error")
 }
