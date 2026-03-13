@@ -10,7 +10,7 @@ import (
 type SubscriptionGateway interface {
 	Create(ctx context.Context, input CreateInput) (string, error)
 	GetByID(ctx context.Context, filter GetByIDFilter) (*GetByIDOutput, error)
-	UpsertConfig(ctx context.Context, tenantID string, input UpsertConfigInput) (bool, error)
+	UpsertConfig(ctx context.Context, tenantID string, input UpsertConfigInput) error
 	GetConfig(ctx context.Context, tenantID string) (*GetConfigOutput, error)
 }
 

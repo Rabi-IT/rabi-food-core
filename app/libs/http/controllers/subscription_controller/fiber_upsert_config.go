@@ -20,14 +20,10 @@ func (c *SubscriptionController) UpsertConfig(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	upserted, err := c.usecase.UpsertConfig(ctx.UserContext(), data)
+	err = c.usecase.UpsertConfig(ctx.UserContext(), data)
 	if err != nil {
 		return err
 	}
 
-	if upserted {
-		return ctx.SendStatus(http.StatusOK)
-	}
-
-	return ctx.SendStatus(http.StatusCreated)
+	return ctx.SendStatus(http.StatusOK)
 }
