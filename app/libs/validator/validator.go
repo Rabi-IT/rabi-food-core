@@ -14,7 +14,7 @@ var (
 
 func init() {
 	V.RegisterTagNameFunc(func(fld reflect.StructField) string {
-		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0] //nolint:mnd
 
 		if name == "-" {
 			return ""
@@ -22,7 +22,6 @@ func init() {
 
 		return name
 	})
-
 }
 
 // ValidationError represents a single validation error with field and tag information.
