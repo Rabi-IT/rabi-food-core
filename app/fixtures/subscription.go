@@ -10,17 +10,36 @@ import (
 )
 
 type subscriptionFixture struct {
-	URI string
+	URI                            string
+	DEFAULT_DISCOUNT_RULE          subscription_gateway.DiscountRule
+	DEFAULT_CUTOFF_OFFSET_MINUTES  uint16
+	DEFAULT_MAX_ATTEMPTS_PER_ORDER uint8
+
+	DEFAULT_TOTAL_CYCLES        uint
+	DEFAULT_AUTO_RENEW          bool
+	DEFAULT_NOTES               string
+	DEFAULT_DELIVERY_WEEKDAY    uint8
+	DEFAULT_DELIVERY_START_HOUR uint8
+	DEFAULT_DELIVERY_END_HOUR   uint8
 }
 
 var (
-	Subscription          = subscriptionFixture{"/subscription/"}
-	DEFAULT_DISCOUNT_RULE = subscription_gateway.DiscountRule{
-		CyclesThreshold: 5,
-		Discount:        10,
+	Subscription = subscriptionFixture{
+		URI: "/subscription/",
+		DEFAULT_DISCOUNT_RULE: subscription_gateway.DiscountRule{
+			CyclesThreshold: 5,  //nolint:mnd
+			Discount:        10, //nolint:mnd
+		},
+		DEFAULT_CUTOFF_OFFSET_MINUTES:  uint16(0),
+		DEFAULT_MAX_ATTEMPTS_PER_ORDER: uint8(1),
+
+		DEFAULT_TOTAL_CYCLES:        uint(1),
+		DEFAULT_AUTO_RENEW:          true,
+		DEFAULT_NOTES:               "Notes",
+		DEFAULT_DELIVERY_WEEKDAY:    uint8(0),
+		DEFAULT_DELIVERY_START_HOUR: uint8(10),
+		DEFAULT_DELIVERY_END_HOUR:   uint8(12),
 	}
-	DEFAULT_CUTOFF_OFFSET_MINUTES  = uint16(0)
-	DEFAULT_MAX_ATTEMPTS_PER_ORDER = uint8(1)
 )
 
 func (subscriptionFixture) UpsertConfig(t *testing.T, input *subscription_gateway.UpsertConfigInput, token string) {
@@ -28,11 +47,11 @@ func (subscriptionFixture) UpsertConfig(t *testing.T, input *subscription_gatewa
 	Body := input
 	if Body == nil {
 		Body = &subscription_gateway.UpsertConfigInput{
-			MaxAttemptsPerOrder: DEFAULT_MAX_ATTEMPTS_PER_ORDER,
+			MaxAttemptsPerOrder: Subscription.DEFAULT_MAX_ATTEMPTS_PER_ORDER,
 			DiscountRules: []subscription_gateway.DiscountRule{
-				DEFAULT_DISCOUNT_RULE,
+				Subscription.DEFAULT_DISCOUNT_RULE,
 			},
-			CutoffOffsetMinutes: DEFAULT_CUTOFF_OFFSET_MINUTES,
+			CutoffOffsetMinutes: Subscription.DEFAULT_CUTOFF_OFFSET_MINUTES,
 		}
 	}
 
@@ -57,14 +76,14 @@ func (subscriptionFixture) Create(t *testing.T, input *subscription_case.CreateI
 			},
 			DeliveryDays: []subscription_gateway.DeliveryDay{
 				{
-					Weekday:   0,
-					StartHour: 10, //nolint:mnd
-					EndHour:   12, //nolint:mnd
+					Weekday:   Subscription.DEFAULT_DELIVERY_WEEKDAY,
+					StartHour: Subscription.DEFAULT_DELIVERY_START_HOUR,
+					EndHour:   Subscription.DEFAULT_DELIVERY_END_HOUR,
 				},
 			},
-			TotalCycles: 10, //nolint:mnd
-			AutoRenew:   true,
-			Notes:       "Notes",
+			TotalCycles: Subscription.DEFAULT_TOTAL_CYCLES,
+			AutoRenew:   Subscription.DEFAULT_AUTO_RENEW,
+			Notes:       Subscription.DEFAULT_NOTES,
 		}
 	}
 
