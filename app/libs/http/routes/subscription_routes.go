@@ -10,4 +10,5 @@ func Subscription(app *fiber.App, c *subscription_controller.SubscriptionControl
 	route := app.Group("/subscription")
 	route.Post("/", c.Create)
 	route.Get("/:id", c.GetByID)
+	route.Put("/config", c.UpsertConfig)
 }
