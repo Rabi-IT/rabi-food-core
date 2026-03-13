@@ -34,7 +34,31 @@ type CreateInput struct {
 	Notes        string                  `json:"notes"`
 }
 
+func (c *CreateInput) Validate() error {
+	seenProducts := make(map[string]struct{}, len(c.Items))
+	for _, item := range c.Items {
+		if _, exists := seenProducts[item.ProductID]; exists {
+			return errs.DuplicateProduct(item.ProductID)
+		}
+		seenProducts[item.ProductID] = struct{}{}
+	}
+
+	seenWeekdays := make(map[uint8]struct{}, len(c.DeliveryDays))
+	for _, day := range c.DeliveryDays {
+		if _, exists := seenWeekdays[day.Weekday]; exists {
+			return errs.DuplicateDeliveryWeekday(day.Weekday)
+		}
+		seenWeekdays[day.Weekday] = struct{}{}
+	}
+
+	return nil
+}
+
 func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (string, error) {
+	if err := input.Validate(); err != nil {
+		return "", err
+	}
+
 	productIds := make([]string, 0, len(input.Items))
 	session := app_context.GetSession(ctx)
 
@@ -59,6 +83,10 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 	config, err := s.gateway.GetConfig(ctx, session.TenantID)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch subscription config: %w", err)
+	}
+
+	if config == nil {
+		return "", errs.ErrTenantSubscriptionNotConfigured
 	}
 
 	price, err := buildSubscriptionPricing(

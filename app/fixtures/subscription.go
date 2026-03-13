@@ -6,7 +6,6 @@ import (
 	"rabi-food-core/usecases/subscription_case"
 	"testing"
 
-	"github.com/gavv/httpexpect/v2"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,7 +13,36 @@ type subscriptionFixture struct {
 	URI string
 }
 
-var Subscription = subscriptionFixture{"/subscription/"}
+var (
+	Subscription          = subscriptionFixture{"/subscription/"}
+	DEFAULT_DISCOUNT_RULE = subscription_gateway.DiscountRule{
+		CyclesThreshold: 5,
+		Discount:        10,
+	}
+	DEFAULT_CUTOFF_OFFSET_MINUTES  = uint16(0)
+	DEFAULT_MAX_ATTEMPTS_PER_ORDER = uint8(1)
+)
+
+func (subscriptionFixture) UpsertConfig(t *testing.T, input *subscription_gateway.UpsertConfigInput, token string) {
+	t.Helper()
+	Body := input
+	if Body == nil {
+		Body = &subscription_gateway.UpsertConfigInput{
+			MaxAttemptsPerOrder: DEFAULT_MAX_ATTEMPTS_PER_ORDER,
+			DiscountRules: []subscription_gateway.DiscountRule{
+				DEFAULT_DISCOUNT_RULE,
+			},
+			CutoffOffsetMinutes: DEFAULT_CUTOFF_OFFSET_MINUTES,
+		}
+	}
+
+	DefaultHTTP(t).
+		Request(http.MethodPut, Subscription.URI+"config").
+		WithHeader("Authorization", "Bearer "+token).
+		WithJSON(Body).
+		Expect().
+		StatusList(http.StatusOK, http.StatusCreated)
+}
 
 func (subscriptionFixture) Create(t *testing.T, input *subscription_case.CreateInput, token string) string {
 	t.Helper()
@@ -41,7 +69,7 @@ func (subscriptionFixture) Create(t *testing.T, input *subscription_case.CreateI
 	}
 
 	id := ""
-	httpexpect.Default(t, AppURL).
+	DefaultHTTP(t).
 		Request(http.MethodPost, Subscription.URI).
 		WithHeader("Authorization", "Bearer "+token).
 		WithJSON(Body).
@@ -56,7 +84,7 @@ func (subscriptionFixture) GetByID(t *testing.T, id string, token string) (subsc
 	t.Helper()
 	found := subscription_gateway.GetByIDOutput{}
 
-	obj := httpexpect.Default(t, AppURL).
+	obj := DefaultHTTP(t).
 		Request(http.MethodGet, Subscription.URI+id).
 		WithHeader("Authorization", "Bearer "+token).
 		Expect().Status(http.StatusOK)
