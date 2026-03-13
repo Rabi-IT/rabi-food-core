@@ -2,6 +2,7 @@ package subscription_case_test
 
 import (
 	"net/http"
+	"rabi-food-core/domain/subscription"
 	"rabi-food-core/fixtures"
 	"rabi-food-core/libs/database/gateways/subscription_gateway"
 	"rabi-food-core/libs/http/fiber_adapter/middlewares"
@@ -68,7 +69,6 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 			Expect().
 			Status(http.StatusCreated).
 			Body().Decode(&id)
-
 	})
 
 	t.Run("should fail if required fields are empty", func() {
@@ -129,17 +129,47 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 			Status(http.StatusCreated).
 			Body().NotEmpty()
 	})
-
 }
 
 func (t *TestSuite) Test_SubscriptionIntegration_GetByID() {
 	t.Run("should be able to get by id", func() {
-		t.T().Skipf("Should implement")
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, token)
+		subscriptionID := fixtures.Subscription.Create(t.T(), nil, token)
+
+		response := new(subscription_gateway.GetByIDOutput)
+		fixtures.DefaultHTTP(t.T()).
+			Request(http.MethodGet, fixtures.Subscription.URI+subscriptionID).
+			WithHeader("Authorization", "Bearer "+token).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Decode(&response)
+
+		t.Equal(subscriptionID, response.ID)
+		t.Equal(tenant.ID, response.TenantID)
+		t.Equal(tenant.UserID, response.UserID)
+		t.Equal(subscription.StatusActive, response.Status)
+
+		t.Len(response.DeliveryDays, 1)
+		deliveryDay := response.DeliveryDays[0]
+		t.Equal(fixtures.Subscription.DEFAULT_DELIVERY_WEEKDAY, deliveryDay.Weekday)
+		t.Equal(fixtures.Subscription.DEFAULT_DELIVERY_START_HOUR, deliveryDay.StartHour)
+		t.Equal(fixtures.Subscription.DEFAULT_DELIVERY_END_HOUR, deliveryDay.EndHour)
+
+		t.Len(response.Items, 1)
+		t.Equal(fixtures.Subscription.DEFAULT_NOTES, response.Notes)
+		t.Equal(fixtures.Subscription.DEFAULT_TOTAL_CYCLES, response.TotalCycles)
+		t.Equal(fixtures.Subscription.DEFAULT_TOTAL_CYCLES, response.RemainingCycles)
+		t.EqualValues(0, response.CycleDiscount)
+		t.Equal(fixtures.Subscription.DEFAULT_CUTOFF_OFFSET_MINUTES, response.CutoffOffsetMinutes)
+		t.Equal(fixtures.Subscription.DEFAULT_AUTO_RENEW, response.AutoRenew)
 	})
 
 	t.Run("should return NotFound when get by id not found", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, token)
 		fixtures.Subscription.Create(t.T(), nil, token)
 
 		NON_EXISTING_ID := uuid.New().String()
@@ -157,6 +187,7 @@ func (t *TestSuite) Test_SubscriptionIntegration_Delete() {
 	t.Run("should not be able to delete", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, token)
 		subscriptionID := fixtures.Subscription.Create(t.T(), nil, token)
 
 		fixtures.DefaultHTTP(t.T()).
