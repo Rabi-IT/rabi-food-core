@@ -10,6 +10,7 @@ import (
 type SubscriptionGateway interface {
 	Create(ctx context.Context, input CreateInput) (string, error)
 	GetByID(ctx context.Context, filter GetByIDFilter) (*GetByIDOutput, error)
+	UpsertConfig(ctx context.Context, tenantID string, input UpsertConfigInput) (bool, error)
 	GetConfig(ctx context.Context, tenantID string) (*GetConfigOutput, error)
 }
 
@@ -134,7 +135,7 @@ type DiscountRule struct {
 	Discount        uint8 `json:"discount"        validate:"min=1,max=100"`
 }
 
-type CreateConfigInput struct {
+type UpsertConfigInput struct {
 	MaxAttemptsPerOrder uint8
 	DiscountRules       []DiscountRule
 	CutoffOffsetMinutes uint16
