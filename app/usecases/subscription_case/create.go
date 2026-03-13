@@ -55,7 +55,8 @@ func (c *CreateInput) Validate() error {
 }
 
 func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (string, error) {
-	if err := input.Validate(); err != nil {
+	err := input.Validate()
+	if err != nil {
 		return "", err
 	}
 
