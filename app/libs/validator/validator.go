@@ -1,6 +1,9 @@
 package validator
 
 import (
+	"reflect"
+	"strings"
+
 	"github.com/go-playground/validator/v10"
 )
 
@@ -8,6 +11,19 @@ var (
 	// V is the singleton validator instance used for struct validation throughout the application.
 	V = validator.New()
 )
+
+func init() {
+	V.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+
+		if name == "-" {
+			return ""
+		}
+
+		return name
+	})
+
+}
 
 // ValidationError represents a single validation error with field and tag information.
 type ValidationError struct {
