@@ -13,10 +13,10 @@ func (g *GormSubscriptionGatewayAdapter) UpsertConfig(
 	ctx context.Context,
 	tenatID string,
 	input UpsertConfigInput,
-) (bool, error) {
+) error {
 	discountRules, err := json.Marshal(input.DiscountRules)
 	if err != nil {
-		return false, fmt.Errorf("failed to marshal discount rules: %w", err)
+		return fmt.Errorf("failed to marshal discount rules: %w", err)
 	}
 
 	result := g.DB.Conn.
@@ -31,5 +31,5 @@ func (g *GormSubscriptionGatewayAdapter) UpsertConfig(
 			CutoffOffsetMinutes: input.CutoffOffsetMinutes,
 		})
 
-	return result.RowsAffected > 0, result.Error
+	return result.Error
 }
