@@ -105,7 +105,7 @@ func (t *TestSuite) Test_CategoryIntegration_Create() {
 			JSON().Decode(&response)
 
 		t.Len(response.Errors, 1)
-		t.Equal("Name", response.Errors[0].Field)
+		t.Equal("name", response.Errors[0].Field)
 		t.Equal("required", response.Errors[0].Tag)
 	})
 
