@@ -9,7 +9,11 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func (g *GormSubscriptionGatewayAdapter) UpsertConfig(ctx context.Context, tenatID string, input UpsertConfigInput) (bool, error) {
+func (g *GormSubscriptionGatewayAdapter) UpsertConfig(
+	ctx context.Context,
+	tenatID string,
+	input UpsertConfigInput,
+) (bool, error) {
 	discountRules, err := json.Marshal(input.DiscountRules)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal discount rules: %w", err)
