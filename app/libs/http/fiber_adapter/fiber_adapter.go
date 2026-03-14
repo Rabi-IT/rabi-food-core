@@ -2,7 +2,6 @@ package fiber_adapter
 
 import (
 	"rabi-food-core/config"
-	"rabi-food-core/libs/docs"
 	"rabi-food-core/libs/http"
 	"rabi-food-core/libs/http/controllers/category_controller"
 	"rabi-food-core/libs/http/controllers/order_controller"
@@ -49,9 +48,7 @@ func New(
 		Use(requestid.New())
 
 	if !config.Env.IsProduction() {
-		app.
-			Static("/docs", "./libs/docs").
-			Get("/docs", docs.ServeUI)
+		app.Static("/docs", "./libs/docs")
 	}
 
 	app.Post("/tenant", tenantController.Create).
