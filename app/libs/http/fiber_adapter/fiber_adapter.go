@@ -2,6 +2,7 @@ package fiber_adapter
 
 import (
 	"rabi-food-core/config"
+	"rabi-food-core/libs/docs"
 	"rabi-food-core/libs/http"
 	"rabi-food-core/libs/http/controllers/category_controller"
 	"rabi-food-core/libs/http/controllers/order_controller"
@@ -39,15 +40,21 @@ func New(
 	})
 
 	jwtMiddleware := jwtware.New(jwtware.Config{
-		SigningKey: jwtware.SigningKey{Key: []byte(config.AuthSecret)},
+		SigningKey:   jwtware.SigningKey{Key: []byte(config.AuthSecret)},
+		ErrorHandler: middlewares.ErrorHandler,
 	})
-
-	requestIDMiddleware := requestid.New()
 
 	app.
 		Use(cors.New()).
-		Use(requestIDMiddleware).
-		Post("/tenant", tenantController.Create).
+		Use(requestid.New())
+
+	if !config.Env.IsProduction() {
+		app.
+			Static("/docs", "./libs/docs").
+			Get("/docs", docs.ServeUI)
+	}
+
+	app.Post("/tenant", tenantController.Create).
 		Use(jwtMiddleware).
 		Use(middlewares.Session).
 		Use(middlewares.Logging())
