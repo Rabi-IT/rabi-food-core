@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// GetTenantByID godoc
+// GetByID godoc
 // @Summary Get tenant by ID
 // @Description Get a tenant by ID
 // @Tags tenants
@@ -15,7 +15,7 @@ import (
 // @Success 200 {object} map[string]interface{}
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /tenant/{id} [get]
+// @Router /tenant/{id} [get].
 func (c *TenantController) GetByID(ctx *fiber.Ctx) error {
 	data, err := c.usecase.GetByID(ctx.UserContext(), ctx.Params("id"))
 

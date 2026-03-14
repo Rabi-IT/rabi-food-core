@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// DeleteOrder godoc
+// Delete godoc
 // @Summary Delete order
 // @Description Delete an order by ID
 // @Tags orders
@@ -19,7 +19,7 @@ import (
 // @Success 204 {string} string "No content"
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /order/{id} [delete]
+// @Router /order/{id} [delete].
 func (c *OrderController) Delete(ctx *fiber.Ctx) error {
 	filter := order_gateway.DeleteFilter{}
 

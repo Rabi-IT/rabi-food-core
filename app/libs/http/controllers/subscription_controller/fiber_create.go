@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// CreateSubscription godoc
+// Create godoc
 // @Summary Create subscription
 // @Description Create a new subscription
 // @Tags subscriptions
@@ -18,7 +18,7 @@ import (
 // @Success 201 {string} string "Created subscription ID"
 // @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
 // @Failure 500 {string} string "Internal server error"
-// @Router /subscription/ [post]
+// @Router /subscription/ [post].
 func (c *SubscriptionController) Create(ctx *fiber.Ctx) error {
 	data := subscription_case.CreateInput{}
 	err := ctx.BodyParser(&data)

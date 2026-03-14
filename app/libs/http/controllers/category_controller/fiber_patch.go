@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// PatchCategory godoc
+// Patch godoc
 // @Summary Patch category
 // @Description Update an existing category
 // @Tags categories
@@ -21,7 +21,7 @@ import (
 // @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /category/{id} [patch]
+// @Router /category/{id} [patch].
 func (c *CategoryController) Patch(ctx *fiber.Ctx) error {
 	filter := category_gateway.PatchFilter{
 		ID: ctx.Params("id"),

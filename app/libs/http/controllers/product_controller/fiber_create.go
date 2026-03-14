@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// CreateProduct godoc
+// Create godoc
 // @Summary Create product
 // @Description Create a new product
 // @Tags products
@@ -18,7 +18,7 @@ import (
 // @Success 201 {string} string "Created product ID"
 // @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
 // @Failure 500 {string} string "Internal server error"
-// @Router /product/ [post]
+// @Router /product/ [post].
 func (c *ProductController) Create(ctx *fiber.Ctx) error {
 	data := product_gateway.CreateInput{}
 	err := ctx.BodyParser(&data)

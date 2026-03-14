@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// PaginateProducts godoc
+// Paginate godoc
 // @Summary Paginate products
 // @Description Paginate products using query filters
 // @Tags products
@@ -21,7 +21,7 @@ import (
 // @Param isActive query bool false "Filter by active products"
 // @Success 200 {object} product_gateway.PaginateOutput
 // @Failure 500 {string} string "Internal server error"
-// @Router /product/ [get]
+// @Router /product/ [get].
 func (c *ProductController) Paginate(ctx *fiber.Ctx) error {
 	page, err := strconv.Atoi(ctx.Query("Page", "0"))
 	if err != nil {

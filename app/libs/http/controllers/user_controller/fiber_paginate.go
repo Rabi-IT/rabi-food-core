@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// PaginateUsers godoc
+// Paginate godoc
 // @Summary Paginate users
 // @Description Paginate users using query filters
 // @Tags users
@@ -21,7 +21,7 @@ import (
 // @Param name query string false "Name"
 // @Success 200 {object} g.PaginateOutput
 // @Failure 500 {string} string "Internal server error"
-// @Router /user/ [get]
+// @Router /user/ [get].
 func (c *UserController) Paginate(ctx *fiber.Ctx) error {
 	page, err := strconv.Atoi(ctx.Query("Page", "0"))
 	if err != nil {

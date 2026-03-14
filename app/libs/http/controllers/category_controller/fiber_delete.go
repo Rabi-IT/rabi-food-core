@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// DeleteCategory godoc
+// Delete godoc
 // @Summary Delete category
 // @Description Delete a category by ID
 // @Tags categories
@@ -19,7 +19,7 @@ import (
 // @Success 204 {string} string "No content"
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /category/{id} [delete]
+// @Router /category/{id} [delete].
 func (c *CategoryController) Delete(ctx *fiber.Ctx) error {
 	filter := category_gateway.DeleteFilter{}
 

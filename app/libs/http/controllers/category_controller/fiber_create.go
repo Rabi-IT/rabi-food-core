@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// CreateCategory godoc
+// Create godoc
 // @Summary Create category
 // @Description Create a new category
 // @Tags categories
@@ -18,7 +18,7 @@ import (
 // @Success 201 {string} string "Created category ID"
 // @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
 // @Failure 500 {string} string "Internal server error"
-// @Router /category/ [post]
+// @Router /category/ [post].
 func (c *CategoryController) Create(ctx *fiber.Ctx) error {
 	data := category_gateway.CreateInput{}
 	err := ctx.BodyParser(&data)
