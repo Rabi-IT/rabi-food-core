@@ -18,6 +18,7 @@ var deps = []dep{
 	{"golangci-lint", "github.com/golangci/golangci-lint/cmd/golangci-lint@latest"},
 	{"gotestsum", "gotest.tools/gotestsum@latest"},
 	{"mockery", "github.com/vektra/mockery/v2@latest"},
+	{"swaggo", "github.com/swaggo/swag/cmd/swag@latest"},
 }
 
 func main() {

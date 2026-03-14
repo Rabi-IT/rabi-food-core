@@ -10,7 +10,7 @@ tasks:
     desc: "Start the development environment"
     dir: app
     dotenv: ["../.env.test"]
-    deps: [infra-test]
+    deps: [infra-test, docs]
     cmds:
       - go run main.go
     silent: false
@@ -23,6 +23,13 @@ tasks:
       GOPATH: /home/kelvin/workspace
     cmds:
       - golangci-lint run --fix --timeout 5m
+    silent: false
+
+  docs:
+    desc: "Generate API documentation using swaggo"
+    dir: app
+    cmds:
+      - swag init --output ./libs/docs --outputTypes json
     silent: false
 
   # =============================
