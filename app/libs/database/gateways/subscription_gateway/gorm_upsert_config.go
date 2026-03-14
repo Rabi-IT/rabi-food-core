@@ -11,7 +11,7 @@ import (
 
 func (g *GormSubscriptionGatewayAdapter) UpsertConfig(
 	ctx context.Context,
-	tenatID string,
+	tenantID string,
 	input UpsertConfigInput,
 ) error {
 	discountRules, err := json.Marshal(input.DiscountRules)
@@ -25,7 +25,7 @@ func (g *GormSubscriptionGatewayAdapter) UpsertConfig(
 			UpdateAll: true,
 		}).
 		Create(&models.SubscriptionConfig{
-			TenantID:            tenatID,
+			TenantID:            tenantID,
 			MaxAttemptsPerOrder: input.MaxAttemptsPerOrder,
 			DiscountRules:       discountRules,
 			CutoffOffsetMinutes: input.CutoffOffsetMinutes,
