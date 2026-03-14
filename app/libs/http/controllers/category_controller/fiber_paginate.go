@@ -8,6 +8,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// PaginateCategories godoc
+// @Summary Paginate categories
+// @Description Paginate categories using query filters
+// @Tags categories
+// @Produce json
+// @Param Page query int false "Page number"
+// @Param PageSize query int false "Page size"
+// @Param tenantId query string false "Tenant ID"
+// @Param name query string false "Category name"
+// @Success 200 {object} category_gateway.PaginateOutput
+// @Failure 500 {string} string "Internal server error"
+// @Router /category/ [get]
 func (c *CategoryController) Paginate(ctx *fiber.Ctx) error {
 	page, err := strconv.Atoi(ctx.Query("Page", "0"))
 	if err != nil {

@@ -9,6 +9,19 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// PatchUser godoc
+// @Summary Patch user
+// @Description Update an existing user
+// @Tags users
+// @Accept json
+// @Produce text/plain
+// @Param id path string true "User ID"
+// @Param user body g.PatchValues true "User patch data"
+// @Success 200 {string} string "Updated"
+// @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
+// @Failure 404 {string} string "Not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router /user/{id} [patch]
 func (c *UserController) Patch(ctx *fiber.Ctx) error {
 	data := g.PatchValues{}
 	err := parser.ParseBody(ctx, &data)

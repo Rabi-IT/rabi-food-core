@@ -6,6 +6,16 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// GetOrderByID godoc
+// @Summary Get order by ID
+// @Description Get an order by ID
+// @Tags orders
+// @Produce json
+// @Param id path string true "Order ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 404 {string} string "Not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router /order/{id} [get]
 func (c *OrderController) GetByID(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 

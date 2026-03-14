@@ -9,6 +9,20 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// ConfirmOrderPayment godoc
+// @Summary Confirm order payment
+// @Description Confirm payment for a specific order
+// @Tags orders
+// @Accept json
+// @Produce text/plain
+// @Param id path string true "Order ID"
+// @Param payment body order_case.ConfirmPaymentInput true "Payment confirmation data"
+// @Success 200 {string} string "Payment confirmed"
+// @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
+// @Failure 404 {string} string "Not found"
+// @Failure 409 {object} errs.AppError "Conflict"
+// @Failure 500 {string} string "Internal server error"
+// @Router /order/{id}/payments/confirm [post]
 func (c *OrderController) ConfirmPayment(ctx *fiber.Ctx) error {
 	orderID := ctx.Params("id")
 

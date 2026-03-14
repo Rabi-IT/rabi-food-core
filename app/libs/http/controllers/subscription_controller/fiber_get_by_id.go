@@ -6,6 +6,16 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// GetSubscriptionByID godoc
+// @Summary Get subscription by ID
+// @Description Get a subscription by ID
+// @Tags subscriptions
+// @Produce json
+// @Param id path string true "Subscription ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 404 {string} string "Not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router /subscription/{id} [get]
 func (c *SubscriptionController) GetByID(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 

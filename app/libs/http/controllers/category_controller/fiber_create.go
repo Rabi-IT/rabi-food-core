@@ -13,10 +13,12 @@ import (
 // @Description Create a new category
 // @Tags categories
 // @Accept json
-// @Produce plain
+// @Produce text/plain
 // @Param category body category_gateway.CreateInput true "Category data"
-// @Success 201 {string} string
-// @Router /categories [post]
+// @Success 201 {string} string "Created category ID"
+// @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
+// @Failure 500 {string} string "Internal server error"
+// @Router /category/ [post]
 func (c *CategoryController) Create(ctx *fiber.Ctx) error {
 	data := category_gateway.CreateInput{}
 	err := ctx.BodyParser(&data)
