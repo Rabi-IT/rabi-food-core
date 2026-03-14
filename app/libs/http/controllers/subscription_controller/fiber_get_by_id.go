@@ -12,7 +12,7 @@ import (
 // @Tags subscriptions
 // @Produce json
 // @Param id path string true "Subscription ID"
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} subscription_gateway.GetByIDOutput
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
 // @Router /subscription/{id} [get].

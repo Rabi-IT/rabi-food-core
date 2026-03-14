@@ -12,7 +12,7 @@ import (
 // @Tags tenants
 // @Produce json
 // @Param id path string true "Tenant ID"
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} tenant_gateway.GetByIDOutput
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
 // @Router /tenant/{id} [get].
