@@ -8,6 +8,17 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// UpsertSubscriptionConfig godoc
+// @Summary Upsert subscription config
+// @Description Create or update subscription config for the current tenant
+// @Tags subscriptions
+// @Accept json
+// @Produce text/plain
+// @Param config body subscription_gateway.UpsertConfigInput true "Subscription config"
+// @Success 200 {string} string "Updated"
+// @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
+// @Failure 500 {string} string "Internal server error"
+// @Router /subscription/config [put]
 func (c *SubscriptionController) UpsertConfig(ctx *fiber.Ctx) error {
 	data := subscription_gateway.UpsertConfigInput{}
 	err := ctx.BodyParser(&data)
