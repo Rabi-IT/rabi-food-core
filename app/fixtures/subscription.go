@@ -37,8 +37,8 @@ var (
 		DEFAULT_AUTO_RENEW:          true,
 		DEFAULT_NOTES:               "Notes",
 		DEFAULT_DELIVERY_WEEKDAY:    uint8(0),
-		DEFAULT_DELIVERY_START_HOUR: uint8(10),
-		DEFAULT_DELIVERY_END_HOUR:   uint8(12),
+		DEFAULT_DELIVERY_START_HOUR: uint8(10), //nolint:mnd
+		DEFAULT_DELIVERY_END_HOUR:   uint8(12), //nolint:mnd
 	}
 )
 
