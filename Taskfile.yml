@@ -28,8 +28,10 @@ tasks:
   docs:
     desc: "Generate API documentation using swaggo"
     dir: app
+    dotenv: ["../.env.test"]
     cmds:
       - swag init --output ./libs/docs --outputTypes json
+      - echo "Docs -> http://localhost:${APP_PORT}/docs"
     silent: false
 
   # =============================
