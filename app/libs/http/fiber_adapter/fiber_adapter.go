@@ -39,8 +39,7 @@ func New(
 	})
 
 	jwtMiddleware := jwtware.New(jwtware.Config{
-		SigningKey:   jwtware.SigningKey{Key: []byte(config.AuthSecret)},
-		ErrorHandler: middlewares.ErrorHandler,
+		SigningKey: jwtware.SigningKey{Key: []byte(config.AuthSecret)},
 	})
 
 	app.
