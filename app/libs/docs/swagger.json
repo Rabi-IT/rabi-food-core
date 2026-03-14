@@ -397,8 +397,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/order_gateway.GetByIDOutput"
                         }
                     },
                     "404": {
@@ -1475,6 +1474,70 @@
                 },
                 "tenantId": {
                     "type": "string"
+                }
+            }
+        },
+        "order_gateway.GetByIDOutput": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deliveryStatus": {
+                    "type": "string"
+                },
+                "externalPaymentId": {
+                    "type": "string"
+                },
+                "fulfillmentStatus": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/order_gateway.OrderItem"
+                    }
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "paidAt": {
+                    "type": "string"
+                },
+                "paymentStatus": {
+                    "$ref": "#/definitions/payment.Status"
+                },
+                "tenantId": {
+                    "type": "string"
+                },
+                "totalPrice": {
+                    "type": "integer"
+                }
+            }
+        },
+        "order_gateway.OrderItem": {
+            "type": "object",
+            "properties": {
+                "productId": {
+                    "type": "string"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "unitPrice": {
+                    "type": "integer"
                 }
             }
         },

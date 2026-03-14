@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// CreateUser godoc
+// Create godoc
 // @Summary Create user
 // @Description Create a new user
 // @Tags users
@@ -18,7 +18,7 @@ import (
 // @Success 201 {string} string "Created user ID"
 // @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
 // @Failure 500 {string} string "Internal server error"
-// @Router /user/ [post]
+// @Router /user/ [post].
 func (c *UserController) Create(ctx *fiber.Ctx) error {
 	data := &user_case.CreateInput{}
 	err := ctx.BodyParser(data)

@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// PatchTenant godoc
+// Patch godoc
 // @Summary Patch tenant
 // @Description Update an existing tenant
 // @Tags tenants
@@ -20,7 +20,7 @@ import (
 // @Failure 400 {string} string "Bad request"
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /tenant/{id} [patch]
+// @Router /tenant/{id} [patch].
 func (c *TenantController) Patch(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 	filter := tenant_case.PatchFilter{

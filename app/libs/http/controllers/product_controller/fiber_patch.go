@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// PatchProduct godoc
+// Patch godoc
 // @Summary Patch product
 // @Description Update an existing product
 // @Tags products
@@ -21,7 +21,7 @@ import (
 // @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /product/{id} [patch]
+// @Router /product/{id} [patch].
 func (c *ProductController) Patch(ctx *fiber.Ctx) error {
 	filter := product_gateway.PatchFilter{
 		ID: ctx.Params("id"),

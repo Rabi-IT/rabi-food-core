@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// GetProductByID godoc
+// GetByID godoc
 // @Summary Get product by ID
 // @Description Get a product by ID
 // @Tags products
@@ -15,7 +15,7 @@ import (
 // @Success 200 {object} map[string]interface{}
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /product/{id} [get]
+// @Router /product/{id} [get].
 func (c *ProductController) GetByID(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 

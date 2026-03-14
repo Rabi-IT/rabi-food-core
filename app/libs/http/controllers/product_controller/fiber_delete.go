@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// DeleteProduct godoc
+// Delete godoc
 // @Summary Delete product
 // @Description Delete a product by ID
 // @Tags products
@@ -15,7 +15,7 @@ import (
 // @Success 204 {string} string "No content"
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /product/{id} [delete]
+// @Router /product/{id} [delete].
 func (c *ProductController) Delete(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 	deleted, err := c.usecase.Delete(ctx.UserContext(), id)

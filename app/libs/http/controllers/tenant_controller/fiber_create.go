@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// CreateTenant godoc
+// Create godoc
 // @Summary Create tenant
 // @Description Create a new tenant and its first user
 // @Tags tenants
@@ -18,7 +18,7 @@ import (
 // @Success 201 {object} tenant_case.CreateOutput
 // @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
 // @Failure 500 {string} string "Internal server error"
-// @Router /tenant [post]
+// @Router /tenant [post].
 func (c *TenantController) Create(ctx *fiber.Ctx) error {
 	data := tenant_case.CreateInput{}
 	err := ctx.BodyParser(&data)

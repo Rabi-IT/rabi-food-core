@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// GetUserByID godoc
+// GetByID godoc
 // @Summary Get user by ID
 // @Description Get a user by ID
 // @Tags users
@@ -19,7 +19,7 @@ import (
 // @Success 200 {object} g.GetByIDOutput
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /user/{id} [get]
+// @Router /user/{id} [get].
 func (c *UserController) GetByID(ctx *fiber.Ctx) error {
 	filter := g.GetByIDFilter{}
 

@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// ConfirmOrderPayment godoc
+// ConfirmPayment godoc
 // @Summary Confirm order payment
 // @Description Confirm payment for a specific order
 // @Tags orders
@@ -22,7 +22,7 @@ import (
 // @Failure 404 {string} string "Not found"
 // @Failure 409 {object} errs.AppError "Conflict"
 // @Failure 500 {string} string "Internal server error"
-// @Router /order/{id}/payments/confirm [post]
+// @Router /order/{id}/payments/confirm [post].
 func (c *OrderController) ConfirmPayment(ctx *fiber.Ctx) error {
 	orderID := ctx.Params("id")
 
