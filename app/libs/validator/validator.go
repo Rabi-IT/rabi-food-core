@@ -17,7 +17,13 @@ func init() {
 		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0] //nolint:mnd
 
 		if name == "-" {
+			// Explicitly ignored field.
 			return ""
+		}
+
+		if name == "" {
+			// Fallback to the struct field name when no json tag name is provided.
+			return fld.Name
 		}
 
 		return name
