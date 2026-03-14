@@ -13,3 +13,7 @@ func (e environment) IsProduction() bool {
 func (e environment) IsTest() bool {
 	return e == "test"
 }
+
+func (e environment) String() string {
+	return string(e)
+}
