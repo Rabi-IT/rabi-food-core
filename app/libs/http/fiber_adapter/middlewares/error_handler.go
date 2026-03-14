@@ -35,6 +35,7 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 	var e *fiber.Error
 	if errors.As(err, &e) {
 		ctx.Set(fiber.HeaderContentType, fiber.MIMETextPlainCharsetUTF8)
+
 		return ctx.Status(e.Code).SendString(err.Error())
 	}
 
