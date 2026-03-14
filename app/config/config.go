@@ -9,7 +9,7 @@ import (
 var (
 	AppPort            = os.Getenv("APP_PORT")
 	AuthSecret         = os.Getenv("AUTH_SECRET")
-	Env                = os.Getenv("ENV")
+	Env                = environment(os.Getenv("ENV"))
 	ProductionDatabase = &DatabaseConfig{
 		Host:         os.Getenv("DATABASE_HOST"),
 		DatabaseName: os.Getenv("DATABASE_NAME"),
@@ -21,8 +21,8 @@ var (
 )
 
 type DatabaseConfig struct {
-	Host         string
-	User         string
+	Host string
+	User string
 	// Password contains database password - gosec ignore
 	Password     string // #nosec G117
 	DatabaseName string
