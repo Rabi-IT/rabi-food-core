@@ -29,6 +29,7 @@ func (g *GormSubscriptionGatewayAdapter) UpsertConfig(
 			MaxAttemptsPerOrder: input.MaxAttemptsPerOrder,
 			DiscountRules:       discountRules,
 			CutoffOffsetMinutes: input.CutoffOffsetMinutes,
+			IsOpen:              input.IsOpen,
 		})
 
 	return result.Error

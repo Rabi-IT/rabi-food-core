@@ -157,6 +157,7 @@ type SubscriptionConfig struct {
 	TenantID string `gorm:"type:uuid;primaryKey;not null"`
 	Tenant   Tenant `gorm:"not null"`
 
+	IsOpen              bool `gorm:"not null"`
 	MaxAttemptsPerOrder uint8
 	DiscountRules       datatypes.JSON
 	CutoffOffsetMinutes uint16

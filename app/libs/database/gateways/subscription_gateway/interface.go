@@ -139,10 +139,12 @@ type UpsertConfigInput struct {
 	MaxAttemptsPerOrder uint8
 	DiscountRules       []DiscountRule
 	CutoffOffsetMinutes uint16
+	IsOpen              bool
 }
 
 type GetConfigOutput struct {
 	MaxAttemptsPerOrder uint8          `json:"maxAttemptsPerOrder"`
 	DiscountRules       []DiscountRule `json:"discountRules"`
 	CutoffOffsetMinutes uint16         `json:"cutoffOffsetMinutes"`
+	IsOpen              bool           `json:"isOpen"`
 }
