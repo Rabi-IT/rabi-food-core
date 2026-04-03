@@ -1,7 +1,7 @@
 package gateway
 
 import (
-	"rabi-food-core/features/category/model"
+	"github.com/Rabi-IT/rabi-food-core/features/category/model"
 
 	"github.com/google/uuid"
 )

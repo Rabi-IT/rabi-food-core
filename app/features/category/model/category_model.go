@@ -1,6 +1,6 @@
 package model
 
-import tenant_model "rabi-food-core/features/tenant/model"
+import tenant_model "github.com/Rabi-IT/rabi-food-core/features/tenant/model"
 
 // Category represents the Category model in the database.
 type Category struct {

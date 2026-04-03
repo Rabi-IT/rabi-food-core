@@ -1,8 +1,8 @@
 package model
 
 import (
-	"rabi-food-core/domain/auth"
-	tenant_model "rabi-food-core/features/tenant/model"
+	"github.com/Rabi-IT/rabi-food-core/domain/auth"
+	tenant_model "github.com/Rabi-IT/rabi-food-core/features/tenant/model"
 )
 
 // User represents the user model in the database.

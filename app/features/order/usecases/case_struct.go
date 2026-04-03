@@ -1,8 +1,8 @@
 package usecases
 
 import (
-	g "rabi-food-core/features/order/gateway"
-	pc "rabi-food-core/features/product/usecases"
+	g "github.com/Rabi-IT/rabi-food-core/features/order/gateway"
+	pc "github.com/Rabi-IT/rabi-food-core/features/product/usecases"
 )
 
 // OrderCase encapsulates the business logic related to orders.

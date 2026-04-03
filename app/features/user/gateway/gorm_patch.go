@@ -1,6 +1,6 @@
 package gateway
 
-import "rabi-food-core/features/user/model"
+import "github.com/Rabi-IT/rabi-food-core/features/user/model"
 
 func (g *GormUserGatewayAdapter) Patch(filter PatchFilter, newValues PatchValues) (bool, error) {
 	query := g.DB.Conn.Model(&model.User{}).Where("id = ?", filter.ID)

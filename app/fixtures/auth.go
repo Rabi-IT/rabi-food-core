@@ -2,9 +2,10 @@ package fixtures
 
 import (
 	"net/http"
-	"rabi-food-core/config"
-	"rabi-food-core/domain/auth"
 	"testing"
+
+	"github.com/Rabi-IT/rabi-food-core/config"
+	"github.com/Rabi-IT/rabi-food-core/domain/auth"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/require"

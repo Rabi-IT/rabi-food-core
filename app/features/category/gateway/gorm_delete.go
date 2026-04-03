@@ -1,6 +1,6 @@
 package gateway
 
-import "rabi-food-core/features/category/model"
+import "github.com/Rabi-IT/rabi-food-core/features/category/model"
 
 func (g *GormCategoryGatewayAdapter) Delete(filter DeleteFilter) (bool, error) {
 	query := g.DB.Conn.Where("id = ?", filter.ID)

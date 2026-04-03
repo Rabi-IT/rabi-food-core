@@ -2,9 +2,10 @@ package usecases
 
 import (
 	"context"
-	"rabi-food-core/app_context"
-	g "rabi-food-core/features/user/gateway"
-	"rabi-food-core/libs/database"
+
+	"github.com/Rabi-IT/rabi-food-core/app_context"
+	g "github.com/Rabi-IT/rabi-food-core/features/user/gateway"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
 )
 
 func (c *UserCase) Paginate(

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"rabi-food-core/features/product/usecases"
+	"github.com/Rabi-IT/rabi-food-core/features/product/usecases"
 )
 
 type ProductController struct {

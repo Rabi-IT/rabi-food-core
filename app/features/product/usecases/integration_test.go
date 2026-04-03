@@ -2,10 +2,11 @@ package usecases_test
 
 import (
 	"net/http"
-	product_gateway "rabi-food-core/features/product/gateway"
-	"rabi-food-core/fixtures"
-	"rabi-food-core/libs/database"
 	"testing"
+
+	product_gateway "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
+	"github.com/Rabi-IT/rabi-food-core/fixtures"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/google/uuid"

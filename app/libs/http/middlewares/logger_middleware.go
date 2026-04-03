@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"rabi-food-core/app_context"
-	"rabi-food-core/libs/logger"
+	"github.com/Rabi-IT/rabi-food-core/app_context"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/requestid"

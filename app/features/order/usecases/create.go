@@ -3,14 +3,15 @@ package usecases
 import (
 	"context"
 	"fmt"
-	"rabi-food-core/app_context"
-	"rabi-food-core/domain/payment_status"
-	"rabi-food-core/features/order/domain"
-	g "rabi-food-core/features/order/gateway"
-	"rabi-food-core/features/product/gateway"
-	product_gateway "rabi-food-core/features/product/gateway"
-	"rabi-food-core/libs/errs"
-	"rabi-food-core/libs/logger"
+
+	"github.com/Rabi-IT/rabi-food-core/app_context"
+	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
+	"github.com/Rabi-IT/rabi-food-core/features/order"
+	g "github.com/Rabi-IT/rabi-food-core/features/order/gateway"
+	"github.com/Rabi-IT/rabi-food-core/features/product/gateway"
+	product_gateway "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
+	"github.com/Rabi-IT/rabi-food-core/libs/errs"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 
 	"github.com/google/uuid"
 )
@@ -77,8 +78,8 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 
 		Code:              uuid.Must(uuid.NewV7()).String(),
 		PaymentStatus:     payment_status.StatusPending,
-		FulfillmentStatus: domain.FulfillmentPending,
-		DeliveryStatus:    domain.DeliveryPending,
+		FulfillmentStatus: order.FulfillmentPending,
+		DeliveryStatus:    order.DeliveryPending,
 		Notes:             input.Notes,
 		TotalPrice:        totalPrice,
 		Items:             orderItems,

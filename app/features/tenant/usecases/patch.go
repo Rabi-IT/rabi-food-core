@@ -2,7 +2,8 @@ package usecases
 
 import (
 	"context"
-	g "rabi-food-core/features/tenant/gateway"
+
+	g "github.com/Rabi-IT/rabi-food-core/features/tenant/gateway"
 )
 
 type PatchFilter struct {

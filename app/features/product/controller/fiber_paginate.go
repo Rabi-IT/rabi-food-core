@@ -1,9 +1,10 @@
 package controller
 
 import (
-	"rabi-food-core/features/product/gateway"
-	"rabi-food-core/libs/database"
 	"strconv"
+
+	"github.com/Rabi-IT/rabi-food-core/features/product/gateway"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
 
 	"github.com/gofiber/fiber/v2"
 )

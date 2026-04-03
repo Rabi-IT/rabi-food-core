@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"rabi-food-core/config"
-	"rabi-food-core/libs/database"
-	"rabi-food-core/libs/http"
 	"testing"
 	"time"
+
+	"github.com/Rabi-IT/rabi-food-core/config"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
+	"github.com/Rabi-IT/rabi-food-core/libs/http"
 
 	"github.com/stretchr/testify/require"
 )

@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"rabi-food-core/features/product/model"
+
+	"github.com/Rabi-IT/rabi-food-core/features/product/model"
 )
 
 var (

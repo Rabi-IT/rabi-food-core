@@ -3,13 +3,14 @@ package usecases
 import (
 	"context"
 	"fmt"
-	"rabi-food-core/app_context"
-	"rabi-food-core/domain/payment_status"
-	product_gateway "rabi-food-core/features/product/gateway"
-	"rabi-food-core/features/subscription"
-	g "rabi-food-core/features/subscription/gateway"
-	"rabi-food-core/libs/errs"
-	"rabi-food-core/libs/logger"
+
+	"github.com/Rabi-IT/rabi-food-core/app_context"
+	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
+	product_gateway "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
+	"github.com/Rabi-IT/rabi-food-core/features/subscription"
+	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
+	"github.com/Rabi-IT/rabi-food-core/libs/errs"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 )
 
 // DeliveryDayInput describes a recurring weekly delivery window provided by the caller.

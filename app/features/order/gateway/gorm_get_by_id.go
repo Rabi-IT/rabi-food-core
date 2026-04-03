@@ -3,7 +3,8 @@ package gateway
 import (
 	"encoding/json"
 	"fmt"
-	"rabi-food-core/features/order/model"
+
+	"github.com/Rabi-IT/rabi-food-core/features/order/model"
 )
 
 func (g *GormOrderGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutput, error) {

@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"rabi-food-core/features/subscription/model"
+
+	"github.com/Rabi-IT/rabi-food-core/features/subscription/model"
 
 	"gorm.io/gorm/clause"
 )

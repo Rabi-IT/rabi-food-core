@@ -3,7 +3,8 @@ package gateway
 import (
 	"encoding/json"
 	"fmt"
-	"rabi-food-core/features/product/model"
+
+	"github.com/Rabi-IT/rabi-food-core/features/product/model"
 
 	"github.com/google/uuid"
 )

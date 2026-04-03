@@ -1,12 +1,13 @@
 package model
 
 import (
-	"rabi-food-core/domain/payment_status"
-	"rabi-food-core/features/order/domain"
-	subscription_model "rabi-food-core/features/subscription/model"
-	tenant_model "rabi-food-core/features/tenant/model"
-	user_model "rabi-food-core/features/user/model"
 	"time"
+
+	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
+	"github.com/Rabi-IT/rabi-food-core/features/order"
+	subscription_model "github.com/Rabi-IT/rabi-food-core/features/subscription/model"
+	tenant_model "github.com/Rabi-IT/rabi-food-core/features/tenant/model"
+	user_model "github.com/Rabi-IT/rabi-food-core/features/user/model"
 
 	"gorm.io/datatypes"
 )
@@ -21,11 +22,11 @@ type Order struct {
 	SubscriptionID *string `gorm:"type:uuid"`
 	Subscription   *subscription_model.Subscription
 
-	Code              string                   `gorm:"uniqueIndex;not null"`
-	DeliveryStatus    domain.DeliveryStatus    `gorm:"type:varchar(20);not null"`
-	FulfillmentStatus domain.FulfillmentStatus `gorm:"type:varchar(20);not null"`
-	Notes             string                   `gorm:"type:text"`
-	TotalPrice        uint                     `gorm:"not null"`
+	Code              string                  `gorm:"uniqueIndex;not null"`
+	DeliveryStatus    order.DeliveryStatus    `gorm:"type:varchar(20);not null"`
+	FulfillmentStatus order.FulfillmentStatus `gorm:"type:varchar(20);not null"`
+	Notes             string                  `gorm:"type:text"`
+	TotalPrice        uint                    `gorm:"not null"`
 
 	PaymentStatus     payment_status.Status `gorm:"type:varchar(20);not null"`
 	ExternalPaymentID *string               `gorm:"type:varchar(100);uniqueIndex"`

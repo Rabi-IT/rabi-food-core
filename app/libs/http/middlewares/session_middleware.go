@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"rabi-food-core/app_context"
-	"rabi-food-core/domain/auth"
+
+	"github.com/Rabi-IT/rabi-food-core/app_context"
+	"github.com/Rabi-IT/rabi-food-core/domain/auth"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"

@@ -2,9 +2,10 @@ package usecases
 
 import (
 	"context"
-	"rabi-food-core/app_context"
-	g "rabi-food-core/features/product/gateway"
-	"rabi-food-core/libs/logger"
+
+	"github.com/Rabi-IT/rabi-food-core/app_context"
+	g "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 )
 
 func (c *ProductCase) Create(ctx context.Context, input g.CreateInput) (string, error) {

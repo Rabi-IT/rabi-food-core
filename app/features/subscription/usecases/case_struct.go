@@ -1,8 +1,8 @@
 package usecases
 
 import (
-	pc "rabi-food-core/features/product/usecases"
-	g "rabi-food-core/features/subscription/gateway"
+	pc "github.com/Rabi-IT/rabi-food-core/features/product/usecases"
+	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
 )
 
 // SubscriptionCase encapsulates the business logic related to subscriptions.

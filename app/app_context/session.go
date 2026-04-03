@@ -2,7 +2,8 @@ package app_context
 
 import (
 	"context"
-	"rabi-food-core/domain/auth"
+
+	"github.com/Rabi-IT/rabi-food-core/domain/auth"
 )
 
 type sessionKey string

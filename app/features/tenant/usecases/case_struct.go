@@ -1,8 +1,8 @@
 package usecases
 
 import (
-	g "rabi-food-core/features/tenant/gateway"
-	user_case "rabi-food-core/features/user/usecases"
+	g "github.com/Rabi-IT/rabi-food-core/features/tenant/gateway"
+	user_case "github.com/Rabi-IT/rabi-food-core/features/user/usecases"
 )
 
 type TenantCase struct {

@@ -2,8 +2,9 @@ package controller
 
 import (
 	"net/http"
-	g "rabi-food-core/features/user/gateway"
-	parser "rabi-food-core/libs/http/parser"
+
+	g "github.com/Rabi-IT/rabi-food-core/features/user/gateway"
+	parser "github.com/Rabi-IT/rabi-food-core/libs/http/parser"
 
 	"github.com/gofiber/fiber/v2"
 )

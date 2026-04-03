@@ -4,9 +4,10 @@
 package usecases
 
 import (
-	product_gateway "rabi-food-core/features/product/gateway"
-	subscription_gateway "rabi-food-core/features/subscription/gateway"
 	"testing"
+
+	product_gateway "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
+	subscription_gateway "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

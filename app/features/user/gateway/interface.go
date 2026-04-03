@@ -1,8 +1,8 @@
 package gateway
 
 import (
-	"rabi-food-core/domain/auth"
-	"rabi-food-core/libs/database"
+	"github.com/Rabi-IT/rabi-food-core/domain/auth"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
 )
 
 type UserGateway interface {

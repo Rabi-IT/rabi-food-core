@@ -2,10 +2,11 @@ package usecases_test
 
 import (
 	"net/http"
-	tenant_case "rabi-food-core/features/tenant/usecases"
-	"rabi-food-core/fixtures"
-	"rabi-food-core/libs/http/middlewares"
 	"testing"
+
+	tenant_case "github.com/Rabi-IT/rabi-food-core/features/tenant/usecases"
+	"github.com/Rabi-IT/rabi-food-core/fixtures"
+	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/stretchr/testify/suite"

@@ -1,9 +1,9 @@
 package usecases
 
 import (
-	product_gateway "rabi-food-core/features/product/gateway"
-	g "rabi-food-core/features/subscription/gateway"
-	"rabi-food-core/libs/errs"
+	product_gateway "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
+	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
+	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 )
 
 type buildSubscriptionPricingOutput struct {

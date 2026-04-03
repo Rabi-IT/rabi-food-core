@@ -1,6 +1,6 @@
 package gateway
 
-import "rabi-food-core/features/tenant/model"
+import "github.com/Rabi-IT/rabi-food-core/features/tenant/model"
 
 func (g *GormTenantGatewayAdapter) GetByID(id string) (*GetByIDOutput, error) {
 	output := &model.Tenant{}

@@ -2,8 +2,9 @@ package usecases
 
 import (
 	"context"
-	"rabi-food-core/app_context"
-	g "rabi-food-core/features/order/gateway"
+
+	"github.com/Rabi-IT/rabi-food-core/app_context"
+	g "github.com/Rabi-IT/rabi-food-core/features/order/gateway"
 )
 
 func (c *OrderCase) Delete(ctx context.Context, filter g.DeleteFilter) (bool, error) {

@@ -1,8 +1,8 @@
 package gateway
 
 import (
-	"rabi-food-core/features/order/model"
-	"rabi-food-core/libs/database"
+	"github.com/Rabi-IT/rabi-food-core/features/order/model"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
 )
 
 func (g *GormOrderGatewayAdapter) Paginate(

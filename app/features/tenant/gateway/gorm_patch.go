@@ -1,6 +1,6 @@
 package gateway
 
-import "rabi-food-core/features/tenant/model"
+import "github.com/Rabi-IT/rabi-food-core/features/tenant/model"
 
 func (g *GormTenantGatewayAdapter) Patch(filter PatchFilter, newValues PatchValues) (bool, error) {
 	query := g.DB.Conn.Model(&model.Tenant{}).Where("id = ?", filter.ID)

@@ -1,6 +1,6 @@
 package gateway
 
-import "rabi-food-core/features/product/model"
+import "github.com/Rabi-IT/rabi-food-core/features/product/model"
 
 func (g *GormProductGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutput, error) {
 	output := &model.Product{}

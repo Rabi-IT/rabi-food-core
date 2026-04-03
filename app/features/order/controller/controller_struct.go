@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"rabi-food-core/features/order/usecases"
+	"github.com/Rabi-IT/rabi-food-core/features/order/usecases"
 )
 
 type OrderController struct {

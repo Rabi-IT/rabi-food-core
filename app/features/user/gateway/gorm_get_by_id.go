@@ -2,7 +2,8 @@ package gateway
 
 import (
 	"errors"
-	"rabi-food-core/features/user/model"
+
+	"github.com/Rabi-IT/rabi-food-core/features/user/model"
 )
 
 var (

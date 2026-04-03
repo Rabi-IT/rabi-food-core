@@ -1,6 +1,6 @@
 package gateway
 
-import "rabi-food-core/features/user/model"
+import "github.com/Rabi-IT/rabi-food-core/features/user/model"
 
 func (g *GormUserGatewayAdapter) Delete(filter DeleteFilter) (bool, error) {
 	result := g.DB.Conn.Where(

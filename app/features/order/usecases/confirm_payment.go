@@ -2,12 +2,13 @@ package usecases
 
 import (
 	"context"
-	"rabi-food-core/app_context"
-	"rabi-food-core/domain/payment_status"
-	g "rabi-food-core/features/order/gateway"
-	"rabi-food-core/libs/errs"
-	"rabi-food-core/libs/logger"
 	"time"
+
+	"github.com/Rabi-IT/rabi-food-core/app_context"
+	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
+	g "github.com/Rabi-IT/rabi-food-core/features/order/gateway"
+	"github.com/Rabi-IT/rabi-food-core/libs/errs"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 )
 
 type ConfirmPaymentInput struct {

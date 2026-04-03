@@ -1,7 +1,7 @@
 package gateway
 
 import (
-	"rabi-food-core/libs/database"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
 )
 
 type ProductGateway interface {

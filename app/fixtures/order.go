@@ -2,11 +2,12 @@ package fixtures
 
 import (
 	"net/http"
-	"rabi-food-core/features/order/domain"
-	g "rabi-food-core/features/order/gateway"
-	c "rabi-food-core/features/order/usecases"
-	"rabi-food-core/libs/errs"
 	"testing"
+
+	"github.com/Rabi-IT/rabi-food-core/features/order"
+	g "github.com/Rabi-IT/rabi-food-core/features/order/gateway"
+	c "github.com/Rabi-IT/rabi-food-core/features/order/usecases"
+	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/stretchr/testify/require"
@@ -69,7 +70,7 @@ func (orderFixture) GetByID(t *testing.T, id string, token string) (g.GetByIDOut
 func (orderFixture) ExpectFulfillmentStatus(
 	t *testing.T,
 	id string,
-	expectedStatus domain.FulfillmentStatus,
+	expectedStatus order.FulfillmentStatus,
 	token string,
 ) {
 	t.Helper()

@@ -1,6 +1,6 @@
 package gateway
 
-import "rabi-food-core/features/order/model"
+import "github.com/Rabi-IT/rabi-food-core/features/order/model"
 
 func (g *GormOrderGatewayAdapter) Patch(filter PatchFilter, newValues PatchValues) (bool, error) {
 	query := g.DB.Conn.Model(&model.Order{}).Where("id = ?", filter.ID)

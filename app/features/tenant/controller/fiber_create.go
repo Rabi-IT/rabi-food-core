@@ -2,8 +2,9 @@ package controller
 
 import (
 	"net/http"
-	"rabi-food-core/features/tenant/usecases"
-	"rabi-food-core/libs/validator"
+
+	"github.com/Rabi-IT/rabi-food-core/features/tenant/usecases"
+	"github.com/Rabi-IT/rabi-food-core/libs/validator"
 
 	"github.com/gofiber/fiber/v2"
 )

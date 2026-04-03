@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"rabi-food-core/features/product/controller"
+	"github.com/Rabi-IT/rabi-food-core/features/product/controller"
 
 	"github.com/gofiber/fiber/v2"
 )

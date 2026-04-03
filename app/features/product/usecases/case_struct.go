@@ -1,6 +1,6 @@
 package usecases
 
-import g "rabi-food-core/features/product/gateway"
+import g "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 
 // ProductCase encapsulates the business logic related to products.
 type ProductCase struct {

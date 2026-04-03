@@ -2,9 +2,10 @@ package fixtures
 
 import (
 	"net/http"
-	g "rabi-food-core/features/subscription/gateway"
-	c "rabi-food-core/features/subscription/usecases"
 	"testing"
+
+	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
+	c "github.com/Rabi-IT/rabi-food-core/features/subscription/usecases"
 
 	"github.com/stretchr/testify/require"
 )

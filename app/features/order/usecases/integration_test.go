@@ -2,17 +2,18 @@ package usecases_test
 
 import (
 	"net/http"
-	"rabi-food-core/domain/auth"
-	"rabi-food-core/domain/payment_status"
-	"rabi-food-core/features/order/gateway"
-	"rabi-food-core/features/order/usecases"
-	product_gateway "rabi-food-core/features/product/gateway"
-	"rabi-food-core/fixtures"
-	"rabi-food-core/libs/database"
-	"rabi-food-core/libs/errs"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/Rabi-IT/rabi-food-core/domain/auth"
+	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
+	"github.com/Rabi-IT/rabi-food-core/features/order/gateway"
+	"github.com/Rabi-IT/rabi-food-core/features/order/usecases"
+	product_gateway "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
+	"github.com/Rabi-IT/rabi-food-core/fixtures"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
+	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/google/uuid"

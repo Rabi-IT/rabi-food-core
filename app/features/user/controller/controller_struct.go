@@ -1,6 +1,6 @@
 package controller
 
-import "rabi-food-core/features/user/usecases"
+import "github.com/Rabi-IT/rabi-food-core/features/user/usecases"
 
 type UserController struct {
 	usecase *usecases.UserCase

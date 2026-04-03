@@ -3,8 +3,9 @@ package logger
 import (
 	"context"
 	"os"
-	"rabi-food-core/config"
 	"time"
+
+	"github.com/Rabi-IT/rabi-food-core/config"
 
 	"github.com/rs/zerolog"
 )

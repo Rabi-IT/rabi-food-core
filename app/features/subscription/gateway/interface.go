@@ -2,9 +2,10 @@ package subscription_gateway
 
 import (
 	"context"
-	"rabi-food-core/domain/payment_status"
-	"rabi-food-core/features/subscription"
 	"time"
+
+	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
+	"github.com/Rabi-IT/rabi-food-core/features/subscription"
 )
 
 type SubscriptionGateway interface {

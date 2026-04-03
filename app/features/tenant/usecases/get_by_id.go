@@ -2,8 +2,9 @@ package usecases
 
 import (
 	"context"
-	"rabi-food-core/app_context"
-	g "rabi-food-core/features/tenant/gateway"
+
+	"github.com/Rabi-IT/rabi-food-core/app_context"
+	g "github.com/Rabi-IT/rabi-food-core/features/tenant/gateway"
 )
 
 func (c *TenantCase) GetByID(ctx context.Context, id string) (*g.GetByIDOutput, error) {

@@ -2,12 +2,13 @@ package usecases_test
 
 import (
 	"net/http"
-	"rabi-food-core/features/subscription"
-	g "rabi-food-core/features/subscription/gateway"
-	"rabi-food-core/features/subscription/usecases"
-	"rabi-food-core/fixtures"
-	"rabi-food-core/libs/http/middlewares"
 	"testing"
+
+	"github.com/Rabi-IT/rabi-food-core/features/subscription"
+	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
+	"github.com/Rabi-IT/rabi-food-core/features/subscription/usecases"
+	"github.com/Rabi-IT/rabi-food-core/fixtures"
+	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"

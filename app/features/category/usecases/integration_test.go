@@ -2,11 +2,12 @@ package usecases_test
 
 import (
 	"net/http"
-	"rabi-food-core/features/category/gateway"
-	"rabi-food-core/fixtures"
-	"rabi-food-core/libs/database"
-	"rabi-food-core/libs/http/middlewares"
 	"testing"
+
+	"github.com/Rabi-IT/rabi-food-core/features/category/gateway"
+	"github.com/Rabi-IT/rabi-food-core/fixtures"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
+	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/google/uuid"

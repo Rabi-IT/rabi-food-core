@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"rabi-food-core/features/subscription/model"
+
+	"github.com/Rabi-IT/rabi-food-core/features/subscription/model"
 )
 
 func (g *GormSubscriptionGatewayAdapter) GetConfig(ctx context.Context, tenantID string) (*GetConfigOutput, error) {

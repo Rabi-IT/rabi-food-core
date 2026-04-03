@@ -1,6 +1,6 @@
 package controller
 
-import "rabi-food-core/features/subscription/usecases"
+import "github.com/Rabi-IT/rabi-food-core/features/subscription/usecases"
 
 type SubscriptionController struct {
 	usecase *usecases.SubscriptionCase

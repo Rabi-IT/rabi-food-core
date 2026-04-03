@@ -1,6 +1,6 @@
 package usecases
 
-import g "rabi-food-core/features/category/gateway"
+import g "github.com/Rabi-IT/rabi-food-core/features/category/gateway"
 
 // CategoryCase encapsulates the business logic related to categorys.
 type CategoryCase struct {

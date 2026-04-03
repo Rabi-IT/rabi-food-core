@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	category_model "rabi-food-core/features/category/model"
-	order_model "rabi-food-core/features/order/model"
-	product_model "rabi-food-core/features/product/model"
-	subscription_model "rabi-food-core/features/subscription/model"
-	tenant_model "rabi-food-core/features/tenant/model"
-	user_model "rabi-food-core/features/user/model"
+	category_model "github.com/Rabi-IT/rabi-food-core/features/category/model"
+	order_model "github.com/Rabi-IT/rabi-food-core/features/order/model"
+	product_model "github.com/Rabi-IT/rabi-food-core/features/product/model"
+	subscription_model "github.com/Rabi-IT/rabi-food-core/features/subscription/model"
+	tenant_model "github.com/Rabi-IT/rabi-food-core/features/tenant/model"
+	user_model "github.com/Rabi-IT/rabi-food-core/features/user/model"
 
 	"github.com/stretchr/testify/require"
 )

@@ -2,10 +2,11 @@ package usecases
 
 import (
 	"context"
-	"rabi-food-core/app_context"
-	"rabi-food-core/domain/auth"
-	g "rabi-food-core/features/user/gateway"
-	"rabi-food-core/libs/logger"
+
+	"github.com/Rabi-IT/rabi-food-core/app_context"
+	"github.com/Rabi-IT/rabi-food-core/domain/auth"
+	g "github.com/Rabi-IT/rabi-food-core/features/user/gateway"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 )
 
 type CreateInput struct {

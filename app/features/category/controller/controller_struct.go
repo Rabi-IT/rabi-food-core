@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"rabi-food-core/features/category/usecases"
+	"github.com/Rabi-IT/rabi-food-core/features/category/usecases"
 )
 
 type CategoryController struct {

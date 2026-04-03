@@ -3,7 +3,8 @@ package subscription_gateway
 import (
 	"context"
 	"fmt"
-	"rabi-food-core/features/subscription/model"
+
+	"github.com/Rabi-IT/rabi-food-core/features/subscription/model"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm/clause"

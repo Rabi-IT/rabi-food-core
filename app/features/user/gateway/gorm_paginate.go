@@ -1,8 +1,8 @@
 package gateway
 
 import (
-	"rabi-food-core/features/user/model"
-	"rabi-food-core/libs/database"
+	"github.com/Rabi-IT/rabi-food-core/features/user/model"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
 )
 
 func (g *GormUserGatewayAdapter) Paginate(

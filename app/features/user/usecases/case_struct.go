@@ -1,6 +1,6 @@
 package usecases
 
-import g "rabi-food-core/features/user/gateway"
+import g "github.com/Rabi-IT/rabi-food-core/features/user/gateway"
 
 // UserCase encapsulates the business logic related to users.
 type UserCase struct {

@@ -1,6 +1,6 @@
 package controller
 
-import "rabi-food-core/features/tenant/usecases"
+import "github.com/Rabi-IT/rabi-food-core/features/tenant/usecases"
 
 type TenantController struct {
 	usecase *usecases.TenantCase

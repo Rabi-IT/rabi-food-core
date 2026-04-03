@@ -1,11 +1,12 @@
 package model
 
 import (
-	"rabi-food-core/domain/payment_status"
-	"rabi-food-core/features/subscription"
-	tenant_model "rabi-food-core/features/tenant/model"
-	user_model "rabi-food-core/features/user/model"
 	"time"
+
+	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
+	"github.com/Rabi-IT/rabi-food-core/features/subscription"
+	tenant_model "github.com/Rabi-IT/rabi-food-core/features/tenant/model"
+	user_model "github.com/Rabi-IT/rabi-food-core/features/user/model"
 
 	"gorm.io/datatypes"
 )

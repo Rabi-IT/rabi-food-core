@@ -3,8 +3,8 @@ package model
 import (
 	"time"
 
-	category_model "rabi-food-core/features/category/model"
-	tenant_model "rabi-food-core/features/tenant/model"
+	category_model "github.com/Rabi-IT/rabi-food-core/features/category/model"
+	tenant_model "github.com/Rabi-IT/rabi-food-core/features/tenant/model"
 
 	"gorm.io/datatypes"
 	"gorm.io/gorm"

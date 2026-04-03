@@ -2,13 +2,14 @@ package usecases_test
 
 import (
 	"net/http"
-	tenant_case "rabi-food-core/features/tenant/usecases"
-	g "rabi-food-core/features/user/gateway"
-	"rabi-food-core/features/user/usecases"
-	"rabi-food-core/fixtures"
-	"rabi-food-core/libs/database"
-	"rabi-food-core/libs/http/middlewares"
 	"testing"
+
+	tenant_case "github.com/Rabi-IT/rabi-food-core/features/tenant/usecases"
+	g "github.com/Rabi-IT/rabi-food-core/features/user/gateway"
+	"github.com/Rabi-IT/rabi-food-core/features/user/usecases"
+	"github.com/Rabi-IT/rabi-food-core/fixtures"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
+	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/google/uuid"

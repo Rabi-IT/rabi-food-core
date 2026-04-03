@@ -1,10 +1,11 @@
 package gateway
 
 import (
-	"rabi-food-core/domain/payment_status"
-	"rabi-food-core/features/order/domain"
-	"rabi-food-core/libs/database"
 	"time"
+
+	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
+	"github.com/Rabi-IT/rabi-food-core/features/order"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
 )
 
 type OrderGateway interface {
@@ -28,8 +29,8 @@ type CreateInput struct {
 	TenantID          string
 	Code              string
 	PaymentStatus     payment_status.Status
-	FulfillmentStatus domain.FulfillmentStatus
-	DeliveryStatus    domain.DeliveryStatus
+	FulfillmentStatus order.FulfillmentStatus
+	DeliveryStatus    order.DeliveryStatus
 	Notes             string
 	TotalPrice        uint
 	Items             []OrderItem
@@ -41,18 +42,18 @@ type GetByIDFilter struct {
 }
 
 type GetByIDOutput struct {
-	ID                string                   `json:"id"`
-	TenantID          string                   `json:"tenantId"`
-	Code              string                   `json:"code"`
-	PaymentStatus     payment_status.Status    `json:"paymentStatus"`
-	FulfillmentStatus domain.FulfillmentStatus `json:"fulfillmentStatus"`
-	DeliveryStatus    domain.DeliveryStatus    `json:"deliveryStatus"`
-	Notes             string                   `json:"notes"`
-	TotalPrice        uint                     `json:"totalPrice"`
-	Items             []OrderItem              `json:"items"`
-	PaidAt            *time.Time               `json:"paidAt"`
-	CreatedAt         time.Time                `json:"createdAt"`
-	ExternalPaymentID *string                  `json:"externalPaymentId"`
+	ID                string                  `json:"id"`
+	TenantID          string                  `json:"tenantId"`
+	Code              string                  `json:"code"`
+	PaymentStatus     payment_status.Status   `json:"paymentStatus"`
+	FulfillmentStatus order.FulfillmentStatus `json:"fulfillmentStatus"`
+	DeliveryStatus    order.DeliveryStatus    `json:"deliveryStatus"`
+	Notes             string                  `json:"notes"`
+	TotalPrice        uint                    `json:"totalPrice"`
+	Items             []OrderItem             `json:"items"`
+	PaidAt            *time.Time              `json:"paidAt"`
+	CreatedAt         time.Time               `json:"createdAt"`
+	ExternalPaymentID *string                 `json:"externalPaymentId"`
 }
 
 type PatchFilter struct {
@@ -62,34 +63,34 @@ type PatchFilter struct {
 }
 
 type PatchValues struct {
-	PaidAt            time.Time                `json:"paidAt"`
-	Provider          string                   `json:"provider"`
-	PaymentStatus     payment_status.Status    `json:"paymentStatus"`
-	ExternalPaymentID string                   `json:"externalPaymentId"`
-	FulfillmentStatus domain.FulfillmentStatus `json:"fulfillmentStatus"`
-	DeliveryStatus    domain.DeliveryStatus    `json:"deliveryStatus"`
+	PaidAt            time.Time               `json:"paidAt"`
+	Provider          string                  `json:"provider"`
+	PaymentStatus     payment_status.Status   `json:"paymentStatus"`
+	ExternalPaymentID string                  `json:"externalPaymentId"`
+	FulfillmentStatus order.FulfillmentStatus `json:"fulfillmentStatus"`
+	DeliveryStatus    order.DeliveryStatus    `json:"deliveryStatus"`
 }
 
 type PaginateFilter struct {
-	UserID            *string                  `json:"userId"`
-	TenantID          *string                  `json:"tenantId"`
-	PaymentStatus     payment_status.Status    `json:"paymentStatus"`
-	FulfillmentStatus domain.FulfillmentStatus `json:"fulfillmentStatus"`
-	DeliveryStatus    domain.DeliveryStatus    `json:"deliveryStatus"`
-	CreatedAtFrom     *time.Time               `json:"createdAtFrom"`
-	CreatedAtTo       *time.Time               `json:"createdAtTo"`
+	UserID            *string                 `json:"userId"`
+	TenantID          *string                 `json:"tenantId"`
+	PaymentStatus     payment_status.Status   `json:"paymentStatus"`
+	FulfillmentStatus order.FulfillmentStatus `json:"fulfillmentStatus"`
+	DeliveryStatus    order.DeliveryStatus    `json:"deliveryStatus"`
+	CreatedAtFrom     *time.Time              `json:"createdAtFrom"`
+	CreatedAtTo       *time.Time              `json:"createdAtTo"`
 }
 
 type PaginateData struct {
-	ID                string                   `json:"id"`
-	TenantID          string                   `json:"tenantId"`
-	Code              string                   `json:"code"`
-	PaymentStatus     payment_status.Status    `json:"paymentStatus"`
-	FulfillmentStatus domain.FulfillmentStatus `json:"fulfillmentStatus"`
-	DeliveryStatus    domain.DeliveryStatus    `json:"deliveryStatus"`
-	Notes             string                   `json:"notes"`
-	TotalPrice        uint                     `json:"totalPrice"`
-	CreatedAt         time.Time                `json:"createdAt"`
+	ID                string                  `json:"id"`
+	TenantID          string                  `json:"tenantId"`
+	Code              string                  `json:"code"`
+	PaymentStatus     payment_status.Status   `json:"paymentStatus"`
+	FulfillmentStatus order.FulfillmentStatus `json:"fulfillmentStatus"`
+	DeliveryStatus    order.DeliveryStatus    `json:"deliveryStatus"`
+	Notes             string                  `json:"notes"`
+	TotalPrice        uint                    `json:"totalPrice"`
+	CreatedAt         time.Time               `json:"createdAt"`
 }
 
 type PaginateOutput struct {

@@ -3,9 +3,10 @@ package middlewares
 import (
 	"errors"
 	"net/http"
-	"rabi-food-core/libs/errs"
-	"rabi-food-core/libs/logger"
-	lib "rabi-food-core/libs/validator"
+
+	"github.com/Rabi-IT/rabi-food-core/libs/errs"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
+	lib "github.com/Rabi-IT/rabi-food-core/libs/validator"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
