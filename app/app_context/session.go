@@ -2,7 +2,7 @@ package app_context
 
 import (
 	"context"
-	"rabi-food-core/domain"
+	"rabi-food-core/domain/auth"
 )
 
 type sessionKey string
@@ -15,7 +15,7 @@ type UserSession struct {
 	Name           string
 	Login          string
 	OriginalUserID string
-	Role           domain.Role
+	Role           auth.Role
 }
 
 func (u *UserSession) GetOriginalUserID() (string, bool) {

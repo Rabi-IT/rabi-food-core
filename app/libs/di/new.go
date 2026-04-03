@@ -3,28 +3,26 @@ package di
 import (
 	"errors"
 	"rabi-food-core/config"
+	category_controller "rabi-food-core/features/category/controller"
+	category_gateway "rabi-food-core/features/category/gateway"
+	category_case "rabi-food-core/features/category/usecases"
+	order_controller "rabi-food-core/features/order/controller"
+	order_gateway "rabi-food-core/features/order/gateway"
+	"rabi-food-core/features/order/usecases"
+	product_controller "rabi-food-core/features/product/controller"
+	product_gateway "rabi-food-core/features/product/gateway"
+	product_case "rabi-food-core/features/product/usecases"
+	subscription_controller "rabi-food-core/features/subscription/controller"
+	subscription_gateway "rabi-food-core/features/subscription/gateway"
+	subscription_case "rabi-food-core/features/subscription/usecases"
+	tenant_controller "rabi-food-core/features/tenant/controller"
+	tenant_gateway "rabi-food-core/features/tenant/gateway"
+	tenant_case "rabi-food-core/features/tenant/usecases"
+	user_controller "rabi-food-core/features/user/controller"
+	user_gateway "rabi-food-core/features/user/gateway"
+	user_case "rabi-food-core/features/user/usecases"
 	"rabi-food-core/libs/database"
-	"rabi-food-core/libs/database/gateways/category_gateway"
-	"rabi-food-core/libs/database/gateways/order_gateway"
-	"rabi-food-core/libs/database/gateways/product_gateway"
-	"rabi-food-core/libs/database/gateways/subscription_gateway"
-	"rabi-food-core/libs/database/gateways/tenant_gateway"
-	"rabi-food-core/libs/database/gateways/user_gateway"
-	"rabi-food-core/libs/database/gorm_adapter"
 	"rabi-food-core/libs/http"
-	"rabi-food-core/libs/http/controllers/category_controller"
-	"rabi-food-core/libs/http/controllers/order_controller"
-	"rabi-food-core/libs/http/controllers/product_controller"
-	"rabi-food-core/libs/http/controllers/subscription_controller"
-	"rabi-food-core/libs/http/controllers/tenant_controller"
-	"rabi-food-core/libs/http/controllers/user_controller"
-	"rabi-food-core/libs/http/fiber_adapter"
-	"rabi-food-core/usecases/category_case"
-	"rabi-food-core/usecases/order_case"
-	"rabi-food-core/usecases/product_case"
-	"rabi-food-core/usecases/subscription_case"
-	"rabi-food-core/usecases/tenant_case"
-	"rabi-food-core/usecases/user_case"
 
 	"github.com/samber/do"
 )
@@ -37,8 +35,8 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	injector := do.New()
 
 	// Database
-	do.Provide(injector, func(_ *do.Injector) (*gorm_adapter.GormAdapter, error) {
-		db, ok := gorm_adapter.New(dbConfig).(*gorm_adapter.GormAdapter)
+	do.Provide(injector, func(_ *do.Injector) (*database.GormAdapter, error) {
+		db, ok := database.New(dbConfig).(*database.GormAdapter)
 		if !ok {
 			//nolint:err113
 			return nil, errors.New("failed to cast database adapter")
@@ -49,7 +47,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 
 	// Database as interface
 	do.Provide(injector, func(i *do.Injector) (database.Database, error) {
-		return do.MustInvoke[*gorm_adapter.GormAdapter](i), nil
+		return do.MustInvoke[*database.GormAdapter](i), nil
 	})
 
 	// HTTP Server
@@ -65,7 +63,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 			return nil, ErrHTTPPortNotConfigured
 		}
 
-		return fiber_adapter.New(
+		return http.New(
 			config.AppPort,
 			tenantController,
 			userController,
@@ -78,7 +76,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 
 	// User dependencies
 	do.Provide(injector, func(i *do.Injector) (user_gateway.UserGateway, error) {
-		db := do.MustInvoke[*gorm_adapter.GormAdapter](i)
+		db := do.MustInvoke[*database.GormAdapter](i)
 
 		return &user_gateway.GormUserGatewayAdapter{DB: db}, nil
 	})
@@ -97,7 +95,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 
 	// Tenant dependencies
 	do.Provide(injector, func(i *do.Injector) (tenant_gateway.TenantGateway, error) {
-		db := do.MustInvoke[*gorm_adapter.GormAdapter](i)
+		db := do.MustInvoke[*database.GormAdapter](i)
 
 		return &tenant_gateway.GormTenantGatewayAdapter{DB: db}, nil
 	})
@@ -123,7 +121,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	})
 
 	do.Provide(injector, func(i *do.Injector) (product_gateway.ProductGateway, error) {
-		db := do.MustInvoke[*gorm_adapter.GormAdapter](i)
+		db := do.MustInvoke[*database.GormAdapter](i)
 
 		return &product_gateway.GormProductGatewayAdapter{DB: db}, nil
 	})
@@ -148,29 +146,29 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	})
 
 	do.Provide(injector, func(i *do.Injector) (category_gateway.CategoryGateway, error) {
-		db := do.MustInvoke[*gorm_adapter.GormAdapter](i)
+		db := do.MustInvoke[*database.GormAdapter](i)
 
 		return &category_gateway.GormCategoryGatewayAdapter{DB: db}, nil
 	})
 
 	// Order dependencies
 	do.Provide(injector, func(i *do.Injector) (*order_controller.OrderController, error) {
-		c := do.MustInvoke[*order_case.OrderCase](i)
+		c := do.MustInvoke[*usecases.OrderCase](i)
 
 		return order_controller.New(c), nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (order_gateway.OrderGateway, error) {
-		db := do.MustInvoke[*gorm_adapter.GormAdapter](i)
+		db := do.MustInvoke[*database.GormAdapter](i)
 
 		return &order_gateway.GormOrderGatewayAdapter{DB: db}, nil
 	})
 
-	do.Provide(injector, func(i *do.Injector) (*order_case.OrderCase, error) {
+	do.Provide(injector, func(i *do.Injector) (*usecases.OrderCase, error) {
 		gw := do.MustInvoke[order_gateway.OrderGateway](i)
 		productCase := do.MustInvoke[*product_case.ProductCase](i)
 
-		return order_case.New(gw, productCase), nil
+		return usecases.New(gw, productCase), nil
 	})
 
 	// Subscription dependencies
@@ -181,7 +179,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	})
 
 	do.Provide(injector, func(i *do.Injector) (subscription_gateway.SubscriptionGateway, error) {
-		db := do.MustInvoke[*gorm_adapter.GormAdapter](i)
+		db := do.MustInvoke[*database.GormAdapter](i)
 
 		return &subscription_gateway.GormSubscriptionGatewayAdapter{DB: db}, nil
 	})

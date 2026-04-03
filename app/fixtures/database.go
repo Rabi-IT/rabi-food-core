@@ -2,21 +2,27 @@ package fixtures
 
 import (
 	"context"
-	"rabi-food-core/libs/database/gorm_adapter/models"
 	"testing"
+
+	category_model "rabi-food-core/features/category/model"
+	order_model "rabi-food-core/features/order/model"
+	product_model "rabi-food-core/features/product/model"
+	subscription_model "rabi-food-core/features/subscription/model"
+	tenant_model "rabi-food-core/features/tenant/model"
+	user_model "rabi-food-core/features/user/model"
 
 	"github.com/stretchr/testify/require"
 )
 
 var tables = []string{
-	models.User{}.TableName(),
-	models.Tenant{}.TableName(),
-	models.Category{}.TableName(),
-	models.Product{}.TableName(),
-	models.Order{}.TableName(),
-	models.SubscriptionDelivery{}.TableName(),
-	models.SubscriptionConfig{}.TableName(),
-	models.Subscription{}.TableName(),
+	user_model.User{}.TableName(),
+	tenant_model.Tenant{}.TableName(),
+	category_model.Category{}.TableName(),
+	product_model.Product{}.TableName(),
+	order_model.Order{}.TableName(),
+	subscription_model.SubscriptionDelivery{}.TableName(),
+	subscription_model.SubscriptionConfig{}.TableName(),
+	subscription_model.Subscription{}.TableName(),
 }
 
 func CleanDatabase(t *testing.T) {

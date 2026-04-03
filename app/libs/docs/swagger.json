@@ -348,7 +348,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/order_case.CreateInput"
+                            "$ref": "#/definitions/usecases.CreateInput"
                         }
                     }
                 ],
@@ -492,7 +492,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/order_case.ConfirmPaymentInput"
+                            "$ref": "#/definitions/usecases.ConfirmPaymentInput"
                         }
                     }
                 ],
@@ -1419,7 +1419,7 @@
                 }
             }
         },
-        "order_case.ConfirmPaymentInput": {
+        "usecases.ConfirmPaymentInput": {
             "type": "object",
             "required": [
                 "externalPaymentId",
@@ -1441,13 +1441,13 @@
                 }
             }
         },
-        "order_case.CreateInput": {
+        "usecases.CreateInput": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/order_case.OrderItem"
+                        "$ref": "#/definitions/usecases.OrderItem"
                     }
                 },
                 "notes": {
@@ -1455,7 +1455,7 @@
                 }
             }
         },
-        "order_case.OrderItem": {
+        "usecases.OrderItem": {
             "type": "object",
             "properties": {
                 "productId": {

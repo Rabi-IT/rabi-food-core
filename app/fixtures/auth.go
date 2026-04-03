@@ -3,7 +3,7 @@ package fixtures
 import (
 	"net/http"
 	"rabi-food-core/config"
-	"rabi-food-core/domain"
+	"rabi-food-core/domain/auth"
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -22,7 +22,7 @@ func (*authFixture) BackofficeToken(t *testing.T, userId string) string {
 		"tenant_id":        "system",
 		"name":             "backoffice",
 		"email":            "backoffice@backoffice.com",
-		"role":             domain.BackofficeRole,
+		"role":             auth.Backoffice,
 		"original_user_id": userId,
 	}
 
@@ -34,9 +34,9 @@ func (*authFixture) BackofficeToken(t *testing.T, userId string) string {
 	return tk
 }
 
-func (auth *authFixture) UserToken(t *testing.T, id string) string {
+func (a *authFixture) UserToken(t *testing.T, id string) string {
 	t.Helper()
-	backofficeTk := auth.BackofficeToken(t, id)
+	backofficeTk := a.BackofficeToken(t, id)
 	user, statusCode := User.GetByID(t, id, backofficeTk)
 	require.Equal(t, http.StatusOK, statusCode)
 
@@ -44,7 +44,7 @@ func (auth *authFixture) UserToken(t *testing.T, id string) string {
 		"user_id":   id,
 		"name":      user.Name,
 		"email":     user.Email,
-		"role":      domain.UserRole,
+		"role":      auth.User,
 		"tenant_id": user.TenantID,
 	}
 
@@ -56,9 +56,9 @@ func (auth *authFixture) UserToken(t *testing.T, id string) string {
 	return tk
 }
 
-func (auth *authFixture) StaffToken(t *testing.T, id string) string {
+func (a *authFixture) StaffToken(t *testing.T, id string) string {
 	t.Helper()
-	backofficeTk := auth.BackofficeToken(t, id)
+	backofficeTk := a.BackofficeToken(t, id)
 	user, statusCode := User.GetByID(t, id, backofficeTk)
 	require.Equal(t, http.StatusOK, statusCode)
 
@@ -66,7 +66,7 @@ func (auth *authFixture) StaffToken(t *testing.T, id string) string {
 		"user_id":   id,
 		"name":      user.Name,
 		"email":     user.Email,
-		"role":      domain.StaffRole,
+		"role":      auth.Staff,
 		"tenant_id": user.TenantID,
 	}
 
@@ -78,14 +78,14 @@ func (auth *authFixture) StaffToken(t *testing.T, id string) string {
 	return tk
 }
 
-func (auth *authFixture) SystemToken(t *testing.T) string {
+func (a *authFixture) SystemToken(t *testing.T) string {
 	t.Helper()
 
 	claims := jwt.MapClaims{
 		"user_id": "system",
 		"name":    "system",
 		"email":   "system@system.com",
-		"role":    domain.SystemRole,
+		"role":    auth.System,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

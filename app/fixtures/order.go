@@ -2,10 +2,10 @@ package fixtures
 
 import (
 	"net/http"
-	"rabi-food-core/domain/order"
-	"rabi-food-core/libs/database/gateways/order_gateway"
+	"rabi-food-core/features/order/domain"
+	g "rabi-food-core/features/order/gateway"
+	c "rabi-food-core/features/order/usecases"
 	"rabi-food-core/libs/errs"
-	"rabi-food-core/usecases/order_case"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -18,12 +18,12 @@ type orderFixture struct {
 
 var Order = orderFixture{"/order/"}
 
-func (orderFixture) Create(t *testing.T, input *order_case.CreateInput, token string) string {
+func (orderFixture) Create(t *testing.T, input *c.CreateInput, token string) string {
 	t.Helper()
 	Body := input
 	if Body == nil {
-		Body = &order_case.CreateInput{
-			Items: []order_case.OrderItem{
+		Body = &c.CreateInput{
+			Items: []c.OrderItem{
 				{
 					ProductID: Product.Create(t, nil, token),
 					Quantity:  1,
@@ -45,11 +45,11 @@ func (orderFixture) Create(t *testing.T, input *order_case.CreateInput, token st
 	return id
 }
 
-func (orderFixture) GetByID(t *testing.T, id string, token string) (order_gateway.GetByIDOutput, int) {
+func (orderFixture) GetByID(t *testing.T, id string, token string) (g.GetByIDOutput, int) {
 	t.Helper()
 	require.NotEmpty(t, id)
 
-	found := order_gateway.GetByIDOutput{}
+	found := g.GetByIDOutput{}
 
 	obj := httpexpect.Default(t, AppURL).
 		Request(http.MethodGet, Order.URI+id).
@@ -69,7 +69,7 @@ func (orderFixture) GetByID(t *testing.T, id string, token string) (order_gatewa
 func (orderFixture) ExpectFulfillmentStatus(
 	t *testing.T,
 	id string,
-	expectedStatus order.FulfillmentStatus,
+	expectedStatus domain.FulfillmentStatus,
 	token string,
 ) {
 	t.Helper()
@@ -78,7 +78,7 @@ func (orderFixture) ExpectFulfillmentStatus(
 	require.Equal(t, expectedStatus, found.FulfillmentStatus)
 }
 
-func (orderFixture) Patch(t *testing.T, id string, input *order_gateway.PatchValues, token string) *errs.AppError {
+func (orderFixture) Patch(t *testing.T, id string, input *g.PatchValues, token string) *errs.AppError {
 	t.Helper()
 	require.NotEmpty(t, id)
 
@@ -105,7 +105,7 @@ func (orderFixture) Patch(t *testing.T, id string, input *order_gateway.PatchVal
 func (orderFixture) ConfirmPayment(
 	t *testing.T,
 	orderID string,
-	input *order_case.ConfirmPaymentInput,
+	input *c.ConfirmPaymentInput,
 	token string,
 ) *errs.AppError {
 	t.Helper()

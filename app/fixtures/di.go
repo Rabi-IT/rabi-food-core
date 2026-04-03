@@ -1,7 +1,7 @@
 package fixtures
 
 import (
-	"rabi-food-core/libs/database/gorm_adapter"
+	"rabi-food-core/libs/database"
 	"rabi-food-core/libs/di"
 	"rabi-food-core/libs/http"
 
@@ -10,6 +10,6 @@ import (
 
 var (
 	testInjector   = di.NewTest()
-	testDB         = do.MustInvoke[*gorm_adapter.GormAdapter](testInjector)
+	testDB         = do.MustInvoke[*database.GormAdapter](testInjector)
 	testHTTPServer = do.MustInvoke[http.HTTPServer](testInjector)
 )

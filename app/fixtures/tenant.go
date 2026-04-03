@@ -2,8 +2,8 @@ package fixtures
 
 import (
 	"net/http"
-	g "rabi-food-core/libs/database/gateways/tenant_gateway"
-	"rabi-food-core/usecases/tenant_case"
+	g "rabi-food-core/features/tenant/gateway"
+	c "rabi-food-core/features/tenant/usecases"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -16,11 +16,11 @@ type tenantFixture struct {
 
 var Tenant = tenantFixture{"/tenant/"}
 
-func (tenantFixture) Create(t *testing.T, input *tenant_case.CreateInput) *tenant_case.CreateOutput {
+func (tenantFixture) Create(t *testing.T, input *c.CreateInput) *c.CreateOutput {
 	t.Helper()
 	Body := input
 	if Body == nil {
-		Body = &tenant_case.CreateInput{
+		Body = &c.CreateInput{
 			Name:     "Name",
 			UserName: "UserName",
 			Phone:    "http://example.com/photo.png",
@@ -28,7 +28,7 @@ func (tenantFixture) Create(t *testing.T, input *tenant_case.CreateInput) *tenan
 		}
 	}
 
-	output := &tenant_case.CreateOutput{}
+	output := &c.CreateOutput{}
 	httpexpect.Default(t, AppURL).
 		Request(http.MethodPost, Tenant.URI).
 		WithJSON(Body).
@@ -36,7 +36,7 @@ func (tenantFixture) Create(t *testing.T, input *tenant_case.CreateInput) *tenan
 		JSON().Object().
 		Decode(output)
 
-	require.NotEqual(t, &tenant_case.CreateOutput{}, output)
+	require.NotEqual(t, &c.CreateOutput{}, output)
 
 	return output
 }

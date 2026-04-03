@@ -2,7 +2,7 @@ package fixtures
 
 import (
 	"net/http"
-	"rabi-food-core/libs/database/gateways/category_gateway"
+	g "rabi-food-core/features/category/gateway"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -15,11 +15,11 @@ type categoryFixture struct {
 
 var Category = categoryFixture{"/category/"}
 
-func (categoryFixture) Create(t *testing.T, input *category_gateway.CreateInput, token string) string {
+func (categoryFixture) Create(t *testing.T, input *g.CreateInput, token string) string {
 	t.Helper()
 	Body := input
 	if Body == nil {
-		Body = &category_gateway.CreateInput{
+		Body = &g.CreateInput{
 			Name:        "Name",
 			Description: "Description",
 		}
@@ -37,9 +37,9 @@ func (categoryFixture) Create(t *testing.T, input *category_gateway.CreateInput,
 	return id
 }
 
-func (categoryFixture) GetByID(t *testing.T, id string, token string) (category_gateway.GetByIDOutput, int) {
+func (categoryFixture) GetByID(t *testing.T, id string, token string) (g.GetByIDOutput, int) {
 	t.Helper()
-	found := category_gateway.GetByIDOutput{}
+	found := g.GetByIDOutput{}
 
 	obj := httpexpect.Default(t, AppURL).
 		Request(http.MethodGet, Category.URI+id).

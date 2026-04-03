@@ -2,8 +2,8 @@ package fixtures
 
 import (
 	"net/http"
-	"rabi-food-core/libs/database/gateways/subscription_gateway"
-	"rabi-food-core/usecases/subscription_case"
+	g "rabi-food-core/features/subscription/gateway"
+	c "rabi-food-core/features/subscription/usecases"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,7 +11,7 @@ import (
 
 type subscriptionFixture struct {
 	URI                            string
-	DEFAULT_DISCOUNT_RULE          subscription_gateway.DiscountRule
+	DEFAULT_DISCOUNT_RULE          g.DiscountRule
 	DEFAULT_CUTOFF_OFFSET_MINUTES  uint16
 	DEFAULT_MAX_ATTEMPTS_PER_ORDER uint8
 
@@ -26,7 +26,7 @@ type subscriptionFixture struct {
 var (
 	Subscription = subscriptionFixture{
 		URI: "/subscription/",
-		DEFAULT_DISCOUNT_RULE: subscription_gateway.DiscountRule{
+		DEFAULT_DISCOUNT_RULE: g.DiscountRule{
 			CyclesThreshold: 5,  //nolint:mnd
 			Discount:        10, //nolint:mnd
 		},
@@ -42,13 +42,13 @@ var (
 	}
 )
 
-func (subscriptionFixture) UpsertConfig(t *testing.T, input *subscription_gateway.UpsertConfigInput, token string) {
+func (subscriptionFixture) UpsertConfig(t *testing.T, input *g.UpsertConfigInput, token string) {
 	t.Helper()
 	Body := input
 	if Body == nil {
-		Body = &subscription_gateway.UpsertConfigInput{
+		Body = &g.UpsertConfigInput{
 			MaxAttemptsPerOrder: Subscription.DEFAULT_MAX_ATTEMPTS_PER_ORDER,
-			DiscountRules: []subscription_gateway.DiscountRule{
+			DiscountRules: []g.DiscountRule{
 				Subscription.DEFAULT_DISCOUNT_RULE,
 			},
 			CutoffOffsetMinutes: Subscription.DEFAULT_CUTOFF_OFFSET_MINUTES,
@@ -63,18 +63,18 @@ func (subscriptionFixture) UpsertConfig(t *testing.T, input *subscription_gatewa
 		StatusList(http.StatusOK, http.StatusCreated)
 }
 
-func (subscriptionFixture) Create(t *testing.T, input *subscription_case.CreateInput, token string) string {
+func (subscriptionFixture) Create(t *testing.T, input *c.CreateInput, token string) string {
 	t.Helper()
 	Body := input
 	if Body == nil {
-		Body = &subscription_case.CreateInput{
-			Items: []subscription_case.SubscriptionItemInput{
+		Body = &c.CreateInput{
+			Items: []c.SubscriptionItemInput{
 				{
 					ProductID: Product.Create(t, nil, token),
 					Quantity:  1,
 				},
 			},
-			DeliveryDays: []subscription_gateway.DeliveryDay{
+			DeliveryDays: []g.DeliveryDay{
 				{
 					Weekday:   Subscription.DEFAULT_DELIVERY_WEEKDAY,
 					StartHour: Subscription.DEFAULT_DELIVERY_START_HOUR,
@@ -99,9 +99,9 @@ func (subscriptionFixture) Create(t *testing.T, input *subscription_case.CreateI
 	return id
 }
 
-func (subscriptionFixture) GetByID(t *testing.T, id string, token string) (subscription_gateway.GetByIDOutput, int) {
+func (subscriptionFixture) GetByID(t *testing.T, id string, token string) (g.GetByIDOutput, int) {
 	t.Helper()
-	found := subscription_gateway.GetByIDOutput{}
+	found := g.GetByIDOutput{}
 
 	obj := DefaultHTTP(t).
 		Request(http.MethodGet, Subscription.URI+id).

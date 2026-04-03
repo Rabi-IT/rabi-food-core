@@ -2,8 +2,8 @@ package fixtures
 
 import (
 	"net/http"
-	"rabi-food-core/libs/database/gateways/user_gateway"
-	"rabi-food-core/usecases/user_case"
+	g "rabi-food-core/features/user/gateway"
+	c "rabi-food-core/features/user/usecases"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -16,11 +16,11 @@ type userFixture struct {
 
 var User = userFixture{"/user/"}
 
-func (userFixture) Create(t *testing.T, input *user_case.CreateInput, token string) string {
+func (userFixture) Create(t *testing.T, input *c.CreateInput, token string) string {
 	t.Helper()
 	Body := input
 	if Body == nil {
-		Body = &user_case.CreateInput{
+		Body = &c.CreateInput{
 			Name:         "Name",
 			Photo:        "http://example.com/photo.png",
 			TaxID:        "TaxID",
@@ -48,9 +48,9 @@ func (userFixture) Create(t *testing.T, input *user_case.CreateInput, token stri
 	return id
 }
 
-func (userFixture) GetByID(t *testing.T, id string, token string) (user_gateway.GetByIDOutput, int) {
+func (userFixture) GetByID(t *testing.T, id string, token string) (g.GetByIDOutput, int) {
 	t.Helper()
-	found := user_gateway.GetByIDOutput{}
+	found := g.GetByIDOutput{}
 
 	obj := httpexpect.Default(t, AppURL).
 		Request(http.MethodGet, User.URI+id).
@@ -67,9 +67,9 @@ func (userFixture) GetByID(t *testing.T, id string, token string) (user_gateway.
 	return found, response.StatusCode
 }
 
-func (userFixture) GetMe(t *testing.T, token string) user_gateway.GetByIDOutput {
+func (userFixture) GetMe(t *testing.T, token string) g.GetByIDOutput {
 	t.Helper()
-	found := user_gateway.GetByIDOutput{}
+	found := g.GetByIDOutput{}
 
 	obj := httpexpect.Default(t, AppURL).
 		Request(http.MethodGet, User.URI+"me").
