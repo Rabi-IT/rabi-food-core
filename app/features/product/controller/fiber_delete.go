@@ -3,6 +3,8 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -18,7 +20,10 @@ import (
 // @Router /product/{id} [delete].
 func (c *ProductController) Delete(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
-	deleted, err := c.usecase.Delete(ctx.UserContext(), id)
+
+	uctx := ctx.UserContext()
+	logger.GetWideEvent(uctx).Event = "delete-product"
+	deleted, err := c.usecase.Delete(uctx, id)
 
 	if err != nil {
 		return err

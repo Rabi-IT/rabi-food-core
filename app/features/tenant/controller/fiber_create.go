@@ -34,7 +34,7 @@ func (c *TenantController) Create(ctx *fiber.Ctx) error {
 	}
 
 	uctx := ctx.UserContext()
-	logger.GetWideEvent(uctx).Event = "new-tenant"
+	logger.GetWideEvent(uctx).Event = "create-tenant"
 	output, err := c.usecase.Create(uctx, data)
 
 	if err != nil {

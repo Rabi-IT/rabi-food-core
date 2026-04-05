@@ -34,7 +34,7 @@ func (c *OrderController) Create(ctx *fiber.Ctx) error {
 	}
 
 	uctx := ctx.UserContext()
-	logger.GetWideEvent(uctx).Event = "new-order"
+	logger.GetWideEvent(uctx).Event = "create-order"
 	id, err := c.usecase.Create(uctx, data)
 
 	if err != nil {

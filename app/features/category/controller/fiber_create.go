@@ -34,7 +34,7 @@ func (c *CategoryController) Create(ctx *fiber.Ctx) error {
 	}
 
 	uctx := ctx.UserContext()
-	logger.GetWideEvent(uctx).Event = "new-category"
+	logger.GetWideEvent(uctx).Event = "create-category"
 	id, err := c.usecase.Create(uctx, data)
 
 	if err != nil {

@@ -41,7 +41,7 @@ func (c *OrderController) ConfirmPayment(ctx *fiber.Ctx) error {
 	}
 
 	uctx := ctx.UserContext()
-	logger.GetWideEvent(uctx).Event = "order_confirm_payment"
+	logger.GetWideEvent(uctx).Event = "confirm-order-payment"
 	ok, err := c.usecase.ConfirmPayment(uctx, usecases.ConfirmPaymentInput{
 		OrderID:           orderID,
 		ExternalPaymentID: body.ExternalPaymentID,

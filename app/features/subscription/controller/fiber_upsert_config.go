@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	gateway "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 	"github.com/Rabi-IT/rabi-food-core/libs/validator"
 
 	"github.com/gofiber/fiber/v2"
@@ -32,7 +33,9 @@ func (c *SubscriptionController) UpsertConfig(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	err = c.usecase.UpsertConfig(ctx.UserContext(), data)
+	uctx := ctx.UserContext()
+	logger.GetWideEvent(uctx).Event = "upsert-subscription-config"
+	err = c.usecase.UpsertConfig(uctx, data)
 	if err != nil {
 		return err
 	}

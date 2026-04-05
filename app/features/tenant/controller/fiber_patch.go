@@ -5,6 +5,7 @@ import (
 
 	"github.com/Rabi-IT/rabi-food-core/features/tenant/usecases"
 	"github.com/Rabi-IT/rabi-food-core/libs/http/parser"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -34,7 +35,9 @@ func (c *TenantController) Patch(ctx *fiber.Ctx) error {
 		return ctx.JSON(err)
 	}
 
-	updated, err := c.usecase.Patch(ctx.UserContext(), filter, data)
+	uctx := ctx.UserContext()
+	logger.GetWideEvent(uctx).Event = "patch-tenant"
+	updated, err := c.usecase.Patch(uctx, filter, data)
 
 	if err != nil {
 		return err

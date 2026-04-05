@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Rabi-IT/rabi-food-core/features/subscription/usecases"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 	"github.com/Rabi-IT/rabi-food-core/libs/validator"
 
 	"github.com/gofiber/fiber/v2"
@@ -32,7 +33,9 @@ func (c *SubscriptionController) Create(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	id, err := c.usecase.Create(ctx.UserContext(), data)
+	uctx := ctx.UserContext()
+	logger.GetWideEvent(uctx).Event = "create-subscription"
+	id, err := c.usecase.Create(uctx, data)
 	if err != nil {
 		return err
 	}
