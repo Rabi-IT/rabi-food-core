@@ -10,11 +10,10 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type contextKey string
+var base zerolog.Logger
 
-var (
-	base      zerolog.Logger
-	loggerKey = contextKey("loggerKey")
+const (
+	loggerKey = "loggerKey"
 )
 
 func init() {
@@ -34,15 +33,24 @@ func init() {
 }
 
 // Get retrieves the logger from the given context.
+// If no logger is found, returns a pointer to a fresh copy of the base logger
+// so that callers can safely call UpdateContext without mutating global state.
 func Get(c context.Context) *zerolog.Logger {
 	v := c.Value(loggerKey)
 	if l, ok := v.(*zerolog.Logger); ok {
 		return l
 	}
 
-	return &base
+	l := base.With().Logger()
+
+	return &l
 }
 
-func WithContext(c context.Context, logger zerolog.Logger) context.Context {
-	return context.WithValue(c, loggerKey, &logger)
+func New() zerolog.Context {
+	return base.With()
+}
+
+// withContext stores the logger in the context.
+func withContext(c context.Context, logger *zerolog.Logger) context.Context {
+	return context.WithValue(c, loggerKey, logger)
 }

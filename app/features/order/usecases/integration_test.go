@@ -422,7 +422,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		body.ExternalPaymentID = "different-id"
 		err = fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
 		t.Require().NotNil(err)
-		t.Require().Equal(errs.ErrConflict.Code, err.Code)
+		t.Require().Equal(errs.ErrPaymentExternalIDConflict.Code, err.Code)
 	})
 
 	t.Run("should return conflict when external payment id is already used by another order", func() {

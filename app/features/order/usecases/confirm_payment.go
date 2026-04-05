@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Rabi-IT/rabi-food-core/app_context"
@@ -19,10 +20,9 @@ type ConfirmPaymentInput struct {
 }
 
 func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) (bool, error) {
-	l := logger.Get(ctx).With().
-		Str(logger.OrderID, in.OrderID).
-		Str(logger.PaymentID, in.ExternalPaymentID).
-		Logger()
+	wd := logger.GetWideEvent(ctx)
+	wd.OrderID = in.OrderID
+	wd.ExternalPaymentID = in.ExternalPaymentID
 
 	session := app_context.GetSession(ctx)
 	if !session.Role.IsSystem() {
@@ -51,48 +51,34 @@ func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) 
 		return true, nil
 	}
 
-	l.Warn().Msg("payment confirmation not updated, checking order status")
-
-	ctx = logger.WithContext(ctx, l)
-
 	return c.handleNotConfirmedPayment(ctx, in)
 }
 
 func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPaymentInput) (bool, error) {
-	l := logger.Get(ctx)
+	wd := logger.GetWideEvent(ctx)
 
 	orderFound, err := c.gateway.GetByID(g.GetByIDFilter{ID: in.OrderID})
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("%w: %w", errs.ErrOrderStateVerificationFailed, err)
 	}
 
 	if orderFound == nil {
-		l.Error().Msg("order not found when confirming payment")
-
-		return false, nil
+		return false, errs.ErrOrderNotFound
 	}
 
 	if orderFound.PaymentStatus == payment_status.StatusPaid {
 		if orderFound.ExternalPaymentID != nil && *orderFound.ExternalPaymentID == in.ExternalPaymentID {
-			l.Info().Msg("payment already confirmed for this order")
-
+			wd.PaymentIdempotencyHit = new(true)
 			return true, nil
 		}
 
-		l.Error().Msg("conflict on confirming payment, external_payment_id already used")
-
-		return false, errs.ErrConflict
+		wd.OriginalExternalPaymentID = *orderFound.ExternalPaymentID
+		return false, errs.ErrPaymentExternalIDConflict
 	}
 
 	if orderFound.PaymentStatus != payment_status.StatusPending {
-		l.Error().
-			Str("current_status", string(orderFound.PaymentStatus)).
-			Msg("invalid transition when confirming payment")
-
 		return false, errs.InvalidTranstion(orderFound.PaymentStatus, payment_status.StatusPaid)
 	}
 
-	l.Error().Msg("payment confirmation not updated due to unknown reason")
-
-	return false, nil
+	return false, errs.ErrUnknownBusinessReason
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/Rabi-IT/rabi-food-core/domain/auth"
 	g "github.com/Rabi-IT/rabi-food-core/features/tenant/gateway"
 	user "github.com/Rabi-IT/rabi-food-core/features/user/usecases"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 )
 
 type CreateInput struct {
@@ -29,11 +30,13 @@ func (c *TenantCase) Create(ctx context.Context, input CreateInput) (out CreateO
 	if err != nil {
 		return
 	}
+	logger.GetWideEvent(ctx).TenantID = tenantId
 
 	ctx = app_context.WithSession(ctx, &app_context.UserSession{
 		TenantID: tenantId,
 		Role:     auth.User,
 	})
+
 	userId, err := c.userCase.Create(ctx, &user.CreateInput{
 		Name:  input.UserName,
 		Phone: input.Phone,

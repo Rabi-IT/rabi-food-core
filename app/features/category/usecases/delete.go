@@ -5,6 +5,7 @@ import (
 
 	"github.com/Rabi-IT/rabi-food-core/app_context"
 	g "github.com/Rabi-IT/rabi-food-core/features/category/gateway"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 )
 
 func (c *CategoryCase) Delete(ctx context.Context, filter g.DeleteFilter) (bool, error) {
@@ -13,5 +14,6 @@ func (c *CategoryCase) Delete(ctx context.Context, filter g.DeleteFilter) (bool,
 		filter.TenantID = session.TenantID
 	}
 
+	logger.GetWideEvent(ctx).CategoryID = filter.ID
 	return c.gateway.Delete(filter)
 }

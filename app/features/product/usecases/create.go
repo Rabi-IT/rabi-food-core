@@ -15,12 +15,11 @@ func (c *ProductCase) Create(ctx context.Context, input g.CreateInput) (string, 
 	}
 
 	id, err := c.gateway.Create(input)
-
 	if err != nil {
 		return "", err
 	}
 
-	logger.Get(ctx).Info().Str(logger.TenantID, session.TenantID).Str(logger.ProductID, id).Msg("product created")
+	logger.GetWideEvent(ctx).ProductID = id
 
 	return id, nil
 }

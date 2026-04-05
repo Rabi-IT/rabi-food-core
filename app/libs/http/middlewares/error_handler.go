@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/Rabi-IT/rabi-food-core/libs/errs"
-	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 	lib "github.com/Rabi-IT/rabi-food-core/libs/validator"
 
 	"github.com/go-playground/validator/v10"
@@ -19,6 +18,7 @@ type ValidationErrorResponse struct {
 }
 
 // ErrorHandler is a middleware that handles errors occurring during request processing.
+// Logging is handled by the Canonical Log Line middleware — this function only formats the response.
 func ErrorHandler(ctx *fiber.Ctx, err error) error {
 	//nolint:errorlint
 	validationErr, ok := err.(validator.ValidationErrors)
@@ -39,8 +39,6 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 
 		return ctx.Status(e.Code).SendString(err.Error())
 	}
-
-	logger.Get(ctx.UserContext()).Error().Err(err).Msg("internal server error")
 
 	return ctx.Status(http.StatusInternalServerError).SendString("internal server error")
 }

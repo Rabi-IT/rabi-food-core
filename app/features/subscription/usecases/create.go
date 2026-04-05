@@ -79,7 +79,7 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 	}
 
 	if len(products) != len(input.Items) {
-		return s.handleMissingProducts(ctx, input.Items, products)
+		return s.handleMissingProducts(input.Items, products)
 	}
 
 	config, err := s.gateway.GetConfig(ctx, session.TenantID)
@@ -125,18 +125,13 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 		return "", err
 	}
 
-	logger.Get(ctx).Info().
-		Str(logger.TenantID, session.TenantID).
-		Str(logger.UserID, session.UserID).
-		Str(logger.SubscriptionID, id).
-		Msg("subscription created")
+	logger.GetWideEvent(ctx).SubscriptionID = id
 
 	return id, nil
 }
 
 // handleMissingProducts returns a structured error after identifying which products are absent.
 func (s *SubscriptionCase) handleMissingProducts(
-	ctx context.Context,
 	requestedItems []SubscriptionItemInput,
 	foundProducts []product_gateway.ListOutput,
 ) (string, error) {
@@ -151,10 +146,6 @@ func (s *SubscriptionCase) handleMissingProducts(
 			missingProductIDs = append(missingProductIDs, item.ProductID)
 		}
 	}
-
-	logger.Get(ctx).Warn().
-		Strs(logger.ProductID, missingProductIDs).
-		Msg("missing products for subscription")
 
 	return "", errs.ProductNotFound(missingProductIDs...)
 }

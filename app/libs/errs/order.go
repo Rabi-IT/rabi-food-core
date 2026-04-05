@@ -7,9 +7,11 @@ import (
 )
 
 var (
-	ErrProductNotFound         = newErr("PRODUCT_NOT_FOUND", http.StatusNotFound)
-	ErrStatusNotModifiable     = newErr("STATUS_NOT_MODIFIABLE", http.StatusBadRequest)
-	ErrInvalidStatusTransition = newErr("INVALID_STATUS_TRANSITION", http.StatusBadRequest)
+	ErrOrderNotFound                = newErr("ORDER_NOT_FOUND", http.StatusNotFound)
+	ErrProductNotFound              = newErr("PRODUCT_NOT_FOUND", http.StatusNotFound)
+	ErrStatusNotModifiable          = newErr("STATUS_NOT_MODIFIABLE", http.StatusBadRequest)
+	ErrInvalidStatusTransition      = newErr("INVALID_STATUS_TRANSITION", http.StatusBadRequest)
+	ErrOrderStateVerificationFailed = newErr("ORDER_STATE_VERIFICATION_FAILED", http.StatusInternalServerError)
 )
 
 func ProductNotFound(productIDs ...string) *AppError {
@@ -28,7 +30,8 @@ func ProductNotFound(productIDs ...string) *AppError {
 
 func StatusNotModifiable(status fmt.Stringer) *AppError {
 	e := *ErrStatusNotModifiable
-	e.Code = fmt.Sprintf("%s__%s", ErrStatusNotModifiable.Code, status)
+	e.Code = ErrStatusNotModifiable.Code
+	e.FullCode = fmt.Sprintf("%s__%s", e.Code, status)
 
 	// To allow errors.Is checks
 	e.err = ErrStatusNotModifiable
@@ -38,7 +41,8 @@ func StatusNotModifiable(status fmt.Stringer) *AppError {
 
 func InvalidTranstion(from, to fmt.Stringer) *AppError {
 	e := *ErrInvalidStatusTransition
-	e.Code = fmt.Sprintf("%s__FROM_%s_TO_%s", ErrInvalidStatusTransition.Code, from, to)
+	e.Code = ErrInvalidStatusTransition.Code
+	e.FullCode = fmt.Sprintf("%s__FROM_%s_TO_%s", e.Code, from, to)
 
 	// To allow errors.Is checks
 	e.err = ErrInvalidStatusTransition

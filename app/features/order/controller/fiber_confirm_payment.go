@@ -5,6 +5,7 @@ import (
 
 	"github.com/Rabi-IT/rabi-food-core/features/order/usecases"
 	parser "github.com/Rabi-IT/rabi-food-core/libs/http/parser"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 	"github.com/Rabi-IT/rabi-food-core/libs/validator"
 
 	"github.com/gofiber/fiber/v2"
@@ -39,7 +40,9 @@ func (c *OrderController) ConfirmPayment(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	ok, err := c.usecase.ConfirmPayment(ctx.UserContext(), usecases.ConfirmPaymentInput{
+	uctx := ctx.UserContext()
+	logger.GetWideEvent(uctx).Event = "order_confirm_payment"
+	ok, err := c.usecase.ConfirmPayment(uctx, usecases.ConfirmPaymentInput{
 		OrderID:           orderID,
 		ExternalPaymentID: body.ExternalPaymentID,
 		Provider:          body.Provider,

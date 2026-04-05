@@ -5,6 +5,7 @@ import (
 
 	g "github.com/Rabi-IT/rabi-food-core/features/user/gateway"
 	parser "github.com/Rabi-IT/rabi-food-core/libs/http/parser"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 	"github.com/Rabi-IT/rabi-food-core/libs/validator"
 
 	"github.com/gofiber/fiber/v2"
@@ -35,7 +36,9 @@ func (c *UserController) Patch(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	updated, err := c.usecase.Patch(ctx.UserContext(), ctx.Params("id"), data)
+	uctx := ctx.UserContext()
+	logger.GetWideEvent(uctx).Event = "patch-user"
+	updated, err := c.usecase.Patch(uctx, ctx.Params("id"), data)
 
 	if err != nil {
 		return err

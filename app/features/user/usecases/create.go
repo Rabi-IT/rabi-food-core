@@ -56,7 +56,7 @@ func (c *UserCase) Create(ctx context.Context, input *CreateInput) (string, erro
 		return "", err
 	}
 
-	logger.Get(ctx).Info().Str(logger.TenantID, tenantId).Str("new_user_id", id).Msg("user created")
+	logger.GetWideEvent(ctx).UserID = id
 
 	return id, nil
 }

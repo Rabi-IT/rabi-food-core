@@ -5,6 +5,7 @@ import (
 
 	"github.com/Rabi-IT/rabi-food-core/features/category/gateway"
 	parser "github.com/Rabi-IT/rabi-food-core/libs/http/parser"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 	"github.com/Rabi-IT/rabi-food-core/libs/validator"
 
 	"github.com/gofiber/fiber/v2"
@@ -39,7 +40,9 @@ func (c *CategoryController) Patch(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	updated, err := c.usecase.Patch(ctx.UserContext(), filter, data)
+	uctx := ctx.UserContext()
+	logger.GetWideEvent(uctx).Event = "patch-category"
+	updated, err := c.usecase.Patch(uctx, filter, data)
 
 	if err != nil {
 		return err

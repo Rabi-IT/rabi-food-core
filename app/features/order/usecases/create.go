@@ -55,8 +55,6 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 	for _, item := range input.Items {
 		product, exists := productMap[item.ProductID]
 		if !exists {
-			logger.Get(ctx).Warn().Msgf("product not found for ID: %s", item.ProductID)
-
 			return "", errs.ProductNotFound(item.ProductID)
 		}
 
@@ -89,7 +87,7 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 		return "", err
 	}
 
-	logger.Get(ctx).Info().Str(logger.TenantID, session.TenantID).Str(logger.OrderID, id).Msg("order created")
+	logger.GetWideEvent(ctx).OrderID = id
 
 	return id, nil
 }
@@ -110,8 +108,6 @@ func (c *OrderCase) handleMissingProducts(
 			missingProductIDs = append(missingProductIDs, item.ProductID)
 		}
 	}
-
-	logger.Get(ctx).Warn().Msgf("missing products: %v", missingProductIDs)
 
 	return "", errs.ProductNotFound(missingProductIDs...)
 }

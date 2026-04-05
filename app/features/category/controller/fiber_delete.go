@@ -5,6 +5,7 @@ import (
 
 	"github.com/Rabi-IT/rabi-food-core/features/category/gateway"
 	parser "github.com/Rabi-IT/rabi-food-core/libs/http/parser"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -29,8 +30,11 @@ func (c *CategoryController) Delete(ctx *fiber.Ctx) error {
 		return ctx.JSON(err)
 	}
 
+	uctx := ctx.UserContext()
+	logger.GetWideEvent(uctx).Event = "delete-category"
+
 	filter.ID = ctx.Params("id")
-	deleted, err := c.usecase.Delete(ctx.UserContext(), filter)
+	deleted, err := c.usecase.Delete(uctx, filter)
 
 	if err != nil {
 		return err

@@ -13,7 +13,8 @@ var (
 
 func DuplicateProduct(productID string) *AppError {
 	e := *ErrDuplicateProduct
-	e.Code = fmt.Sprintf("%s__%s", ErrDuplicateProduct.Code, productID)
+	e.Code = ErrDuplicateProduct.Code
+	e.FullCode = fmt.Sprintf("%s__%s", e.Code, productID)
 
 	// allow errors.Is
 	e.err = ErrDuplicateProduct
@@ -23,7 +24,8 @@ func DuplicateProduct(productID string) *AppError {
 
 func DuplicateDeliveryWeekday(weekday uint8) *AppError {
 	e := *ErrDuplicateDeliveryWeekday
-	e.Code = fmt.Sprintf("%s__%d", ErrDuplicateDeliveryWeekday.Code, weekday)
+	e.Code = ErrDuplicateDeliveryWeekday.Code
+	e.FullCode = fmt.Sprintf("%s__%d", e.Code, weekday)
 
 	// allow errors.Is
 	e.err = ErrDuplicateDeliveryWeekday

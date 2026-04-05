@@ -49,7 +49,11 @@ func (g *GormAdapter) Migrate() error {
 func (g *GormAdapter) Connect(ctx context.Context) error {
 	time.Local = time.UTC
 
-	logger.Get(ctx).Info().Msg("Connecting to database with DSN: " + g.config.String())
+	logger.
+		Get(ctx).
+		Info().
+		Msg("Connecting to database with DSN: " + g.config.String())
+
 	dsn := parseDSN(g.config)
 	db, err := gorm.Open(postgres.Open(dsn))
 

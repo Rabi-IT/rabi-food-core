@@ -55,10 +55,11 @@ func New(
 		app.Static("/docs", "./libs/docs")
 	}
 
-	app.Post("/tenant", tenantController.Create).
+	app.
+		Use(middlewares.Logging()).
+		Post("/tenant", tenantController.Create).
 		Use(jwtMiddleware).
-		Use(middlewares.Session).
-		Use(middlewares.Logging())
+		Use(middlewares.Session)
 
 	user_routes.User(app, userController)
 	tenant_routes.Tenant(app, tenantController)

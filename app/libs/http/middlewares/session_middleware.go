@@ -7,6 +7,7 @@ import (
 
 	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/domain/auth"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -38,7 +39,21 @@ func Session(c *fiber.Ctx) error {
 		Role:           auth.Role(fmt.Sprint(claims["role"])),
 	}
 
-	ctx := context.WithValue(c.Context(), app_context.SessionKey, session)
+	userID, isBackoffice := session.GetOriginalUserID()
+
+	uctx := c.UserContext()
+	wd := logger.GetWideEvent(uctx)
+	wd.ActorID = userID
+
+	if isBackoffice {
+		wd.IsBackoffice = true
+	}
+
+	if session.TenantID != "" {
+		wd.ActorTenantID = session.TenantID
+	}
+
+	ctx := context.WithValue(uctx, app_context.SessionKey, session)
 	c.SetUserContext(ctx)
 
 	return c.Next()
