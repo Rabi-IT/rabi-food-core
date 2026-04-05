@@ -21,8 +21,7 @@ type ConfirmPaymentInput struct {
 
 func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) (bool, error) {
 	wd := logger.GetWideEvent(ctx)
-	wd.OrderID = in.OrderID
-	wd.ExternalPaymentID = in.ExternalPaymentID
+	wd.TrackOrderPayment(in.OrderID, in.ExternalPaymentID)
 
 	session := app_context.GetSession(ctx)
 	if !session.Role.IsSystem() {
@@ -68,11 +67,11 @@ func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPay
 
 	if orderFound.PaymentStatus == payment_status.StatusPaid {
 		if orderFound.ExternalPaymentID != nil && *orderFound.ExternalPaymentID == in.ExternalPaymentID {
-			wd.PaymentIdempotencyHit = new(true)
+			wd.MarkPaymentIdempotent()
 			return true, nil
 		}
 
-		wd.OriginalExternalPaymentID = *orderFound.ExternalPaymentID
+		wd.TrackPaymentConflict(*orderFound.ExternalPaymentID)
 		return false, errs.ErrPaymentExternalIDConflict
 	}
 

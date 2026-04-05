@@ -83,11 +83,10 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 		Items:             orderItems,
 	})
 
+	logger.GetWideEvent(ctx).SetOrderID(id)
 	if err != nil {
 		return "", err
 	}
-
-	logger.GetWideEvent(ctx).OrderID = id
 
 	return id, nil
 }

@@ -51,12 +51,11 @@ func (c *UserCase) Create(ctx context.Context, input *CreateInput) (string, erro
 		Name:         input.Name,
 		Role:         auth.User,
 	})
+	logger.GetWideEvent(ctx).SetUserID(id)
 
 	if err != nil {
 		return "", err
 	}
-
-	logger.GetWideEvent(ctx).UserID = id
 
 	return id, nil
 }

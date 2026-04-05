@@ -14,6 +14,6 @@ func (c *CategoryCase) Delete(ctx context.Context, filter g.DeleteFilter) (bool,
 		filter.TenantID = session.TenantID
 	}
 
-	logger.GetWideEvent(ctx).CategoryID = filter.ID
+	logger.GetWideEvent(ctx).SetCategoryID(filter.ID)
 	return c.gateway.Delete(filter)
 }

@@ -26,11 +26,11 @@ func (c *TenantCase) Create(ctx context.Context, input CreateInput) (out CreateO
 	tenantId, err := c.gateway.Create(g.CreateInput{
 		Name: input.Name,
 	})
+	logger.GetWideEvent(ctx).SetTenantID(tenantId)
 
 	if err != nil {
 		return
 	}
-	logger.GetWideEvent(ctx).TenantID = tenantId
 
 	ctx = app_context.WithSession(ctx, &app_context.UserSession{
 		TenantID: tenantId,

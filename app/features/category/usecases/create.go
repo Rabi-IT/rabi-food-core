@@ -13,11 +13,10 @@ func (c *CategoryCase) Create(ctx context.Context, input g.CreateInput) (string,
 	input.TenantID = session.TenantID
 
 	id, err := c.gateway.Create(input)
+	logger.GetWideEvent(ctx).SetCategoryID(id)
 	if err != nil {
 		return "", err
 	}
-
-	logger.GetWideEvent(ctx).CategoryID = id
 
 	return id, nil
 }

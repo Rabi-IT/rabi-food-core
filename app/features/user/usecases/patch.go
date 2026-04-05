@@ -9,7 +9,7 @@ import (
 )
 
 func (c *UserCase) Patch(ctx context.Context, id string, values g.PatchValues) (bool, error) {
-	logger.GetWideEvent(ctx).UserID = id
+	logger.GetWideEvent(ctx).SetUserID(id)
 	filter := g.PatchFilter{
 		ID: id,
 	}

@@ -120,12 +120,11 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 		PaymentAmount:       price.PaymentAmount(),
 		PaymentStatus:       payment_status.StatusPending,
 	})
+	logger.GetWideEvent(ctx).SetSubscriptionID(id)
 
 	if err != nil {
 		return "", err
 	}
-
-	logger.GetWideEvent(ctx).SubscriptionID = id
 
 	return id, nil
 }

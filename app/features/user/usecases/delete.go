@@ -18,6 +18,6 @@ func (c *UserCase) Delete(ctx context.Context, id string) (bool, error) {
 		filter.TenantID = session.TenantID
 	}
 
-	logger.GetWideEvent(ctx).UserID = id
+	logger.GetWideEvent(ctx).SetUserID(id)
 	return c.gateway.Delete(filter)
 }

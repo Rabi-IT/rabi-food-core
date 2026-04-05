@@ -15,11 +15,10 @@ func (c *ProductCase) Create(ctx context.Context, input g.CreateInput) (string, 
 	}
 
 	id, err := c.gateway.Create(input)
+	logger.GetWideEvent(ctx).SetProductID(id)
 	if err != nil {
 		return "", err
 	}
-
-	logger.GetWideEvent(ctx).ProductID = id
 
 	return id, nil
 }

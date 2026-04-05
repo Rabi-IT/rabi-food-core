@@ -30,20 +30,78 @@ type WideEvent struct {
 	ActorTenantID string
 	IsBackoffice  bool
 
-	OrderID        string
-	CategoryID     string
-	ProductID      string
-	SubscriptionID string
-	UserID         string
-	TenantID       string
+	orderID        string
+	categoryID     string
+	productID      string
+	subscriptionID string
+	userID         string
+	tenantID       string
 
 	// Payment
-	ExternalPaymentID         string
-	OriginalExternalPaymentID string
-	PaymentIdempotencyHit     *bool
+	externalPaymentID         string
+	originalExternalPaymentID string
+	paymentIdempotencyHit     *bool
 
 	err       string
 	errorCode string
+}
+
+// --- Usecase setters (thread-safe) ---
+
+func (w *WideEvent) SetOrderID(id string) {
+	w.mu.Lock()
+	w.orderID = id
+	w.mu.Unlock()
+}
+
+func (w *WideEvent) SetCategoryID(id string) {
+	w.mu.Lock()
+	w.categoryID = id
+	w.mu.Unlock()
+}
+
+func (w *WideEvent) SetProductID(id string) {
+	w.mu.Lock()
+	w.productID = id
+	w.mu.Unlock()
+}
+
+func (w *WideEvent) SetSubscriptionID(id string) {
+	w.mu.Lock()
+	w.subscriptionID = id
+	w.mu.Unlock()
+}
+
+func (w *WideEvent) SetUserID(id string) {
+	w.mu.Lock()
+	w.userID = id
+	w.mu.Unlock()
+}
+
+func (w *WideEvent) SetTenantID(id string) {
+	w.mu.Lock()
+	w.tenantID = id
+	w.mu.Unlock()
+}
+
+func (w *WideEvent) TrackOrderPayment(orderID, externalPaymentID string) {
+	w.mu.Lock()
+	w.orderID = orderID
+	w.externalPaymentID = externalPaymentID
+	w.mu.Unlock()
+}
+
+func (w *WideEvent) MarkPaymentIdempotent() {
+	w.mu.Lock()
+	v := true
+	w.paymentIdempotencyHit = &v
+	w.mu.Unlock()
+}
+
+func (w *WideEvent) TrackPaymentConflict(originalExternalPaymentID string) {
+	w.mu.Lock()
+	w.originalExternalPaymentID = originalExternalPaymentID
+	w.mu.Unlock()
 }
 
 func (w *WideEvent) SetErrorCode(code string) {
@@ -73,7 +131,10 @@ func (w *WideEvent) reset() {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
+	w.Event = ""
 	w.Method = ""
+	w.Path = ""
+	w.Query = ""
 	w.StatusCode = 0
 	w.LatencyMs = 0
 	w.RequestID = ""
@@ -82,16 +143,16 @@ func (w *WideEvent) reset() {
 	w.ActorTenantID = ""
 	w.IsBackoffice = false
 
-	w.OrderID = ""
-	w.CategoryID = ""
-	w.ProductID = ""
-	w.SubscriptionID = ""
-	w.UserID = ""
-	w.TenantID = ""
+	w.orderID = ""
+	w.categoryID = ""
+	w.productID = ""
+	w.subscriptionID = ""
+	w.userID = ""
+	w.tenantID = ""
 
-	w.ExternalPaymentID = ""
-	w.OriginalExternalPaymentID = ""
-	w.PaymentIdempotencyHit = nil
+	w.externalPaymentID = ""
+	w.originalExternalPaymentID = ""
+	w.paymentIdempotencyHit = nil
 
 	w.err = ""
 	w.errorCode = ""
@@ -112,33 +173,33 @@ func (w *WideEvent) MarshalZerologObject(e *zerolog.Event) {
 		e.Str("event", w.Event)
 	}
 
-	if w.OrderID != "" {
-		e.Str("order_id", w.OrderID)
+	if w.orderID != "" {
+		e.Str("order_id", w.orderID)
 	}
-	if w.CategoryID != "" {
-		e.Str("category_id", w.CategoryID)
+	if w.categoryID != "" {
+		e.Str("category_id", w.categoryID)
 	}
-	if w.ProductID != "" {
-		e.Str("product_id", w.ProductID)
+	if w.productID != "" {
+		e.Str("product_id", w.productID)
 	}
-	if w.SubscriptionID != "" {
-		e.Str("subscription_id", w.SubscriptionID)
+	if w.subscriptionID != "" {
+		e.Str("subscription_id", w.subscriptionID)
 	}
-	if w.UserID != "" {
-		e.Str("user_id", w.UserID)
+	if w.userID != "" {
+		e.Str("user_id", w.userID)
 	}
-	if w.TenantID != "" {
-		e.Str("tenant_id", w.TenantID)
+	if w.tenantID != "" {
+		e.Str("tenant_id", w.tenantID)
 	}
 
-	if w.ExternalPaymentID != "" {
-		e.Str("external_payment_id", w.ExternalPaymentID)
+	if w.externalPaymentID != "" {
+		e.Str("payment.external_id", w.externalPaymentID)
 	}
-	if w.OriginalExternalPaymentID != "" {
-		e.Str("original_external_payment_id", w.OriginalExternalPaymentID)
+	if w.originalExternalPaymentID != "" {
+		e.Str("payment.original_external_id", w.originalExternalPaymentID)
 	}
-	if w.PaymentIdempotencyHit != nil {
-		e.Bool("payment_idempotency_hit", *w.PaymentIdempotencyHit)
+	if w.paymentIdempotencyHit != nil {
+		e.Bool("payment.idempotency_hit", *w.paymentIdempotencyHit)
 	}
 
 	if w.err != "" {
