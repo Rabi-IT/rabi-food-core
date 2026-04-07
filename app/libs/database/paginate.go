@@ -1,36 +1,46 @@
 package database
 
 import (
-	"sync"
+	"context"
 
-	"gorm.io/gorm"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/sync/errgroup"
 )
 
-// Paginate performs pagination on the given GORM query.
-func Paginate(query *gorm.DB, count *int64, data any, paginate PaginateInput) error {
-	var wg sync.WaitGroup
-	countErr := error(nil)
-	countSession := query.Session(&gorm.Session{})
-	wg.Go(func() {
-		result := countSession.Count(count)
-		countErr = result.Error
+// Paginate executes count and data queries in parallel and scans results into []T.
+func Paginate[T any](
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	countSQL string,
+	countArgs []any,
+	dataSQL string,
+	dataArgs []any,
+) ([]T, int64, error) {
+	var (
+		count int64
+		rows  []T
+		eg    errgroup.Group
+	)
+
+	eg.Go(func() error {
+		return pool.QueryRow(ctx, countSQL, countArgs...).Scan(&count)
 	})
 
-	paginateErr := error(nil)
-	paginateSession := query.Session(&gorm.Session{})
-	wg.Go(func() {
-		result := paginateSession.Limit(paginate.PageSize).Offset(paginate.Offset()).Find(data)
-		paginateErr = result.Error
+	eg.Go(func() error {
+		r, err := pool.Query(ctx, dataSQL, dataArgs...)
+		if err != nil {
+			return err
+		}
+
+		rows, err = pgx.CollectRows(r, pgx.RowToStructByName[T])
+
+		return err
 	})
 
-	wg.Wait()
-	if countErr != nil {
-		return countErr
+	if err := eg.Wait(); err != nil {
+		return nil, 0, err
 	}
 
-	if paginateErr != nil {
-		return paginateErr
-	}
-
-	return nil
+	return rows, count, nil
 }

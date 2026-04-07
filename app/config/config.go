@@ -1,10 +1,6 @@
 package config
 
-import (
-	"os"
-
-	"gorm.io/gorm/logger"
-)
+import "os"
 
 var (
 	AppPort            = os.Getenv("APP_PORT")
@@ -16,7 +12,6 @@ var (
 		User:         os.Getenv("DATABASE_USER"),
 		Password:     os.Getenv("DATABASE_PASSWORD"),
 		Port:         os.Getenv("DATABASE_PORT"),
-		LogLevel:     logger.Warn,
 	}
 )
 
@@ -27,7 +22,6 @@ type DatabaseConfig struct {
 	Password     string // #nosec G117
 	DatabaseName string
 	Port         string
-	LogLevel     logger.LogLevel
 }
 
 func (d DatabaseConfig) String() string {
