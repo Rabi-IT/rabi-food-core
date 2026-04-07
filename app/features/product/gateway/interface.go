@@ -32,11 +32,12 @@ type ListOutput struct {
 }
 
 type CreateInput struct {
-	TenantID      string         `json:"tenantId"`
-	Name          string         `json:"name"`
-	Description   string         `json:"description"`
-	Photo         string         `json:"photo"`
-	CategoryID    string         `json:"categoryId"    validate:"required"`
+	TenantID    string `json:"tenantId"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Photo       string `json:"photo"`
+	CategoryID  string `json:"categoryId"    validate:"required"`
+	// Unit of measurement (e.g., "kg", "liter", "piece")
 	Unit          string         `json:"unit"`
 	Price         uint           `json:"price"`
 	IsActive      bool           `json:"isActive"`
