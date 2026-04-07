@@ -1,4 +1,14 @@
 {
     // Useful when clicking "run test | debug test" above a test function
-    "go.testEnvFile": "${workspaceFolder}/.env.test"
+    "go.testEnvFile": "${workspaceFolder}/.env.test",
+    "[sql]": {
+        "editor.defaultFormatter": "inferrinizzard.prettier-sql-vscode",
+        "editor.formatOnSave": true
+    },
+    "Prettier-SQL.SQLFlavourOverride": "postgresql",
+    "Prettier-SQL.keywordCase": "upper",
+    "Prettier-SQL.indentStyle": "standard",
+    "Prettier-SQL.logicalOperatorNewline": "before",
+    "Prettier-SQL.expressionWidth": 80,
+    "Prettier-SQL.linesBetweenQueries": 1
 }

@@ -6,13 +6,8 @@ import (
 	"time"
 
 	"github.com/Rabi-IT/rabi-food-core/config"
-	category_model "github.com/Rabi-IT/rabi-food-core/features/category/model"
-	order_model "github.com/Rabi-IT/rabi-food-core/features/order/model"
-	product_model "github.com/Rabi-IT/rabi-food-core/features/product/model"
-	subscription_model "github.com/Rabi-IT/rabi-food-core/features/subscription/model"
-	tenant_model "github.com/Rabi-IT/rabi-food-core/features/tenant/model"
-	user_model "github.com/Rabi-IT/rabi-food-core/features/user/model"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
+	"github.com/pressly/goose/v3"
 
 	gormLogger "gorm.io/gorm/logger"
 
@@ -31,18 +26,20 @@ func New(c *config.DatabaseConfig) Database {
 	return &GormAdapter{config: c}
 }
 
-// Migrate performs automatic migration for the database model.
-func (g *GormAdapter) Migrate() error {
-	return g.Conn.AutoMigrate(
-		&user_model.User{},
-		&tenant_model.Tenant{},
-		&product_model.Product{},
-		&category_model.Category{},
-		&order_model.Order{},
-		&subscription_model.Subscription{},
-		&subscription_model.SubscriptionConfig{},
-		&subscription_model.SubscriptionDelivery{},
-	)
+// migrate runs pending database migrations using Goose.
+func (g *GormAdapter) migrate() error {
+	sqlDB, err := g.Conn.DB()
+	if err != nil {
+		return err
+	}
+
+	goose.SetBaseFS(migrationsFS)
+
+	if err := goose.SetDialect("postgres"); err != nil {
+		return err
+	}
+
+	return goose.Up(sqlDB, "migrations")
 }
 
 // Connect establishes a connection to the database.
@@ -108,7 +105,7 @@ func (g *GormAdapter) CreateDatabase(ctx context.Context) error {
 	return sql.Close()
 }
 
-// Start initializes the database connection and performs migrations.
+// Start initializes the database connection and runs migrations.
 func (g *GormAdapter) Start(ctx context.Context) error {
 	err := g.CreateDatabase(ctx)
 	if err != nil {
@@ -120,7 +117,7 @@ func (g *GormAdapter) Start(ctx context.Context) error {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	err = g.Migrate()
+	err = g.migrate()
 	if err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)
 	}
