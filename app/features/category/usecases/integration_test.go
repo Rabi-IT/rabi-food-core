@@ -263,8 +263,8 @@ func (t *TestSuite) Test_CategoryIntegration_Patch() {
 		categoryID := fixtures.Category.Create(t.T(), nil, token)
 
 		Body := gateway.PatchValues{
-			Name:        "Updated Name",
-			Description: "Updated Description",
+			Name:        new("Updated Name"),
+			Description: new("Updated Description"),
 		}
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
@@ -292,8 +292,8 @@ func (t *TestSuite) Test_CategoryIntegration_Patch() {
 		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
 
 		Body := gateway.PatchValues{
-			Name:        "Updated Name",
-			Description: "Updated Description",
+			Name:        new("Updated Name"),
+			Description: new("Updated Description"),
 		}
 
 		httpexpect.Default(t.T(), fixtures.AppURL).

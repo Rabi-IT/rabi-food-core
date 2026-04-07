@@ -12,7 +12,7 @@ type PatchFilter struct {
 }
 
 type PatchValues struct {
-	Name string
+	Name *string
 }
 
 func (c *TenantCase) Patch(ctx context.Context, filter PatchFilter, values PatchValues) (bool, error) {

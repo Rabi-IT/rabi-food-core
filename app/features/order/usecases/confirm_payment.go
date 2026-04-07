@@ -28,14 +28,15 @@ func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) 
 		return false, errs.ErrForbidden
 	}
 
+	paidStatus := payment_status.StatusPaid
 	updated, err := c.gateway.Patch(g.PatchFilter{
 		ID:            in.OrderID,
 		PaymentStatus: payment_status.StatusPending,
 	}, g.PatchValues{
-		ExternalPaymentID: in.ExternalPaymentID,
-		PaymentStatus:     payment_status.StatusPaid,
-		Provider:          in.Provider,
-		PaidAt:            in.PaidAt,
+		ExternalPaymentID: &in.ExternalPaymentID,
+		PaymentStatus:     &paidStatus,
+		Provider:          &in.Provider,
+		PaidAt:            &in.PaidAt,
 	})
 
 	if err != nil {

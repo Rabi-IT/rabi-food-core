@@ -24,10 +24,10 @@ type GetByIDFilter struct {
 }
 
 type GetByIDOutput struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	TenantID    string `json:"tenantId"`
+	ID          string `json:"id"          db:"id"`
+	Name        string `json:"name"        db:"name"`
+	Description string `json:"description" db:"description"`
+	TenantID    string `json:"tenantId"    db:"tenant_id"`
 }
 
 type PatchFilter struct {
@@ -36,8 +36,8 @@ type PatchFilter struct {
 }
 
 type PatchValues struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name        *string `json:"name"`
+	Description *string `json:"description"`
 }
 
 type PaginateFilter struct {
@@ -46,9 +46,9 @@ type PaginateFilter struct {
 }
 
 type PaginateData struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          string `json:"id"          db:"id"`
+	Name        string `json:"name"        db:"name"`
+	Description string `json:"description" db:"description"`
 }
 
 type PaginateOutput struct {

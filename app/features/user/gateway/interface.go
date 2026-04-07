@@ -36,19 +36,19 @@ type GetByIDFilter struct {
 }
 
 type GetByIDOutput struct {
-	ID         string `json:"id"`
-	TenantID   string `json:"tenantId"`
-	Phone      string `json:"phone"`
-	City       string `json:"city"`
-	State      string `json:"state"`
-	ZIP        string `json:"zip"`
-	Name       string `json:"name"`
-	Email      string `json:"email"`
-	Photo      string `json:"photo"`
-	TaxID      string `json:"taxId"`
-	SocialID   string `json:"socialId"`
-	Street     string `json:"street"`
-	Complement string `json:"complement"`
+	ID         string `json:"id"         db:"id"`
+	TenantID   string `json:"tenantId"   db:"tenant_id"`
+	Phone      string `json:"phone"      db:"phone"`
+	City       string `json:"city"       db:"city"`
+	State      string `json:"state"      db:"state"`
+	ZIP        string `json:"zip"        db:"zip"`
+	Name       string `json:"name"       db:"name"`
+	Email      string `json:"email"      db:"email"`
+	Photo      string `json:"photo"      db:"photo"`
+	TaxID      string `json:"taxId"      db:"tax_id"`
+	SocialID   string `json:"socialId"   db:"social_id"`
+	Street     string `json:"street"     db:"street"`
+	Complement string `json:"complement" db:"complement"`
 }
 
 type PatchFilter struct {
@@ -57,17 +57,17 @@ type PatchFilter struct {
 }
 
 type PatchValues struct {
-	ZIP        string `gorm:"column:zip"          json:"zip"`
-	Phone      string `json:"phone"`
-	City       string `json:"city"`
-	State      string `json:"state"`
-	TaxID      string `json:"taxId"`
-	SocialID   string `json:"socialId"`
-	Street     string `json:"street"`
-	Complement string `json:"complement"`
-	Name       string `json:"name"`
-	Email      string `validate:"omitempty,email"`
-	Photo      string `validate:"omitempty,url"`
+	ZIP        *string `json:"zip"`
+	Phone      *string `json:"phone"`
+	City       *string `json:"city"`
+	State      *string `json:"state"`
+	TaxID      *string `json:"taxId"`
+	SocialID   *string `json:"socialId"`
+	Street     *string `json:"street"`
+	Complement *string `json:"complement"`
+	Name       *string `json:"name"`
+	Email      *string `validate:"omitempty,email"`
+	Photo      *string `validate:"omitempty,url"`
 }
 
 type PaginateFilter struct {
@@ -78,11 +78,11 @@ type PaginateFilter struct {
 }
 
 type PaginateData struct {
-	ID    string `json:"id"`
-	Photo string `json:"photo"`
-	Name  string `json:"name"`
-	State string `json:"state"`
-	City  string `json:"city"`
+	ID    string `json:"id"    db:"id"`
+	Photo string `json:"photo" db:"photo"`
+	Name  string `json:"name"  db:"name"`
+	State string `json:"state" db:"state"`
+	City  string `json:"city"  db:"city"`
 }
 
 type PaginateOutput struct {

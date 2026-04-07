@@ -11,7 +11,7 @@ type PatchFilter struct {
 }
 
 type PatchValues struct {
-	Name string
+	Name *string
 }
 
 type CreateInput struct {
@@ -19,6 +19,6 @@ type CreateInput struct {
 }
 
 type GetByIDOutput struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID   string `json:"id" db:"id"`
+	Name string `json:"name" db:"name"`
 }

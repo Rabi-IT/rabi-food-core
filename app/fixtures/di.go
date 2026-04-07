@@ -10,6 +10,6 @@ import (
 
 var (
 	testInjector   = di.NewTest()
-	testDB         = do.MustInvoke[*database.GormAdapter](testInjector)
+	testDB         = do.MustInvoke[*database.PgxAdapter](testInjector)
 	testHTTPServer = do.MustInvoke[http.HTTPServer](testInjector)
 )

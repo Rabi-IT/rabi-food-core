@@ -49,16 +49,16 @@ type GetByIDFilter struct {
 }
 
 type GetByIDOutput struct {
-	ID           string `json:"id"`
-	TenantID     string `json:"tenantId"`
-	Name         string `json:"name"`
-	Description  string `json:"description"`
-	Photo        string `json:"photo"`
-	CategoryID   string `json:"categoryId"`
-	CategoryName string `json:"categoryName"`
-	Unit         string `json:"unit"`
-	Price        uint   `json:"price"`
-	IsActive     bool   `json:"isActive"`
+	ID           string `json:"id"           db:"id"`
+	TenantID     string `json:"tenantId"     db:"tenant_id"`
+	Name         string `json:"name"         db:"name"`
+	Description  string `json:"description"  db:"description"`
+	Photo        string `json:"photo"        db:"photo"`
+	CategoryID   string `json:"categoryId"   db:"category_id"`
+	CategoryName string `json:"categoryName" db:"category_name"`
+	Unit         string `json:"unit"         db:"unit"`
+	Price        uint   `json:"price"        db:"price"`
+	IsActive     bool   `json:"isActive"     db:"is_active"`
 }
 
 type PatchFilter struct {
@@ -67,13 +67,13 @@ type PatchFilter struct {
 }
 
 type PatchValues struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Photo       string `json:"photo"`
-	CategoryID  string `json:"categoryId"`
-	Unit        string `json:"unit"`
-	Price       uint   `json:"price"`
-	IsActive    bool   `json:"isActive"`
+	Name        *string `json:"name"`
+	Description *string `json:"description"`
+	Photo       *string `json:"photo"`
+	CategoryID  *string `json:"categoryId"`
+	Unit        *string `json:"unit"`
+	Price       *uint   `json:"price"`
+	IsActive    *bool   `json:"isActive"`
 }
 
 type PaginateFilter struct {
@@ -84,14 +84,14 @@ type PaginateFilter struct {
 }
 
 type PaginateData struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Photo       string `json:"photo"`
-	CategoryID  string `json:"categoryId"`
-	Unit        string `json:"unit"`
-	Price       uint   `json:"price"`
-	IsActive    bool   `json:"isActive"`
+	ID          string `json:"id"          db:"id"`
+	Name        string `json:"name"        db:"name"`
+	Description string `json:"description" db:"description"`
+	Photo       string `json:"photo"       db:"photo"`
+	CategoryID  string `json:"categoryId"  db:"category_id"`
+	Unit        string `json:"unit"        db:"unit"`
+	Price       uint   `json:"price"       db:"price"`
+	IsActive    bool   `json:"isActive"    db:"is_active"`
 }
 
 type PaginateOutput struct {

@@ -63,12 +63,12 @@ type PatchFilter struct {
 }
 
 type PatchValues struct {
-	PaidAt            time.Time               `json:"paidAt"`
-	Provider          string                  `json:"provider"`
-	PaymentStatus     payment_status.Status   `json:"paymentStatus"`
-	ExternalPaymentID string                  `json:"externalPaymentId"`
-	FulfillmentStatus order.FulfillmentStatus `json:"fulfillmentStatus"`
-	DeliveryStatus    order.DeliveryStatus    `json:"deliveryStatus"`
+	PaidAt            *time.Time               `json:"paidAt"`
+	Provider          *string                  `json:"provider"`
+	PaymentStatus     *payment_status.Status   `json:"paymentStatus"`
+	ExternalPaymentID *string                  `json:"externalPaymentId"`
+	FulfillmentStatus *order.FulfillmentStatus `json:"fulfillmentStatus"`
+	DeliveryStatus    *order.DeliveryStatus    `json:"deliveryStatus"`
 }
 
 type PaginateFilter struct {
@@ -82,15 +82,15 @@ type PaginateFilter struct {
 }
 
 type PaginateData struct {
-	ID                string                  `json:"id"`
-	TenantID          string                  `json:"tenantId"`
-	Code              string                  `json:"code"`
-	PaymentStatus     payment_status.Status   `json:"paymentStatus"`
-	FulfillmentStatus order.FulfillmentStatus `json:"fulfillmentStatus"`
-	DeliveryStatus    order.DeliveryStatus    `json:"deliveryStatus"`
-	Notes             string                  `json:"notes"`
-	TotalPrice        uint                    `json:"totalPrice"`
-	CreatedAt         time.Time               `json:"createdAt"`
+	ID                string                  `json:"id"                db:"id"`
+	TenantID          string                  `json:"tenantId"          db:"tenant_id"`
+	Code              string                  `json:"code"              db:"code"`
+	PaymentStatus     payment_status.Status   `json:"paymentStatus"     db:"payment_status"`
+	FulfillmentStatus order.FulfillmentStatus `json:"fulfillmentStatus" db:"fulfillment_status"`
+	DeliveryStatus    order.DeliveryStatus    `json:"deliveryStatus"    db:"delivery_status"`
+	Notes             string                  `json:"notes"             db:"notes"`
+	TotalPrice        uint                    `json:"totalPrice"        db:"total_price"`
+	CreatedAt         time.Time               `json:"createdAt"         db:"created_at"`
 }
 
 type PaginateOutput struct {

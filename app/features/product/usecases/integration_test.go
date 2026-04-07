@@ -194,8 +194,8 @@ func (t *TestSuite) Test_ProductIntegration_Patch() {
 		productID := fixtures.Product.Create(t.T(), nil, token)
 
 		Body := product_gateway.PatchValues{
-			Name:        "Updated Name",
-			Description: "Updated Description",
+			Name:        new("Updated Name"),
+			Description: new("Updated Description"),
 		}
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
@@ -223,8 +223,8 @@ func (t *TestSuite) Test_ProductIntegration_Patch() {
 		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
 
 		Body := product_gateway.PatchValues{
-			Name:        "Updated Name",
-			Description: "Updated Description",
+			Name:        new("Updated Name"),
+			Description: new("Updated Description"),
 		}
 
 		httpexpect.Default(t.T(), fixtures.AppURL).

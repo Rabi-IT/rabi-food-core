@@ -36,8 +36,8 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	injector := do.New()
 
 	// Database
-	do.Provide(injector, func(_ *do.Injector) (*database.GormAdapter, error) {
-		db, ok := database.New(dbConfig).(*database.GormAdapter)
+	do.Provide(injector, func(_ *do.Injector) (*database.PgxAdapter, error) {
+		db, ok := database.NewPgx(dbConfig).(*database.PgxAdapter)
 		if !ok {
 			//nolint:err113
 			return nil, errors.New("failed to cast database adapter")
@@ -48,7 +48,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 
 	// Database as interface
 	do.Provide(injector, func(i *do.Injector) (database.Database, error) {
-		return do.MustInvoke[*database.GormAdapter](i), nil
+		return do.MustInvoke[*database.PgxAdapter](i), nil
 	})
 
 	// HTTP Server
@@ -77,9 +77,9 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 
 	// User dependencies
 	do.Provide(injector, func(i *do.Injector) (user_gateway.UserGateway, error) {
-		db := do.MustInvoke[*database.GormAdapter](i)
+		db := do.MustInvoke[*database.PgxAdapter](i)
 
-		return &user_gateway.GormUserGatewayAdapter{DB: db}, nil
+		return &user_gateway.PgxUserGatewayAdapter{DB: db}, nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (*user_case.UserCase, error) {
@@ -96,9 +96,9 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 
 	// Tenant dependencies
 	do.Provide(injector, func(i *do.Injector) (tenant_gateway.TenantGateway, error) {
-		db := do.MustInvoke[*database.GormAdapter](i)
+		db := do.MustInvoke[*database.PgxAdapter](i)
 
-		return &tenant_gateway.GormTenantGatewayAdapter{DB: db}, nil
+		return &tenant_gateway.PgxTenantGatewayAdapter{DB: db}, nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (*tenant_case.TenantCase, error) {
@@ -122,9 +122,9 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	})
 
 	do.Provide(injector, func(i *do.Injector) (product_gateway.ProductGateway, error) {
-		db := do.MustInvoke[*database.GormAdapter](i)
+		db := do.MustInvoke[*database.PgxAdapter](i)
 
-		return &product_gateway.GormProductGatewayAdapter{DB: db}, nil
+		return &product_gateway.PgxProductGatewayAdapter{DB: db}, nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (*product_controller.ProductController, error) {
@@ -147,9 +147,9 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	})
 
 	do.Provide(injector, func(i *do.Injector) (category_gateway.CategoryGateway, error) {
-		db := do.MustInvoke[*database.GormAdapter](i)
+		db := do.MustInvoke[*database.PgxAdapter](i)
 
-		return &category_gateway.GormCategoryGatewayAdapter{DB: db}, nil
+		return &category_gateway.PgxCategoryGatewayAdapter{DB: db}, nil
 	})
 
 	// Order dependencies
@@ -160,9 +160,9 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	})
 
 	do.Provide(injector, func(i *do.Injector) (order_gateway.OrderGateway, error) {
-		db := do.MustInvoke[*database.GormAdapter](i)
+		db := do.MustInvoke[*database.PgxAdapter](i)
 
-		return &order_gateway.GormOrderGatewayAdapter{DB: db}, nil
+		return &order_gateway.PgxOrderGatewayAdapter{DB: db}, nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (*usecases.OrderCase, error) {
@@ -180,9 +180,9 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	})
 
 	do.Provide(injector, func(i *do.Injector) (subscription_gateway.SubscriptionGateway, error) {
-		db := do.MustInvoke[*database.GormAdapter](i)
+		db := do.MustInvoke[*database.PgxAdapter](i)
 
-		return &subscription_gateway.GormSubscriptionGatewayAdapter{DB: db}, nil
+		return &subscription_gateway.PgxSubscriptionGatewayAdapter{DB: db}, nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (*subscription_case.SubscriptionCase, error) {

@@ -350,17 +350,17 @@ func (t *TestSuite) Test_UserIntegration_Patch() {
 		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
 
 		Body := g.PatchValues{
-			ZIP:        "NewZIP",
-			Phone:      "NewPhone",
-			Email:      "new-email@email.com",
-			Street:     "NewStreet",
-			SocialID:   "NewSocialID",
-			TaxID:      "NewTaxID",
-			City:       "NewCity",
-			State:      "NewState",
-			Complement: "NewComplement",
-			Name:       "NewName",
-			Photo:      "http://example.com/new-photo.png",
+			ZIP:        new("NewZIP"),
+			Phone:      new("NewPhone"),
+			Email:      new("new-email@email.com"),
+			Street:     new("NewStreet"),
+			SocialID:   new("NewSocialID"),
+			TaxID:      new("NewTaxID"),
+			City:       new("NewCity"),
+			State:      new("NewState"),
+			Complement: new("NewComplement"),
+			Name:       new("NewName"),
+			Photo:      new("http://example.com/new-photo.png"),
 		}
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
