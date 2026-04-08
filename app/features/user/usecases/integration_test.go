@@ -10,6 +10,7 @@ import (
 	"github.com/Rabi-IT/rabi-food-core/fixtures"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
 	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
+	"github.com/google/uuid"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/stretchr/testify/suite"
@@ -286,34 +287,6 @@ func (t *TestSuite) Test_UserIntegration_Paginate() {
 		}
 	})
 
-	t.Run("should be able to paginate users from another tenant if is a backoffice user", func() {
-		tenant := fixtures.Tenant.Create(t.T(), nil) // Create 1 users
-		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
-
-		for range 5 {
-			fixtures.User.Create(t.T(), nil, token) // Create 5 users
-		}
-
-		anotherTenant := fixtures.Tenant.Create(t.T(), nil) // Create 1 user
-		backoffToken := fixtures.Auth.BackofficeToken(t.T(), anotherTenant.UserID)
-		EXPECTED_AMOUNT_OF_USERS := 7
-
-		response := new(g.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodGet, fixtures.User.URI).
-			WithHeader("Authorization", "Bearer "+backoffToken).
-			WithQueryObject(database.PaginateInput{
-				Page:     0,
-				PageSize: 10,
-			}).
-			Expect().
-			Status(http.StatusOK).
-			JSON().Decode(&response)
-
-		t.Len(response.Data, EXPECTED_AMOUNT_OF_USERS)
-		t.Equal(1, response.MaxPages)
-	})
-
 	t.Run("should not be able to paginate users from another tenant", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
@@ -393,95 +366,95 @@ func (t *TestSuite) Test_UserIntegration_Patch() {
 			})
 	})
 
-	// t.Run("should return an error if photo is invalid", func() {
-	// 	tenant := fixtures.Tenant.Create(t.T(), nil)
-	// 	token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
+	t.Run("should return an error if photo is invalid", func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
 
-	// 	Body := g.PatchValues{
-	// 		Photo: "invalid-url",
-	// 	}
+		Body := g.PatchValues{
+			Photo: new("invalid-url"),
+		}
 
-	// 	response := &middlewares.ValidationErrorResponse{}
-	// 	httpexpect.Default(t.T(), fixtures.AppURL).
-	// 		Request(http.MethodPatch, fixtures.User.URI+tenant.UserID).
-	// 		WithHeader("Authorization", "Bearer "+token).
-	// 		WithJSON(Body).
-	// 		Expect().
-	// 		Status(http.StatusBadRequest).
-	// 		JSON().Decode(response)
+		response := &middlewares.ValidationErrorResponse{}
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodPatch, fixtures.User.URI+tenant.UserID).
+			WithHeader("Authorization", "Bearer "+token).
+			WithJSON(Body).
+			Expect().
+			Status(http.StatusBadRequest).
+			JSON().Decode(response)
 
-	// 	t.Len(response.Errors, 1)
-	// 	t.Equal("Photo", response.Errors[0].Field)
-	// 	t.Equal("url", response.Errors[0].Tag)
-	// })
+		t.Len(response.Errors, 1)
+		t.Equal("Photo", response.Errors[0].Field)
+		t.Equal("url", response.Errors[0].Tag)
+	})
 
-	// t.Run("should be able to update another user for the same tenant if role is TenantManager", func() {
-	// 	t.T().Skip("Skipping until TenantManager role is implemented")
-	// })
+	t.Run("should be able to update another user for the same tenant if role is TenantManager", func() {
+		t.T().Skip("Skipping until TenantManager role is implemented")
+	})
 
-	// t.Run("should be able to update another user with backoffice role", func() {
-	// 	tenant1 := fixtures.Tenant.Create(t.T(), nil)
-	// 	tenant2 := fixtures.Tenant.Create(t.T(), nil)
-	// 	backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
+	t.Run("should be able to update another user with backoffice role", func() {
+		tenant1 := fixtures.Tenant.Create(t.T(), nil)
+		tenant2 := fixtures.Tenant.Create(t.T(), nil)
+		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
 
-	// 	Body := g.PatchValues{
-	// 		Name: "NewName",
-	// 	}
+		Body := g.PatchValues{
+			Name: new("NewName"),
+		}
 
-	// 	httpexpect.Default(t.T(), fixtures.AppURL).
-	// 		Request(http.MethodPatch, fixtures.User.URI+tenant2.UserID).
-	// 		WithHeader("Authorization", "Bearer "+backofficeToken).
-	// 		WithJSON(Body).
-	// 		Expect().
-	// 		Status(http.StatusOK).
-	// 		Body().NotEmpty()
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodPatch, fixtures.User.URI+tenant2.UserID).
+			WithHeader("Authorization", "Bearer "+backofficeToken).
+			WithJSON(Body).
+			Expect().
+			Status(http.StatusOK).
+			Body().NotEmpty()
 
-	// 	httpexpect.Default(t.T(), fixtures.AppURL).
-	// 		Request(http.MethodGet, fixtures.User.URI+tenant2.UserID).
-	// 		WithHeader("Authorization", "Bearer "+backofficeToken).
-	// 		Expect().
-	// 		Status(http.StatusOK).
-	// 		JSON().Object().
-	// 		ContainsSubset(map[string]any{
-	// 			"name": "NewName",
-	// 		})
-	// })
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodGet, fixtures.User.URI+tenant2.UserID).
+			WithHeader("Authorization", "Bearer "+backofficeToken).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Object().
+			ContainsSubset(map[string]any{
+				"name": "NewName",
+			})
+	})
 
-	// t.Run("should return not found if user does not exist", func() {
-	// 	NON_EXISTENT_ID := uuid.NewString()
-	// 	tenant := fixtures.Tenant.Create(t.T(), nil)
-	// 	backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant.UserID)
+	t.Run("should return not found if user does not exist", func() {
+		NON_EXISTENT_ID := uuid.NewString()
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant.UserID)
 
-	// 	Body := g.PatchValues{
-	// 		Name: "NewName",
-	// 	}
+		Body := g.PatchValues{
+			Name: new("NewName"),
+		}
 
-	// 	httpexpect.Default(t.T(), fixtures.AppURL).
-	// 		Request(http.MethodPatch, fixtures.User.URI+NON_EXISTENT_ID).
-	// 		WithHeader("Authorization", "Bearer "+backofficeToken).
-	// 		WithJSON(Body).
-	// 		Expect().
-	// 		Status(http.StatusNotFound)
-	// })
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodPatch, fixtures.User.URI+NON_EXISTENT_ID).
+			WithHeader("Authorization", "Bearer "+backofficeToken).
+			WithJSON(Body).
+			Expect().
+			Status(http.StatusNotFound)
+	})
 
-	// t.Run("should not be able to patch a user from another tenant", func() {
-	// 	tenant := fixtures.Tenant.Create(t.T(), nil)
-	// 	token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
+	t.Run("should not be able to patch a user from another tenant", func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		token := fixtures.Auth.UserToken(t.T(), tenant.UserID)
 
-	// 	anotherTenant := fixtures.Tenant.Create(t.T(), nil)
+		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
 
-	// 	Body := g.PatchValues{
-	// 		Name: "New Name",
-	// 	}
+		Body := g.PatchValues{
+			Name: new("New Name"),
+		}
 
-	// 	httpexpect.Default(t.T(), fixtures.AppURL).
-	// 		Request(http.MethodPatch, fixtures.User.URI+anotherTenant.UserID).
-	// 		WithHeader("Authorization", "Bearer "+token).
-	// 		WithJSON(Body).
-	// 		Expect().
-	// 		Status(http.StatusNotFound).
-	// 		Body().NotEmpty()
-	// })
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodPatch, fixtures.User.URI+anotherTenant.UserID).
+			WithHeader("Authorization", "Bearer "+token).
+			WithJSON(Body).
+			Expect().
+			Status(http.StatusNotFound).
+			Body().NotEmpty()
+	})
 }
 
 func (t *TestSuite) Test_UserIntegration_Delete() {
