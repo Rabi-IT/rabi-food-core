@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"github.com/Rabi-IT/rabi-food-core/domain/auth"
 	"github.com/Rabi-IT/rabi-food-core/features/order/controller"
+	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -14,6 +16,6 @@ func Order(app *fiber.App, c *controller.OrderController) {
 	route.Get("/", c.Paginate)
 	route.Post("/:id/payments/confirm", c.ConfirmPayment)
 
-	backoffice := app.Group("/backoffice/order")
+	backoffice := app.Group("/backoffice/order", middlewares.RequireRole(auth.Backoffice))
 	backoffice.Get("/", c.BackofficePaginate)
 }
