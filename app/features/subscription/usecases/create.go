@@ -10,6 +10,7 @@ import (
 	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
+	"github.com/google/uuid"
 )
 
 // DeliveryDayInput describes a recurring weekly delivery window provided by the caller.
@@ -118,6 +119,7 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 		ItemsDiscount:       price.ItemsDiscount,
 		PaymentAmount:       price.PaymentAmount(),
 		PaymentStatus:       payment_status.StatusPending,
+		ExternalPaymentID:   uuid.Must(uuid.NewV7()).String(),
 	})
 	logger.GetWideEvent(ctx).SetSubscriptionID(id)
 
