@@ -12,10 +12,11 @@ import (
 )
 
 type userFixture struct {
-	URI string
+	URI          string
+	BackofficeURI string
 }
 
-var User = userFixture{"/user/"}
+var User = userFixture{URI: "/user/", BackofficeURI: "/backoffice/user/"}
 
 func (userFixture) Create(t *testing.T, input *c.CreateInput, token string) string {
 	t.Helper()

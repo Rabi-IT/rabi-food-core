@@ -3,7 +3,6 @@ package controller
 import (
 	"strconv"
 
-	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/category/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
 
@@ -11,18 +10,18 @@ import (
 )
 
 // Paginate godoc
-// @Summary Paginate categories
-// @Description Paginate categories using query filters
-// @Tags categories
+// @Summary Paginate categories (backoffice)
+// @Description Paginate categories without tenant restriction; TenantID filter is optional
+// @Tags categories backoffice
 // @Produce json
 // @Param Page query int false "Page number"
 // @Param PageSize query int false "Page size"
-// @Param tenantId query string false "Tenant ID"
+// @Param tenantId query string false "Optional tenant ID filter"
 // @Param name query string false "Category name"
 // @Success 200 {object} gateway.PaginateOutput
 // @Failure 500 {string} string "Internal server error"
-// @Router /category/ [get].
-func (c *CategoryController) Paginate(ctx *fiber.Ctx) error {
+// @Router /backoffice/category/ [get].
+func (c *CategoryBackofficeController) Paginate(ctx *fiber.Ctx) error {
 	page, err := strconv.Atoi(ctx.Query("Page", "0"))
 	if err != nil {
 		return err
@@ -34,14 +33,11 @@ func (c *CategoryController) Paginate(ctx *fiber.Ctx) error {
 	}
 
 	filter := gateway.PaginateFilter{}
-	err = ctx.QueryParser(&filter)
-	if err != nil {
+	if err = ctx.QueryParser(&filter); err != nil {
 		return err
 	}
 
 	uctx := ctx.UserContext()
-	session := app_context.GetSession(uctx)
-	filter.TenantID = &session.TenantID
 
 	paginate := database.PaginateInput{
 		Page:     page,

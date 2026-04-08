@@ -237,6 +237,66 @@ func (t *TestSuite) Test_ProductIntegration_Patch() {
 	})
 }
 
+func (t *TestSuite) Test_ProductIntegration_BackofficePaginate() {
+	t.Run("should see products from all tenants", func() {
+		tenant1 := fixtures.Tenant.Create(t.T(), nil)
+		token1 := fixtures.Auth.UserToken(t.T(), tenant1.UserID)
+		tenant2 := fixtures.Tenant.Create(t.T(), nil)
+		token2 := fixtures.Auth.UserToken(t.T(), tenant2.UserID)
+
+		for range 3 {
+			fixtures.Product.Create(t.T(), nil, token1)
+		}
+		for range 3 {
+			fixtures.Product.Create(t.T(), nil, token2)
+		}
+
+		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
+
+		response := new(product_gateway.PaginateOutput)
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodGet, fixtures.Product.BackofficeURI).
+			WithHeader("Authorization", "Bearer "+backofficeToken).
+			WithQueryObject(database.PaginateInput{Page: 0, PageSize: 10}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Decode(&response)
+
+		t.Len(response.Data, 6)
+	})
+
+	t.Run("should filter by tenantId when provided", func() {
+		tenant1 := fixtures.Tenant.Create(t.T(), nil)
+		token1 := fixtures.Auth.UserToken(t.T(), tenant1.UserID)
+		tenant2 := fixtures.Tenant.Create(t.T(), nil)
+		token2 := fixtures.Auth.UserToken(t.T(), tenant2.UserID)
+
+		for range 3 {
+			fixtures.Product.Create(t.T(), nil, token1)
+		}
+		for range 2 {
+			fixtures.Product.Create(t.T(), nil, token2)
+		}
+
+		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
+
+		response := new(product_gateway.PaginateOutput)
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodGet, fixtures.Product.BackofficeURI).
+			WithHeader("Authorization", "Bearer "+backofficeToken).
+			WithQueryObject(map[string]any{
+				"Page":     0,
+				"PageSize": 10,
+				"tenantId": tenant1.ID,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Decode(&response)
+
+		t.Len(response.Data, 3)
+	})
+}
+
 func (t *TestSuite) Test_ProductIntegration_Delete() {
 	t.Run("should be able to delete", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)

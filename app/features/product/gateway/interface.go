@@ -16,7 +16,7 @@ type ProductGateway interface {
 type ListFilter struct {
 	IDs      []string `json:"ids"`
 	IsActive *bool    `json:"isActive"`
-	TenantID string   `json:"tenantId"`
+	TenantID *string  `json:"tenantId"`
 }
 
 type DiscountRule struct {

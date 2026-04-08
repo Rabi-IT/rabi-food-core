@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/order/usecases"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 	"github.com/Rabi-IT/rabi-food-core/libs/validator"
@@ -34,6 +35,10 @@ func (c *OrderController) Create(ctx *fiber.Ctx) error {
 	}
 
 	uctx := ctx.UserContext()
+	session := app_context.GetSession(uctx)
+	data.TenantID = session.TenantID
+	data.UserID = session.UserID
+
 	logger.GetWideEvent(uctx).Event = "create-order"
 	id, err := c.usecase.Create(uctx, data)
 

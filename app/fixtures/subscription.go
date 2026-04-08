@@ -11,7 +11,8 @@ import (
 )
 
 type subscriptionFixture struct {
-	URI                            string
+	URI          string
+	BackofficeURI string
 	DEFAULT_DISCOUNT_RULE          g.DiscountRule
 	DEFAULT_CUTOFF_OFFSET_MINUTES  uint16
 	DEFAULT_MAX_ATTEMPTS_PER_ORDER uint8
@@ -26,7 +27,8 @@ type subscriptionFixture struct {
 
 var (
 	Subscription = subscriptionFixture{
-		URI: "/subscription/",
+		URI:          "/subscription/",
+		BackofficeURI: "/backoffice/subscription/",
 		DEFAULT_DISCOUNT_RULE: g.DiscountRule{
 			CyclesThreshold: 5,  //nolint:mnd
 			Discount:        10, //nolint:mnd

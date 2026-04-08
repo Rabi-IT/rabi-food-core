@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
 	product_gateway "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 	"github.com/Rabi-IT/rabi-food-core/features/subscription"
@@ -28,6 +27,8 @@ type SubscriptionItemInput struct {
 
 // CreateInput contains all data required to create a new subscription.
 type CreateInput struct {
+	TenantID     string                  `json:"-"`
+	UserID       string                  `json:"-"`
 	Items        []SubscriptionItemInput `json:"items"        validate:"required,min=1"`
 	DeliveryDays []g.DeliveryDay         `json:"deliveryDays" validate:"required,min=1"`
 	TotalCycles  uint                    `json:"totalCycles"  validate:"required,min=1"`
@@ -62,8 +63,6 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 	}
 
 	productIds := make([]string, 0, len(input.Items))
-	session := app_context.GetSession(ctx)
-
 	for _, item := range input.Items {
 		productIds = append(productIds, item.ProductID)
 	}
@@ -71,7 +70,7 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 	products, err := s.productCase.List(ctx, product_gateway.ListFilter{
 		IDs:      productIds,
 		IsActive: new(true),
-		TenantID: session.TenantID,
+		TenantID: &input.TenantID,
 	})
 
 	if err != nil {
@@ -82,7 +81,7 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 		return s.handleMissingProducts(input.Items, products)
 	}
 
-	config, err := s.gateway.GetConfig(ctx, session.TenantID)
+	config, err := s.gateway.GetConfig(ctx, input.TenantID)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch subscription config: %w", err)
 	}
@@ -103,8 +102,8 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 	}
 
 	id, err := s.gateway.Create(ctx, g.CreateInput{
-		UserID:              session.UserID,
-		TenantID:            session.TenantID,
+		UserID:              input.UserID,
+		TenantID:            input.TenantID,
 		Status:              subscription.StatusActive,
 		DeliveryDays:        input.DeliveryDays,
 		Items:               price.SubscriptionItems,

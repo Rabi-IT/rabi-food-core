@@ -3,26 +3,30 @@ package controller
 import (
 	"strconv"
 
-	"github.com/Rabi-IT/rabi-food-core/app_context"
-	"github.com/Rabi-IT/rabi-food-core/features/category/gateway"
+	"github.com/Rabi-IT/rabi-food-core/features/order/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 // Paginate godoc
-// @Summary Paginate categories
-// @Description Paginate categories using query filters
-// @Tags categories
+// @Summary Paginate orders (backoffice)
+// @Description Paginate orders without tenant restriction; TenantID filter is optional
+// @Tags orders backoffice
 // @Produce json
 // @Param Page query int false "Page number"
 // @Param PageSize query int false "Page size"
-// @Param tenantId query string false "Tenant ID"
-// @Param name query string false "Category name"
+// @Param tenantId query string false "Optional tenant ID filter"
+// @Param userId query string false "User ID"
+// @Param paymentStatus query string false "Payment status"
+// @Param fulfillmentStatus query string false "Fulfillment status"
+// @Param deliveryStatus query string false "Delivery status"
+// @Param createdAtFrom query string false "Created at from (RFC3339)"
+// @Param createdAtTo query string false "Created at to (RFC3339)"
 // @Success 200 {object} gateway.PaginateOutput
 // @Failure 500 {string} string "Internal server error"
-// @Router /category/ [get].
-func (c *CategoryController) Paginate(ctx *fiber.Ctx) error {
+// @Router /backoffice/order/ [get].
+func (c *OrderBackofficeController) Paginate(ctx *fiber.Ctx) error {
 	page, err := strconv.Atoi(ctx.Query("Page", "0"))
 	if err != nil {
 		return err
@@ -34,14 +38,11 @@ func (c *CategoryController) Paginate(ctx *fiber.Ctx) error {
 	}
 
 	filter := gateway.PaginateFilter{}
-	err = ctx.QueryParser(&filter)
-	if err != nil {
+	if err = ctx.QueryParser(&filter); err != nil {
 		return err
 	}
 
 	uctx := ctx.UserContext()
-	session := app_context.GetSession(uctx)
-	filter.TenantID = &session.TenantID
 
 	paginate := database.PaginateInput{
 		Page:     page,

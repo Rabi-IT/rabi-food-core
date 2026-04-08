@@ -6,11 +6,13 @@ import (
 
 	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
 	"github.com/Rabi-IT/rabi-food-core/features/subscription"
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
 )
 
 type SubscriptionGateway interface {
 	Create(ctx context.Context, input CreateInput) (string, error)
 	GetByID(ctx context.Context, filter GetByIDFilter) (*GetByIDOutput, error)
+	Paginate(ctx context.Context, filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
 	UpsertConfig(ctx context.Context, tenantID string, input UpsertConfigInput) error
 	GetConfig(ctx context.Context, tenantID string) (*GetConfigOutput, error)
 }

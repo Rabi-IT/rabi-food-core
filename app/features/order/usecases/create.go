@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
 	"github.com/Rabi-IT/rabi-food-core/features/order"
 	g "github.com/Rabi-IT/rabi-food-core/features/order/gateway"
@@ -22,8 +21,10 @@ type OrderItem struct {
 }
 
 type CreateInput struct {
-	Items []OrderItem `json:"items"`
-	Notes string      `json:"notes"`
+	TenantID string      `json:"-"`
+	UserID   string      `json:"-"`
+	Items    []OrderItem `json:"items"`
+	Notes    string      `json:"notes"`
 }
 
 func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, error) {
@@ -32,17 +33,17 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 		productIds = append(productIds, item.ProductID)
 	}
 
-	isActive := true
 	products, err := c.productCase.List(ctx, product_gateway.ListFilter{
 		IDs:      productIds,
-		IsActive: &isActive,
+		IsActive: new(true),
+		TenantID: &input.TenantID,
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch products: %w", err)
 	}
 
 	if len(products) != len(input.Items) {
-		return c.handleMissingProducts(ctx, input.Items, products)
+		return c.handleMissingProducts(input.Items, products)
 	}
 
 	productMap := make(map[string]gateway.ListOutput)
@@ -69,10 +70,9 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 		totalPrice += itemTotal
 	}
 
-	session := app_context.GetSession(ctx)
 	id, err := c.gateway.Create(g.CreateInput{
-		UserID:   session.UserID,
-		TenantID: session.TenantID,
+		UserID:   input.UserID,
+		TenantID: input.TenantID,
 
 		Code:              uuid.Must(uuid.NewV7()).String(),
 		PaymentStatus:     payment_status.StatusPending,
@@ -92,7 +92,6 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 }
 
 func (c *OrderCase) handleMissingProducts(
-	ctx context.Context,
 	requestedItems []OrderItem,
 	foundProducts []gateway.ListOutput,
 ) (string, error) {

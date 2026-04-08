@@ -11,10 +11,11 @@ import (
 )
 
 type productFixture struct {
-	URI string
+	URI          string
+	BackofficeURI string
 }
 
-var Product = productFixture{"/product/"}
+var Product = productFixture{URI: "/product/", BackofficeURI: "/backoffice/product/"}
 
 func (productFixture) Create(t *testing.T, input *g.CreateInput, token string) string {
 	t.Helper()

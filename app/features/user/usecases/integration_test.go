@@ -517,3 +517,56 @@ func (t *TestSuite) Test_UserIntegration_Delete() {
 			Body().NotEmpty()
 	})
 }
+
+func (t *TestSuite) Test_UserIntegration_BackofficePaginate() {
+	t.Run("should see users from all tenants", func() {
+		tenant1 := fixtures.Tenant.Create(t.T(), nil)
+		token1 := fixtures.Auth.UserToken(t.T(), tenant1.UserID)
+		tenant2 := fixtures.Tenant.Create(t.T(), nil)
+		token2 := fixtures.Auth.UserToken(t.T(), tenant2.UserID)
+
+		fixtures.User.Create(t.T(), nil, token1)
+		fixtures.User.Create(t.T(), nil, token2)
+
+		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
+
+		response := new(g.PaginateOutput)
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodGet, fixtures.User.BackofficeURI).
+			WithHeader("Authorization", "Bearer "+backofficeToken).
+			WithQueryObject(database.PaginateInput{Page: 0, PageSize: 10}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Decode(&response)
+
+		t.GreaterOrEqual(len(response.Data), 2)
+	})
+
+	t.Run("should filter by tenantId when provided", func() {
+		tenant1 := fixtures.Tenant.Create(t.T(), nil)
+		token1 := fixtures.Auth.UserToken(t.T(), tenant1.UserID)
+		tenant2 := fixtures.Tenant.Create(t.T(), nil)
+		token2 := fixtures.Auth.UserToken(t.T(), tenant2.UserID)
+
+		fixtures.User.Create(t.T(), nil, token1)
+		fixtures.User.Create(t.T(), nil, token1)
+		fixtures.User.Create(t.T(), nil, token2)
+
+		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
+
+		response := new(g.PaginateOutput)
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodGet, fixtures.User.BackofficeURI).
+			WithHeader("Authorization", "Bearer "+backofficeToken).
+			WithQueryObject(map[string]any{
+				"Page":     0,
+				"PageSize": 10,
+				"tenantId": tenant1.ID,
+			}).
+			Expect().
+			Status(http.StatusOK).
+			JSON().Decode(&response)
+
+		t.GreaterOrEqual(len(response.Data), 2)
+	})
+}

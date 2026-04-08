@@ -14,10 +14,11 @@ import (
 )
 
 type orderFixture struct {
-	URI string
+	URI          string
+	BackofficeURI string
 }
 
-var Order = orderFixture{"/order/"}
+var Order = orderFixture{URI: "/order/", BackofficeURI: "/backoffice/order/"}
 
 func (orderFixture) Create(t *testing.T, input *c.CreateInput, token string) string {
 	t.Helper()

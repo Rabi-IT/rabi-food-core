@@ -31,8 +31,8 @@ func (g *PgxProductGatewayAdapter) List(filter ListFilter) ([]ListOutput, error)
 		Where(sq.Eq{"id": filter.IDs}).
 		PlaceholderFormat(sq.Dollar)
 
-	if filter.TenantID != "" {
-		b = b.Where(sq.Eq{"tenant_id": filter.TenantID})
+	if filter.TenantID != nil {
+		b = b.Where(sq.Eq{"tenant_id": *filter.TenantID})
 	}
 
 	if filter.IsActive != nil {

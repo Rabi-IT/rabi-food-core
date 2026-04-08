@@ -32,11 +32,17 @@ type fiberAdapter struct {
 func New(
 	port string,
 	tenantController *tenant_controller.TenantController,
+	tenantBackofficeController *tenant_controller.TenantBackofficeController,
 	userController *user_controller.UserController,
+	userBackofficeController *user_controller.UserBackofficeController,
 	productController *product_controller.ProductController,
+	productBackofficeController *product_controller.ProductBackofficeController,
 	categoryController *category_controller.CategoryController,
+	categoryBackofficeController *category_controller.CategoryBackofficeController,
 	orderController *order_controller.OrderController,
+	orderBackofficeController *order_controller.OrderBackofficeController,
 	subscriptionController *subscription_controller.SubscriptionController,
+	subscriptionBackofficeController *subscription_controller.SubscriptionBackofficeController,
 ) HTTPServer {
 	app := fiber.New(fiber.Config{
 		Immutable:    true,
@@ -61,12 +67,12 @@ func New(
 		Use(jwtMiddleware).
 		Use(middlewares.Session)
 
-	user_routes.User(app, userController)
-	tenant_routes.Tenant(app, tenantController)
-	product_routes.Product(app, productController)
-	category_routes.Category(app, categoryController)
-	order_routes.Order(app, orderController)
-	subscription_routes.Subscription(app, subscriptionController)
+	user_routes.User(app, userController, userBackofficeController)
+	tenant_routes.Tenant(app, tenantController, tenantBackofficeController)
+	product_routes.Product(app, productController, productBackofficeController)
+	category_routes.Category(app, categoryController, categoryBackofficeController)
+	order_routes.Order(app, orderController, orderBackofficeController)
+	subscription_routes.Subscription(app, subscriptionController, subscriptionBackofficeController)
 
 	return &fiberAdapter{
 		app:  app,

@@ -3,28 +3,28 @@ package controller
 import (
 	"strconv"
 
-	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 // Paginate godoc
-// @Summary Paginate products
-// @Description Paginate products using query filters
-// @Tags products
+// @Summary Paginate products (backoffice)
+// @Description Paginate products without tenant restriction; TenantID filter is optional
+// @Tags products backoffice
 // @Produce json
 // @Param Page query int false "Page number"
 // @Param PageSize query int false "Page size"
-// @Param tenantId query string false "Tenant ID"
+// @Param tenantId query string false "Optional tenant ID filter"
 // @Param name query string false "Product name"
 // @Param categoryId query string false "Category ID"
 // @Param isActive query bool false "Filter by active products"
 // @Success 200 {object} product_gateway.PaginateOutput
 // @Failure 500 {string} string "Internal server error"
-// @Router /product/ [get].
-func (c *ProductController) Paginate(ctx *fiber.Ctx) error {
+// @Router /backoffice/product/ [get].
+func (c *ProductBackofficeController) Paginate(ctx *fiber.Ctx) error {
 	page, err := strconv.Atoi(ctx.Query("Page", "0"))
 	if err != nil {
 		return err
@@ -36,14 +36,12 @@ func (c *ProductController) Paginate(ctx *fiber.Ctx) error {
 	}
 
 	filter := gateway.PaginateFilter{}
-	err = ctx.QueryParser(&filter)
-	if err != nil {
+	if err = ctx.QueryParser(&filter); err != nil {
 		return err
 	}
 
 	uctx := ctx.UserContext()
-	session := app_context.GetSession(uctx)
-	filter.TenantID = &session.TenantID
+	logger.GetWideEvent(uctx).Event = "backoffice-paginate-products"
 
 	paginate := database.PaginateInput{
 		Page:     page,
@@ -51,7 +49,6 @@ func (c *ProductController) Paginate(ctx *fiber.Ctx) error {
 	}
 
 	result, err := c.usecase.Paginate(uctx, filter, paginate)
-
 	if err != nil {
 		return err
 	}

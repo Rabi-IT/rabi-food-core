@@ -6,11 +6,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Category(app *fiber.App, c *controller.CategoryController) {
+func Category(app *fiber.App, c *controller.CategoryController, bc *controller.CategoryBackofficeController) {
 	route := app.Group("/category")
 	route.Post("/", c.Create)
 	route.Patch("/:id", c.Patch)
 	route.Delete("/:id", c.Delete)
 	route.Get("/:id", c.GetByID)
 	route.Get("/", c.Paginate)
+
+	backoffice := app.Group("/backoffice/category")
+	backoffice.Get("/", bc.Paginate)
 }

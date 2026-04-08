@@ -1,9 +1,12 @@
 package gateway
 
+import "github.com/Rabi-IT/rabi-food-core/libs/database"
+
 type TenantGateway interface {
 	Patch(filter PatchFilter, values PatchValues) (bool, error)
 	Create(input CreateInput) (string, error)
 	GetByID(id string) (*GetByIDOutput, error)
+	Paginate(filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
 }
 
 type PatchFilter struct {
@@ -21,4 +24,18 @@ type CreateInput struct {
 type GetByIDOutput struct {
 	ID   string `json:"id" db:"id"`
 	Name string `json:"name" db:"name"`
+}
+
+type PaginateFilter struct {
+	Name *string `json:"name"`
+}
+
+type PaginateData struct {
+	ID   string `json:"id"   db:"id"`
+	Name string `json:"name" db:"name"`
+}
+
+type PaginateOutput struct {
+	Data     []PaginateData `json:"data"`
+	MaxPages int            `json:"maxPages"`
 }

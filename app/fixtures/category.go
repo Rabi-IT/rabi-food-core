@@ -11,10 +11,11 @@ import (
 )
 
 type categoryFixture struct {
-	URI string
+	URI          string
+	BackofficeURI string
 }
 
-var Category = categoryFixture{"/category/"}
+var Category = categoryFixture{URI: "/category/", BackofficeURI: "/backoffice/category/"}
 
 func (categoryFixture) Create(t *testing.T, input *g.CreateInput, token string) string {
 	t.Helper()
