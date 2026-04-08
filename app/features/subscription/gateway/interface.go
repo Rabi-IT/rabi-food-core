@@ -15,6 +15,8 @@ type SubscriptionGateway interface {
 	Paginate(ctx context.Context, filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
 	UpsertConfig(ctx context.Context, tenantID string, input UpsertConfigInput) error
 	GetConfig(ctx context.Context, tenantID string) (*GetConfigOutput, error)
+	List(ctx context.Context, filter ListFilter) ([]ListOutput, error)
+	CreateDeliveries(ctx context.Context, inputs []CreateDeliveryInput) error
 }
 
 // SubscriptionItem holds a snapshot of a product at subscription creation time.
@@ -150,9 +152,21 @@ type CreateDeliveryInput struct {
 	EndHour        uint8
 	CutoffAt       time.Time
 	Status         subscription.DeliveryStatus
-	// MaxAttempts is a snapshot from the parent subscription at scheduling time,
-	// ensuring consistent behavior even if the subscription config changes later.
-	MaxAttempts uint8
+	MaxAttempts    uint8
+}
+
+type ListFilter struct {
+	ID                 *string
+	Status             subscription.Status
+	RemainingCyclesGTE uint
+	Weekday            time.Weekday
+}
+
+type ListOutput struct {
+	ID                  string
+	DeliveryDays        []DeliveryDay
+	CutoffOffsetMinutes uint16
+	MaxAttemptsPerOrder uint8
 }
 
 type DiscountRule struct {

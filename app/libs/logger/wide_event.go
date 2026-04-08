@@ -42,6 +42,12 @@ type WideEvent struct {
 	originalExternalPaymentID string
 	paymentIdempotencyHit     *bool
 
+	// Delivery Scheduling
+	deliverySchedulingDate     string
+	deliverySchedulingWeekday  string
+	deliverySchedulingTimezone string
+	deliverySchedulingCount    *int
+
 	err       string
 	errorCode string
 }
@@ -104,6 +110,15 @@ func (w *WideEvent) TrackPaymentConflict(originalExternalPaymentID string) {
 	w.mu.Unlock()
 }
 
+func (w *WideEvent) TrackDeliveryScheduling(date, weekday, timezone string, count int) {
+	w.mu.Lock()
+	w.deliverySchedulingDate = date
+	w.deliverySchedulingWeekday = weekday
+	w.deliverySchedulingTimezone = timezone
+	w.deliverySchedulingCount = &count
+	w.mu.Unlock()
+}
+
 func (w *WideEvent) SetErrorCode(code string) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
@@ -154,6 +169,11 @@ func (w *WideEvent) reset() {
 	w.originalExternalPaymentID = ""
 	w.paymentIdempotencyHit = nil
 
+	w.deliverySchedulingDate = ""
+	w.deliverySchedulingWeekday = ""
+	w.deliverySchedulingTimezone = ""
+	w.deliverySchedulingCount = nil
+
 	w.err = ""
 	w.errorCode = ""
 }
@@ -200,6 +220,15 @@ func (w *WideEvent) MarshalZerologObject(e *zerolog.Event) {
 	}
 	if w.paymentIdempotencyHit != nil {
 		e.Bool("payment.idempotency_hit", *w.paymentIdempotencyHit)
+	}
+
+	if w.deliverySchedulingDate != "" {
+		e.Str("delivery_scheduling.date", w.deliverySchedulingDate)
+		e.Str("delivery_scheduling.weekday", w.deliverySchedulingWeekday)
+		e.Str("delivery_scheduling.timezone", w.deliverySchedulingTimezone)
+		if w.deliverySchedulingCount != nil {
+			e.Int("delivery_scheduling.count", *w.deliverySchedulingCount)
+		}
 	}
 
 	if w.err != "" {

@@ -9,14 +9,30 @@ import (
 	"github.com/google/uuid"
 )
 
-// CreateDeliveries inserts multiple subscription deliveries in a single batch.
+// CreateDeliveries inserts multiple subscription deliveries in batches.
 // The operation is idempotent: duplicate (subscription_id, scheduled_date) pairs are
 // silently ignored thanks to the unique constraint on the table.
+//
+// Each row uses 10 parameters. pgx supports up to 65535 parameters per statement,
+// so batches are capped at 6000 rows to stay safely under the limit.
 func (g *PgxSubscriptionGatewayAdapter) CreateDeliveries(ctx context.Context, inputs []CreateDeliveryInput) error {
 	if len(inputs) == 0 {
 		return nil
 	}
 
+	const batchSize = 6000
+
+	for start := 0; start < len(inputs); start += batchSize {
+		end := min(start+batchSize, len(inputs))
+		if err := g.createDeliveriesBatch(ctx, inputs[start:end]); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (g *PgxSubscriptionGatewayAdapter) createDeliveriesBatch(ctx context.Context, inputs []CreateDeliveryInput) error {
 	now := time.Now().UTC()
 
 	b := sq.
