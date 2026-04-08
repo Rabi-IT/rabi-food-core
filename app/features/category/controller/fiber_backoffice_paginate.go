@@ -21,7 +21,7 @@ import (
 // @Success 200 {object} gateway.PaginateOutput
 // @Failure 500 {string} string "Internal server error"
 // @Router /backoffice/category/ [get].
-func (c *CategoryBackofficeController) Paginate(ctx *fiber.Ctx) error {
+func (c *CategoryController) BackofficePaginate(ctx *fiber.Ctx) error {
 	page, err := strconv.Atoi(ctx.Query("Page", "0"))
 	if err != nil {
 		return err

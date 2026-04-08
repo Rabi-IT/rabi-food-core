@@ -23,7 +23,7 @@ import (
 // @Success 200 {object} g.PaginateOutput
 // @Failure 500 {string} string "Internal server error"
 // @Router /backoffice/user/ [get].
-func (c *UserBackofficeController) Paginate(ctx *fiber.Ctx) error {
+func (c *UserController) BackofficePaginate(ctx *fiber.Ctx) error {
 	page, err := strconv.Atoi(ctx.Query("Page", "0"))
 	if err != nil {
 		return err

@@ -54,17 +54,11 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	// HTTP Server
 	do.Provide(injector, func(i *do.Injector) (http.HTTPServer, error) {
 		tenantController := do.MustInvoke[*tenant_controller.TenantController](i)
-		tenantBackofficeController := do.MustInvoke[*tenant_controller.TenantBackofficeController](i)
 		userController := do.MustInvoke[*user_controller.UserController](i)
-		userBackofficeController := do.MustInvoke[*user_controller.UserBackofficeController](i)
 		productController := do.MustInvoke[*product_controller.ProductController](i)
-		productBackofficeController := do.MustInvoke[*product_controller.ProductBackofficeController](i)
 		categoryController := do.MustInvoke[*category_controller.CategoryController](i)
-		categoryBackofficeController := do.MustInvoke[*category_controller.CategoryBackofficeController](i)
 		orderController := do.MustInvoke[*order_controller.OrderController](i)
-		orderBackofficeController := do.MustInvoke[*order_controller.OrderBackofficeController](i)
 		subscriptionController := do.MustInvoke[*subscription_controller.SubscriptionController](i)
-		subscriptionBackofficeController := do.MustInvoke[*subscription_controller.SubscriptionBackofficeController](i)
 
 		if config.AppPort == "" {
 			return nil, ErrHTTPPortNotConfigured
@@ -73,17 +67,11 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		return http.New(
 			config.AppPort,
 			tenantController,
-			tenantBackofficeController,
 			userController,
-			userBackofficeController,
 			productController,
-			productBackofficeController,
 			categoryController,
-			categoryBackofficeController,
 			orderController,
-			orderBackofficeController,
 			subscriptionController,
-			subscriptionBackofficeController,
 		), nil
 	})
 
@@ -106,12 +94,6 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		return user_controller.New(c), nil
 	})
 
-	do.Provide(injector, func(i *do.Injector) (*user_controller.UserBackofficeController, error) {
-		c := do.MustInvoke[*user_case.UserCase](i)
-
-		return user_controller.NewBackoffice(c), nil
-	})
-
 	// Tenant dependencies
 	do.Provide(injector, func(i *do.Injector) (tenant_gateway.TenantGateway, error) {
 		db := do.MustInvoke[*database.PgxAdapter](i)
@@ -130,12 +112,6 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		c := do.MustInvoke[*tenant_case.TenantCase](i)
 
 		return tenant_controller.New(c), nil
-	})
-
-	do.Provide(injector, func(i *do.Injector) (*tenant_controller.TenantBackofficeController, error) {
-		c := do.MustInvoke[*tenant_case.TenantCase](i)
-
-		return tenant_controller.NewBackoffice(c), nil
 	})
 
 	// Product dependencies
@@ -157,23 +133,11 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		return product_controller.New(c), nil
 	})
 
-	do.Provide(injector, func(i *do.Injector) (*product_controller.ProductBackofficeController, error) {
-		c := do.MustInvoke[*product_case.ProductCase](i)
-
-		return product_controller.NewBackoffice(c), nil
-	})
-
 	// Category dependencies
 	do.Provide(injector, func(i *do.Injector) (*category_controller.CategoryController, error) {
 		c := do.MustInvoke[*category_case.CategoryCase](i)
 
 		return category_controller.New(c), nil
-	})
-
-	do.Provide(injector, func(i *do.Injector) (*category_controller.CategoryBackofficeController, error) {
-		c := do.MustInvoke[*category_case.CategoryCase](i)
-
-		return category_controller.NewBackoffice(c), nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (*category_case.CategoryCase, error) {
@@ -195,12 +159,6 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		return order_controller.New(c), nil
 	})
 
-	do.Provide(injector, func(i *do.Injector) (*order_controller.OrderBackofficeController, error) {
-		c := do.MustInvoke[*usecases.OrderCase](i)
-
-		return order_controller.NewBackoffice(c), nil
-	})
-
 	do.Provide(injector, func(i *do.Injector) (order_gateway.OrderGateway, error) {
 		db := do.MustInvoke[*database.PgxAdapter](i)
 
@@ -219,12 +177,6 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		c := do.MustInvoke[*subscription_case.SubscriptionCase](i)
 
 		return subscription_controller.New(c), nil
-	})
-
-	do.Provide(injector, func(i *do.Injector) (*subscription_controller.SubscriptionBackofficeController, error) {
-		c := do.MustInvoke[*subscription_case.SubscriptionCase](i)
-
-		return subscription_controller.NewBackoffice(c), nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (subscription_gateway.SubscriptionGateway, error) {

@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Subscription(app *fiber.App, c *controller.SubscriptionController, bc *controller.SubscriptionBackofficeController) {
+func Subscription(app *fiber.App, c *controller.SubscriptionController) {
 	route := app.Group("/subscription")
 	route.Post("/", c.Create)
 	route.Get("/", c.Paginate)
@@ -14,5 +14,5 @@ func Subscription(app *fiber.App, c *controller.SubscriptionController, bc *cont
 	route.Put("/config", c.UpsertConfig)
 
 	backoffice := app.Group("/backoffice/subscription")
-	backoffice.Get("/", bc.Paginate)
+	backoffice.Get("/", c.BackofficePaginate)
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Order(app *fiber.App, c *controller.OrderController, bc *controller.OrderBackofficeController) {
+func Order(app *fiber.App, c *controller.OrderController) {
 	route := app.Group("/order")
 	route.Post("/", c.Create)
 	route.Delete("/:id", c.Delete)
@@ -15,5 +15,5 @@ func Order(app *fiber.App, c *controller.OrderController, bc *controller.OrderBa
 	route.Post("/:id/payments/confirm", c.ConfirmPayment)
 
 	backoffice := app.Group("/backoffice/order")
-	backoffice.Get("/", bc.Paginate)
+	backoffice.Get("/", c.BackofficePaginate)
 }

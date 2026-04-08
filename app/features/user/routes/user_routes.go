@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func User(app *fiber.App, c *controller.UserController, bc *controller.UserBackofficeController) {
+func User(app *fiber.App, c *controller.UserController) {
 	route := app.Group("/user")
 	route.Post("/", c.Create)
 	route.Patch("/:id", c.Patch)
@@ -15,5 +15,5 @@ func User(app *fiber.App, c *controller.UserController, bc *controller.UserBacko
 	route.Get("/", c.Paginate)
 
 	backoffice := app.Group("/backoffice/user")
-	backoffice.Get("/", bc.Paginate)
+	backoffice.Get("/", c.BackofficePaginate)
 }

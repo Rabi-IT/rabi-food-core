@@ -5,7 +5,6 @@ import (
 
 	"github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
-	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -24,7 +23,7 @@ import (
 // @Success 200 {object} product_gateway.PaginateOutput
 // @Failure 500 {string} string "Internal server error"
 // @Router /backoffice/product/ [get].
-func (c *ProductBackofficeController) Paginate(ctx *fiber.Ctx) error {
+func (c *ProductController) BackofficePaginate(ctx *fiber.Ctx) error {
 	page, err := strconv.Atoi(ctx.Query("Page", "0"))
 	if err != nil {
 		return err
@@ -41,7 +40,6 @@ func (c *ProductBackofficeController) Paginate(ctx *fiber.Ctx) error {
 	}
 
 	uctx := ctx.UserContext()
-	logger.GetWideEvent(uctx).Event = "backoffice-paginate-products"
 
 	paginate := database.PaginateInput{
 		Page:     page,
