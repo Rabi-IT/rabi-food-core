@@ -3,8 +3,13 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/features/product/gateway"
+
 	"github.com/gofiber/fiber/v2"
 )
+
+// keep import for swagger documentation.
+var _ *gateway.GetByIDOutput
 
 // GetByID godoc
 // @Summary Get product by ID
@@ -12,7 +17,7 @@ import (
 // @Tags products
 // @Produce json
 // @Param id path string true "Product ID"
-// @Success 200 {object} product_gateway.GetByIDOutput
+// @Success 200 {object} gateway.GetByIDOutput
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
 // @Router /product/{id} [get].

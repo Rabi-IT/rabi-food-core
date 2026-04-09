@@ -16,7 +16,7 @@ import (
 // @Tags products
 // @Accept json
 // @Produce text/plain
-// @Param product body product_gateway.CreateInput true "Product data"
+// @Param product body gateway.CreateInput true "Product data"
 // @Success 201 {string} string "Created product ID"
 // @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
 // @Failure 500 {string} string "Internal server error"

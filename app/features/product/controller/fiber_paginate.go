@@ -21,7 +21,7 @@ import (
 // @Param name query string false "Product name"
 // @Param categoryId query string false "Category ID"
 // @Param isActive query bool false "Filter by active products"
-// @Success 200 {object} product_gateway.PaginateOutput
+// @Success 200 {object} gateway.PaginateOutput
 // @Failure 500 {string} string "Internal server error"
 // @Router /product/ [get].
 func (c *ProductController) Paginate(ctx *fiber.Ctx) error {

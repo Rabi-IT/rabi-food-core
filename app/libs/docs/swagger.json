@@ -4,6 +4,372 @@
         "contact": {}
     },
     "paths": {
+        "/backoffice/category/": {
+            "get": {
+                "description": "Paginate categories without tenant restriction; TenantID filter is optional",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories backoffice"
+                ],
+                "summary": "Paginate categories (backoffice)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "Page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "PageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional tenant ID filter",
+                        "name": "tenantId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Category name",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_category_gateway.PaginateOutput"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/backoffice/order/": {
+            "get": {
+                "description": "Paginate orders without tenant restriction; TenantID filter is optional",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders backoffice"
+                ],
+                "summary": "Paginate orders (backoffice)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "Page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "PageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional tenant ID filter",
+                        "name": "tenantId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Payment status",
+                        "name": "paymentStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Fulfillment status",
+                        "name": "fulfillmentStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Delivery status",
+                        "name": "deliveryStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Created at from (RFC3339)",
+                        "name": "createdAtFrom",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Created at to (RFC3339)",
+                        "name": "createdAtTo",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_order_gateway.PaginateOutput"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/backoffice/product/": {
+            "get": {
+                "description": "Paginate products without tenant restriction; TenantID filter is optional",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products backoffice"
+                ],
+                "summary": "Paginate products (backoffice)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "Page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "PageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional tenant ID filter",
+                        "name": "tenantId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Product name",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "categoryId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by active products",
+                        "name": "isActive",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_product_gateway.PaginateOutput"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/backoffice/subscription/": {
+            "get": {
+                "description": "Paginate subscriptions without tenant restriction; TenantID filter is optional",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions backoffice"
+                ],
+                "summary": "Paginate subscriptions (backoffice)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "Page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "PageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional tenant ID filter",
+                        "name": "tenantId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional user ID filter",
+                        "name": "userId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional status filter",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/subscription_gateway.PaginateOutput"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/backoffice/tenant/": {
+            "get": {
+                "description": "Paginate all tenants",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenants backoffice"
+                ],
+                "summary": "Paginate tenants (backoffice)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "Page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "PageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tenant name",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_tenant_gateway.PaginateOutput"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/backoffice/user/": {
+            "get": {
+                "description": "Paginate users without tenant restriction; TenantID filter is optional",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users backoffice"
+                ],
+                "summary": "Paginate users (backoffice)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "Page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "PageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional tenant ID filter",
+                        "name": "tenantId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "State",
+                        "name": "state",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "City",
+                        "name": "city",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_user_gateway.PaginateOutput"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/category/": {
             "get": {
                 "description": "Paginate categories using query filters",
@@ -44,7 +410,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/category_gateway.PaginateOutput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_category_gateway.PaginateOutput"
                         }
                     },
                     "500": {
@@ -74,7 +440,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/category_gateway.CreateInput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_category_gateway.CreateInput"
                         }
                     }
                 ],
@@ -123,7 +489,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/category_gateway.GetByIDOutput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_category_gateway.GetByIDOutput"
                         }
                     },
                     "404": {
@@ -165,7 +531,7 @@
                         "name": "category",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/category_gateway.DeleteFilter"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_category_gateway.DeleteFilter"
                         }
                     }
                 ],
@@ -216,7 +582,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/category_gateway.PatchValues"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_category_gateway.PatchValues"
                         }
                     }
                 ],
@@ -318,7 +684,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/order_gateway.PaginateOutput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_order_gateway.PaginateOutput"
                         }
                     },
                     "500": {
@@ -348,7 +714,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/usecases.CreateInput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_order_usecases.CreateInput"
                         }
                     }
                 ],
@@ -397,7 +763,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/order_gateway.GetByIDOutput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_order_gateway.GetByIDOutput"
                         }
                     },
                     "404": {
@@ -439,7 +805,7 @@
                         "name": "order",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/order_gateway.DeleteFilter"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_order_gateway.DeleteFilter"
                         }
                     }
                 ],
@@ -582,7 +948,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/product_gateway.PaginateOutput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_product_gateway.PaginateOutput"
                         }
                     },
                     "500": {
@@ -612,7 +978,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/product_gateway.CreateInput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_product_gateway.CreateInput"
                         }
                     }
                 ],
@@ -661,8 +1027,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_product_gateway.GetByIDOutput"
                         }
                     },
                     "404": {
@@ -744,7 +1109,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/product_gateway.PatchValues"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_product_gateway.PatchValues"
                         }
                     }
                 ],
@@ -777,6 +1142,44 @@
             }
         },
         "/subscription/": {
+            "get": {
+                "description": "Paginate subscriptions using query filters",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Paginate subscriptions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "Page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "PageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/subscription_gateway.PaginateOutput"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create a new subscription",
                 "consumes": [
@@ -796,7 +1199,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/subscription_case.CreateInput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_subscription_usecases.CreateInput"
                         }
                     }
                 ],
@@ -891,8 +1294,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/subscription_gateway.GetByIDOutput"
                         }
                     },
                     "404": {
@@ -930,7 +1332,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/tenant_case.CreateInput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_tenant_usecases.CreateInput"
                         }
                     }
                 ],
@@ -938,7 +1340,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/tenant_case.CreateOutput"
+                            "$ref": "#/definitions/usecases.CreateOutput"
                         }
                     },
                     "400": {
@@ -979,8 +1381,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_tenant_gateway.GetByIDOutput"
                         }
                     },
                     "404": {
@@ -1023,7 +1424,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/tenant_case.PatchValues"
+                            "$ref": "#/definitions/usecases.PatchValues"
                         }
                     }
                 ],
@@ -1107,7 +1508,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user_gateway.PaginateOutput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_user_gateway.PaginateOutput"
                         }
                     },
                     "500": {
@@ -1137,7 +1538,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user_case.CreateInput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_user_usecases.CreateInput"
                         }
                     }
                 ],
@@ -1189,7 +1590,7 @@
                         "name": "user",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/user_gateway.GetByIDFilter"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_user_gateway.GetByIDFilter"
                         }
                     }
                 ],
@@ -1197,7 +1598,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user_gateway.GetByIDOutput"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_user_gateway.GetByIDOutput"
                         }
                     },
                     "404": {
@@ -1279,7 +1680,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user_gateway.PatchValues"
+                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_user_gateway.PatchValues"
                         }
                     }
                 ],
@@ -1313,94 +1714,13 @@
         }
     },
     "definitions": {
-        "category_gateway.CreateInput": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "tenantId": {
-                    "type": "string"
-                }
-            }
-        },
-        "category_gateway.DeleteFilter": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "tenantId": {
-                    "type": "string"
-                }
-            }
-        },
-        "category_gateway.GetByIDOutput": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "tenantId": {
-                    "type": "string"
-                }
-            }
-        },
-        "category_gateway.PaginateData": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "category_gateway.PaginateOutput": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/category_gateway.PaginateData"
-                    }
-                },
-                "maxPages": {
-                    "type": "integer"
-                }
-            }
-        },
-        "category_gateway.PatchValues": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "errs.AppError": {
             "type": "object",
             "properties": {
                 "code": {
+                    "type": "string"
+                },
+                "fullCode": {
                     "type": "string"
                 },
                 "status": {
@@ -1408,120 +1728,18 @@
                 }
             }
         },
-        "middlewares.ValidationErrorResponse": {
+        "gateway.DiscountRule": {
             "type": "object",
             "properties": {
-                "errors": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/validator.ValidationError"
-                    }
-                }
-            }
-        },
-        "usecases.ConfirmPaymentInput": {
-            "type": "object",
-            "required": [
-                "externalPaymentId",
-                "paidAt",
-                "provider"
-            ],
-            "properties": {
-                "externalPaymentId": {
-                    "type": "string"
+                "discount": {
+                    "type": "integer"
                 },
-                "orderID": {
-                    "type": "string"
-                },
-                "paidAt": {
-                    "type": "string"
-                },
-                "provider": {
-                    "type": "string"
-                }
-            }
-        },
-        "usecases.CreateInput": {
-            "type": "object",
-            "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/usecases.OrderItem"
-                    }
-                },
-                "notes": {
-                    "type": "string"
-                }
-            }
-        },
-        "usecases.OrderItem": {
-            "type": "object",
-            "properties": {
-                "productId": {
-                    "type": "string"
-                },
-                "quantity": {
+                "quantityThreshold": {
                     "type": "integer"
                 }
             }
         },
-        "order_gateway.DeleteFilter": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "tenantId": {
-                    "type": "string"
-                }
-            }
-        },
-        "order_gateway.GetByIDOutput": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "deliveryStatus": {
-                    "type": "string"
-                },
-                "externalPaymentId": {
-                    "type": "string"
-                },
-                "fulfillmentStatus": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/order_gateway.OrderItem"
-                    }
-                },
-                "notes": {
-                    "type": "string"
-                },
-                "paidAt": {
-                    "type": "string"
-                },
-                "paymentStatus": {
-                    "$ref": "#/definitions/payment.Status"
-                },
-                "tenantId": {
-                    "type": "string"
-                },
-                "totalPrice": {
-                    "type": "integer"
-                }
-            }
-        },
-        "order_gateway.OrderItem": {
+        "gateway.OrderItem": {
             "type": "object",
             "properties": {
                 "productId": {
@@ -1541,7 +1759,146 @@
                 }
             }
         },
-        "order_gateway.PaginateData": {
+        "github_com_Rabi-IT_rabi-food-core_features_category_gateway.CreateInput": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tenantId": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Rabi-IT_rabi-food-core_features_category_gateway.DeleteFilter": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "tenantId": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Rabi-IT_rabi-food-core_features_category_gateway.GetByIDOutput": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tenantId": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Rabi-IT_rabi-food-core_features_category_gateway.PaginateData": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Rabi-IT_rabi-food-core_features_category_gateway.PaginateOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_category_gateway.PaginateData"
+                    }
+                },
+                "maxPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_Rabi-IT_rabi-food-core_features_category_gateway.PatchValues": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Rabi-IT_rabi-food-core_features_order_gateway.DeleteFilter": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "tenantId": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Rabi-IT_rabi-food-core_features_order_gateway.GetByIDOutput": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deliveryStatus": {
+                    "type": "string"
+                },
+                "externalPaymentId": {
+                    "type": "string"
+                },
+                "fulfillmentStatus": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gateway.OrderItem"
+                    }
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "paidAt": {
+                    "type": "string"
+                },
+                "paymentStatus": {
+                    "$ref": "#/definitions/payment_status.Status"
+                },
+                "tenantId": {
+                    "type": "string"
+                },
+                "totalPrice": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_Rabi-IT_rabi-food-core_features_order_gateway.PaginateData": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1563,7 +1920,7 @@
                     "type": "string"
                 },
                 "paymentStatus": {
-                    "$ref": "#/definitions/payment.Status"
+                    "$ref": "#/definitions/payment_status.Status"
                 },
                 "tenantId": {
                     "type": "string"
@@ -1573,13 +1930,13 @@
                 }
             }
         },
-        "order_gateway.PaginateOutput": {
+        "github_com_Rabi-IT_rabi-food-core_features_order_gateway.PaginateOutput": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/order_gateway.PaginateData"
+                        "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_order_gateway.PaginateData"
                     }
                 },
                 "maxPages": {
@@ -1587,42 +1944,21 @@
                 }
             }
         },
-        "payment.Status": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "authorized",
-                "paid",
-                "failed",
-                "cancelled",
-                "refunded"
-            ],
-            "x-enum-comments": {
-                "StatusAuthorized": "auth ok, yet to capture",
-                "StatusCancelled": "voided before capture",
-                "StatusFailed": "attempt failed",
-                "StatusPaid": "captured/settled",
-                "StatusPending": "not initiated or waiting user action",
-                "StatusRefunded": "refunded after capture"
-            },
-            "x-enum-descriptions": [
-                "not initiated or waiting user action",
-                "auth ok, yet to capture",
-                "captured/settled",
-                "attempt failed",
-                "voided before capture",
-                "refunded after capture"
-            ],
-            "x-enum-varnames": [
-                "StatusPending",
-                "StatusAuthorized",
-                "StatusPaid",
-                "StatusFailed",
-                "StatusCancelled",
-                "StatusRefunded"
-            ]
+        "github_com_Rabi-IT_rabi-food-core_features_order_usecases.CreateInput": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/usecases.OrderItem"
+                    }
+                },
+                "notes": {
+                    "type": "string"
+                }
+            }
         },
-        "product_gateway.CreateInput": {
+        "github_com_Rabi-IT_rabi-food-core_features_product_gateway.CreateInput": {
             "type": "object",
             "required": [
                 "categoryId"
@@ -1637,8 +1973,44 @@
                 "discountRules": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/product_gateway.DiscountRule"
+                        "$ref": "#/definitions/gateway.DiscountRule"
                     }
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "photo": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "tenantId": {
+                    "type": "string"
+                },
+                "unit": {
+                    "description": "Unit of measurement (e.g., \"kg\", \"liter\", \"piece\")",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Rabi-IT_rabi-food-core_features_product_gateway.GetByIDOutput": {
+            "type": "object",
+            "properties": {
+                "categoryId": {
+                    "type": "string"
+                },
+                "categoryName": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
                 },
                 "isActive": {
                     "type": "boolean"
@@ -1660,18 +2032,7 @@
                 }
             }
         },
-        "product_gateway.DiscountRule": {
-            "type": "object",
-            "properties": {
-                "discount": {
-                    "type": "integer"
-                },
-                "quantityThreshold": {
-                    "type": "integer"
-                }
-            }
-        },
-        "product_gateway.PaginateData": {
+        "github_com_Rabi-IT_rabi-food-core_features_product_gateway.PaginateData": {
             "type": "object",
             "properties": {
                 "categoryId": {
@@ -1700,13 +2061,13 @@
                 }
             }
         },
-        "product_gateway.PaginateOutput": {
+        "github_com_Rabi-IT_rabi-food-core_features_product_gateway.PaginateOutput": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/product_gateway.PaginateData"
+                        "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_product_gateway.PaginateData"
                     }
                 },
                 "maxPages": {
@@ -1714,7 +2075,7 @@
                 }
             }
         },
-        "product_gateway.PatchValues": {
+        "github_com_Rabi-IT_rabi-food-core_features_product_gateway.PatchValues": {
             "type": "object",
             "properties": {
                 "categoryId": {
@@ -1740,7 +2101,7 @@
                 }
             }
         },
-        "subscription_case.CreateInput": {
+        "github_com_Rabi-IT_rabi-food-core_features_subscription_usecases.CreateInput": {
             "type": "object",
             "required": [
                 "deliveryDays",
@@ -1762,7 +2123,7 @@
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                        "$ref": "#/definitions/subscription_case.SubscriptionItemInput"
+                        "$ref": "#/definitions/usecases.SubscriptionItemInput"
                     }
                 },
                 "notes": {
@@ -1774,79 +2135,43 @@
                 }
             }
         },
-        "subscription_case.SubscriptionItemInput": {
+        "github_com_Rabi-IT_rabi-food-core_features_tenant_gateway.GetByIDOutput": {
             "type": "object",
-            "required": [
-                "productId",
-                "quantity"
-            ],
             "properties": {
-                "productId": {
+                "id": {
                     "type": "string"
                 },
-                "quantity": {
-                    "type": "integer",
-                    "minimum": 1
+                "name": {
+                    "type": "string"
                 }
             }
         },
-        "subscription_gateway.DeliveryDay": {
+        "github_com_Rabi-IT_rabi-food-core_features_tenant_gateway.PaginateData": {
             "type": "object",
             "properties": {
-                "endHour": {
-                    "description": "0–23",
-                    "type": "integer",
-                    "maximum": 23,
-                    "minimum": 1
+                "id": {
+                    "type": "string"
                 },
-                "startHour": {
-                    "description": "0–23",
-                    "type": "integer",
-                    "maximum": 23,
-                    "minimum": 0
-                },
-                "weekday": {
-                    "description": "0 = Sunday … 6 = Saturday",
-                    "type": "integer",
-                    "maximum": 6,
-                    "minimum": 0
+                "name": {
+                    "type": "string"
                 }
             }
         },
-        "subscription_gateway.DiscountRule": {
+        "github_com_Rabi-IT_rabi-food-core_features_tenant_gateway.PaginateOutput": {
             "type": "object",
             "properties": {
-                "cyclesThreshold": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "discount": {
-                    "type": "integer",
-                    "maximum": 100,
-                    "minimum": 1
-                }
-            }
-        },
-        "subscription_gateway.UpsertConfigInput": {
-            "type": "object",
-            "properties": {
-                "cutoffOffsetMinutes": {
-                    "type": "integer",
-                    "format": "int32"
-                },
-                "discountRules": {
+                "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/subscription_gateway.DiscountRule"
+                        "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_tenant_gateway.PaginateData"
                     }
                 },
-                "maxAttemptsPerOrder": {
-                    "type": "integer",
-                    "format": "int32"
+                "maxPages": {
+                    "type": "integer"
                 }
             }
         },
-        "tenant_case.CreateInput": {
+        "github_com_Rabi-IT_rabi-food-core_features_tenant_usecases.CreateInput": {
             "type": "object",
             "required": [
                 "email",
@@ -1869,26 +2194,134 @@
                 }
             }
         },
-        "tenant_case.CreateOutput": {
+        "github_com_Rabi-IT_rabi-food-core_features_user_gateway.GetByIDFilter": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "string"
                 },
-                "userId": {
+                "tenantId": {
                     "type": "string"
                 }
             }
         },
-        "tenant_case.PatchValues": {
+        "github_com_Rabi-IT_rabi-food-core_features_user_gateway.GetByIDOutput": {
             "type": "object",
             "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "complement": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "photo": {
+                    "type": "string"
+                },
+                "socialId": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "taxId": {
+                    "type": "string"
+                },
+                "tenantId": {
+                    "type": "string"
+                },
+                "zip": {
                     "type": "string"
                 }
             }
         },
-        "user_case.CreateInput": {
+        "github_com_Rabi-IT_rabi-food-core_features_user_gateway.PaginateData": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "photo": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Rabi-IT_rabi-food-core_features_user_gateway.PaginateOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_user_gateway.PaginateData"
+                    }
+                },
+                "maxPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_Rabi-IT_rabi-food-core_features_user_gateway.PatchValues": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "complement": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "photo": {
+                    "type": "string"
+                },
+                "socialId": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "taxId": {
+                    "type": "string"
+                },
+                "zip": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Rabi-IT_rabi-food-core_features_user_usecases.CreateInput": {
             "type": "object",
             "required": [
                 "email",
@@ -1936,88 +2369,205 @@
                 }
             }
         },
-        "user_gateway.GetByIDFilter": {
+        "middlewares.ValidationErrorResponse": {
             "type": "object",
             "properties": {
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/validator.ValidationError"
+                    }
+                }
+            }
+        },
+        "payment_status.Status": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "authorized",
+                "paid",
+                "failed",
+                "cancelled",
+                "refunded"
+            ],
+            "x-enum-comments": {
+                "StatusAuthorized": "auth ok, yet to capture",
+                "StatusCancelled": "voided before capture",
+                "StatusFailed": "attempt failed",
+                "StatusPaid": "captured/settled",
+                "StatusPending": "not initiated or waiting user action",
+                "StatusRefunded": "refunded after capture"
+            },
+            "x-enum-descriptions": [
+                "not initiated or waiting user action",
+                "auth ok, yet to capture",
+                "captured/settled",
+                "attempt failed",
+                "voided before capture",
+                "refunded after capture"
+            ],
+            "x-enum-varnames": [
+                "StatusPending",
+                "StatusAuthorized",
+                "StatusPaid",
+                "StatusFailed",
+                "StatusCancelled",
+                "StatusRefunded"
+            ]
+        },
+        "subscription.Status": {
+            "type": "string",
+            "enum": [
+                "active",
+                "paused",
+                "cancelled",
+                "expired",
+                "superseded"
+            ],
+            "x-enum-varnames": [
+                "StatusActive",
+                "StatusPaused",
+                "StatusCancelled",
+                "StatusExpired",
+                "StatusSuperseded"
+            ]
+        },
+        "subscription_gateway.DeliveryDay": {
+            "type": "object",
+            "properties": {
+                "endHour": {
+                    "description": "0–23",
+                    "type": "integer",
+                    "maximum": 23,
+                    "minimum": 1
+                },
+                "startHour": {
+                    "description": "0–23",
+                    "type": "integer",
+                    "maximum": 23,
+                    "minimum": 0
+                },
+                "weekday": {
+                    "description": "0 = Sunday … 6 = Saturday",
+                    "type": "integer",
+                    "maximum": 6,
+                    "minimum": 0
+                }
+            }
+        },
+        "subscription_gateway.DiscountRule": {
+            "type": "object",
+            "properties": {
+                "cyclesThreshold": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "discount": {
+                    "description": "percentage (1–100)",
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "subscription_gateway.GetByIDOutput": {
+            "type": "object",
+            "properties": {
+                "autoRenew": {
+                    "type": "boolean"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "cutoffOffsetMinutes": {
+                    "type": "integer"
+                },
+                "cycleDiscount": {
+                    "type": "integer"
+                },
+                "deliveryDays": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/subscription_gateway.DeliveryDay"
+                    }
+                },
                 "id": {
                     "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/subscription_gateway.SubscriptionItem"
+                    }
+                },
+                "itemsDiscount": {
+                    "type": "integer"
+                },
+                "itemsTotal": {
+                    "type": "integer"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "paymentAmount": {
+                    "type": "integer"
+                },
+                "remainingCycles": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/subscription.Status"
                 },
                 "tenantId": {
                     "type": "string"
+                },
+                "totalCycles": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "string"
                 }
             }
         },
-        "user_gateway.GetByIDOutput": {
+        "subscription_gateway.PaginateData": {
             "type": "object",
             "properties": {
-                "city": {
-                    "type": "string"
+                "autoRenew": {
+                    "type": "boolean"
                 },
-                "complement": {
-                    "type": "string"
-                },
-                "email": {
+                "createdAt": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "name": {
-                    "type": "string"
+                "paymentAmount": {
+                    "type": "integer"
                 },
-                "phone": {
-                    "type": "string"
+                "remainingCycles": {
+                    "type": "integer"
                 },
-                "photo": {
-                    "type": "string"
-                },
-                "socialId": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string"
-                },
-                "street": {
-                    "type": "string"
-                },
-                "taxId": {
-                    "type": "string"
+                "status": {
+                    "$ref": "#/definitions/subscription.Status"
                 },
                 "tenantId": {
                     "type": "string"
                 },
-                "zip": {
+                "totalCycles": {
+                    "type": "integer"
+                },
+                "userId": {
                     "type": "string"
                 }
             }
         },
-        "user_gateway.PaginateData": {
-            "type": "object",
-            "properties": {
-                "city": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "photo": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string"
-                }
-            }
-        },
-        "user_gateway.PaginateOutput": {
+        "subscription_gateway.PaginateOutput": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/user_gateway.PaginateData"
+                        "$ref": "#/definitions/subscription_gateway.PaginateData"
                     }
                 },
                 "maxPages": {
@@ -2025,41 +2575,119 @@
                 }
             }
         },
-        "user_gateway.PatchValues": {
+        "subscription_gateway.SubscriptionItem": {
             "type": "object",
             "properties": {
-                "city": {
-                    "type": "string"
+                "discount": {
+                    "type": "integer"
                 },
-                "complement": {
-                    "type": "string"
-                },
-                "email": {
+                "itemId": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "phone": {
+                "quantity": {
+                    "type": "integer"
+                },
+                "subtotal": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "unitPrice": {
+                    "type": "integer"
+                }
+            }
+        },
+        "subscription_gateway.UpsertConfigInput": {
+            "type": "object",
+            "properties": {
+                "cutoffOffsetMinutes": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "discountRules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/subscription_gateway.DiscountRule"
+                    }
+                },
+                "isOpen": {
+                    "type": "boolean"
+                },
+                "maxAttemptsPerOrder": {
+                    "type": "integer",
+                    "format": "int32"
+                }
+            }
+        },
+        "usecases.ConfirmPaymentInput": {
+            "type": "object",
+            "required": [
+                "externalPaymentId",
+                "paidAt",
+                "provider"
+            ],
+            "properties": {
+                "externalPaymentId": {
                     "type": "string"
                 },
-                "photo": {
+                "orderID": {
                     "type": "string"
                 },
-                "socialId": {
+                "paidAt": {
                     "type": "string"
                 },
-                "state": {
+                "provider": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.CreateOutput": {
+            "type": "object",
+            "properties": {
+                "id": {
                     "type": "string"
                 },
-                "street": {
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.OrderItem": {
+            "type": "object",
+            "properties": {
+                "productId": {
                     "type": "string"
                 },
-                "taxId": {
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "usecases.PatchValues": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.SubscriptionItemInput": {
+            "type": "object",
+            "required": [
+                "productId",
+                "quantity"
+            ],
+            "properties": {
+                "productId": {
                     "type": "string"
                 },
-                "zip": {
-                    "type": "string"
+                "quantity": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },

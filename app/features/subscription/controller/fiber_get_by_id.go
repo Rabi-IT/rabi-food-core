@@ -3,8 +3,13 @@ package controller
 import (
 	"net/http"
 
+	gateway "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
+
 	"github.com/gofiber/fiber/v2"
 )
+
+// keep import for swagger documentation.
+var _ *gateway.GetByIDOutput
 
 // GetByID godoc
 // @Summary Get subscription by ID
