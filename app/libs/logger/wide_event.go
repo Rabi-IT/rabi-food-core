@@ -141,6 +141,20 @@ func (w *WideEvent) FinishRequest(statusCode int, err error, latencyMs int64) {
 	}
 }
 
+func (w *WideEvent) FinishCronJob(err error, latencyMs int64) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	w.LatencyMs = latencyMs
+	if err != nil {
+		w.err = err.Error()
+		var appError *errs.AppError
+		if errors.As(err, &appError) {
+			w.errorCode = appError.Code
+		}
+	}
+}
+
 // reset clears all fields of the WideEvent, preparing it for reuse from the pool.
 func (w *WideEvent) reset() {
 	w.mu.Lock()

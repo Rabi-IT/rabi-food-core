@@ -11,6 +11,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/google/uuid v1.6.0
 	github.com/pressly/goose/v3 v3.27.0
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/zerolog v1.31.0
 	github.com/samber/do v1.6.0
 	golang.org/x/sync v0.19.0
