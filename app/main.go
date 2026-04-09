@@ -34,8 +34,7 @@ func main() {
 	}
 
 	// Cron scheduler
-	scheduler := do.MustInvoke[*appCron.Scheduler](injector)
-	scheduler.Start(ctx)
+	appCron.Start(ctx, injector)
 
 	httpServer := do.MustInvoke[http.HTTPServer](injector)
 

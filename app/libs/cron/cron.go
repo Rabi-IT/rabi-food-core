@@ -61,12 +61,7 @@ func (s *Scheduler) register(ctx context.Context, job Job) error {
 	return err
 }
 
-func (s *Scheduler) Start(ctx context.Context) {
+func (s *Scheduler) start(ctx context.Context) {
 	logger.Get(ctx).Info().Msg("starting cron")
 	s.cron.Start()
-}
-
-func (s *Scheduler) Stop(ctx context.Context) context.Context {
-	logger.Get(ctx).Info().Msg("stopping cron")
-	return s.cron.Stop()
 }

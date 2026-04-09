@@ -30,5 +30,5 @@ func Start(ctx context.Context, injector *do.Injector) {
 		logger.Get(ctx).Fatal().Err(err).Msg("Failed to create delivery scheduler")
 	}
 
-	scheduler.Start(ctx)
+	scheduler.start(ctx)
 }
