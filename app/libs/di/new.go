@@ -195,10 +195,14 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	return injector
 }
 
-func NewProduction() *do.Injector {
-	return newInjector(config.ProductionDatabase)
-}
-
 func NewTest() *do.Injector {
 	return newInjector(config.TestDatabase)
+}
+
+func Injector() *do.Injector {
+	if config.Env.IsProduction() {
+		return newInjector(config.ProductionDatabase)
+	}
+
+	return NewTest()
 }

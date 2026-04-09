@@ -50,7 +50,7 @@ func New() zerolog.Context {
 	return base.With()
 }
 
-// withContext stores the logger in the context.
-func withContext(c context.Context, logger *zerolog.Logger) context.Context {
+// WithContext stores the logger in the context.
+func WithContext(c context.Context, logger *zerolog.Logger) context.Context {
 	return context.WithValue(c, loggerKey, logger)
 }
