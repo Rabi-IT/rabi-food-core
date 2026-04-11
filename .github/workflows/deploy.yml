@@ -58,4 +58,5 @@ jobs:
           script: |
             mv rabi-food-core@latest rabi-food-core
             chmod 700 rabi-food-core
+            sudo systemctl set-environment APP_VERSION=${{ github.event.release.tag_name }}
             sudo systemctl restart rabi-food-core.service

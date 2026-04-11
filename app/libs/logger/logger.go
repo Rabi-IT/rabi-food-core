@@ -26,9 +26,9 @@ func init() {
 			Out:        os.Stdout,
 			TimeFormat: time.RFC3339,
 			NoColor:    true,
-		}).With().Timestamp().Logger()
+		}).With().Timestamp().Str("version", config.AppVersion).Logger()
 	} else {
-		base = zerolog.New(os.Stdout).With().Timestamp().Logger()
+		base = zerolog.New(os.Stdout).With().Timestamp().Str("version", config.AppVersion).Logger()
 	}
 }
 

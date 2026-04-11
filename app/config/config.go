@@ -4,6 +4,7 @@ import "os"
 
 var (
 	AppPort            = os.Getenv("APP_PORT")
+	AppVersion         = os.Getenv("APP_VERSION")
 	AuthSecret         = os.Getenv("AUTH_SECRET")
 	Env                = environment(os.Getenv("ENV"))
 	ProductionDatabase = &DatabaseConfig{
