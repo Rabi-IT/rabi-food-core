@@ -1,6 +1,6 @@
 services:
   app-test:
-    image: golang:1.25-alpine
+    image: golang:1.26.1-alpine
     container_name: app-test
     env_file:
       - ../.env.test
