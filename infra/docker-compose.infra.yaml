@@ -1,6 +1,6 @@
 services:
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.6.7
     container_name: grafana
     ports:
       - "3100:3100"
@@ -19,7 +19,7 @@ services:
       - observability
 
   loki:
-    image: grafana/loki:3.5.7
+    image: grafana/loki:3.7.1
     container_name: loki
     ports:
       - "3200:3200"
@@ -33,7 +33,7 @@ services:
       - observability
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.11.1
     container_name: prometheus
     ports:
       - "9090:9090"
@@ -51,7 +51,7 @@ services:
       - observability
 
   alloy:
-    image: grafana/alloy:latest
+    image: grafana/alloy:v1.14.0
     container_name: alloy
     command: ["run", "/etc/alloy/alloy.config.alloy"]
     volumes:
