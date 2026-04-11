@@ -297,7 +297,7 @@ JWT_SECRET=your-secret-key
 Different environments available:
 
 - `docker-compose.infra.yaml` - Complete infrastructure
-- `docker-compose.infra-test.yaml` - Database only for tests
+- `docker-compose.test-database.yaml` - Database only for tests
 - `docker-compose.test.yaml` - Test environment with logs
 - `docker-compose.yaml` - Production
 

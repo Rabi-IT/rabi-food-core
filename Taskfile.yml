@@ -13,7 +13,7 @@ tasks:
     desc: "Start the development environment"
     dir: app
     dotenv: ["../.env.test"]
-    deps: [infra-test, docs]
+    deps: [test-database, docs]
     cmds:
       - go run main.go
     silent: false
@@ -67,27 +67,27 @@ tasks:
   # =============================
   # 🧪 Tests and utilities
   # =============================
-  infra-test:
+  test-database:
     desc: "Start only the infrastructure for tests (Postgres, pgAdmin)"
     dir: infra
     dotenv: ["../.env.test"]
     cmds:
-      - docker compose -f docker-compose.infra-test.yaml up -d postgres pgadmin
+      - docker compose -f docker-compose.test-database.yaml up -d postgres pgadmin
     silent: false
 
-  infra-test-down:
+  test-database-down:
     desc: "Stop the test infrastructure"
     dir: infra
     dotenv: ["../.env.test"]
     cmds:
-      - docker compose -f docker-compose.infra-test.yaml down
+      - docker compose -f docker-compose.test-database.yaml down
     silent: true
 
   migrate:
     desc: "Run pending database migrations"
     dir: app
     dotenv: ["../.env.test"]
-    deps: [infra-test]
+    deps: [test-database]
     cmds:
       - echo "goose {{.GOOSE_VERSION}}"
       - go run github.com/pressly/goose/v3/cmd/goose@{{.GOOSE_VERSION}} -dir libs/database/migrations postgres "host=${TEST_DATABASE_HOST} user=${TEST_DATABASE_USER} password=${TEST_DATABASE_PASSWORD} port=${TEST_DATABASE_PORT} dbname=${TEST_DATABASE_NAME}" up
@@ -119,19 +119,9 @@ tasks:
     silent: false
 
   test:
-    desc: "Start the test environment"
-    dir: app
-    dotenv: ["../.env.test"]
-    deps: [infra-test]
-    cmds:
-      - go clean -testcache
-      - go run gotest.tools/gotestsum@v1.13.0 --format testname -- ./... -p 1 -v
-    silent: false
-
-  test-with-logs:
     desc: "Start the test environment with infrastructure logs"
     dotenv: ["../.env.test"]
-    deps: [infra, infra-test]
+    deps: [infra, test-database]
     dir: infra
     cmds:
       - docker compose -f docker-compose.test.yaml up
