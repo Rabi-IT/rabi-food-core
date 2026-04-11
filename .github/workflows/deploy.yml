@@ -42,6 +42,20 @@ jobs:
       - name: Rename binary
         run: mv rabi-food-core rabi-food-core@latest
 
+      - name: Run Migrations
+        working-directory: app
+        env:
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST_PRODUCTION }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER_PRODUCTION }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD_PRODUCTION }}
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT_PRODUCTION }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME_PRODUCTION }}
+        run: |
+          go run github.com/pressly/goose/v3/cmd/goose@v3.27.0 \
+            -dir libs/database/migrations postgres \
+            "host=${DATABASE_HOST} user=${DATABASE_USER} password=${DATABASE_PASSWORD} port=${DATABASE_PORT} dbname=${DATABASE_NAME}" \
+            up
+
       - name: Copy binary
         uses: appleboy/scp-action@master
         with:
