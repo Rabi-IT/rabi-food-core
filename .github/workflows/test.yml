@@ -6,9 +6,10 @@ on:
       - main
       - dev
       - staging
+  workflow_call:
 
 jobs:
-  Test:
+  test:
     runs-on: ubuntu-latest
     # We can't use actions/setup-go@v6 (or later) due to a known networking issue.
     # When using it, the Go process loses DNS access to service containers (like postgres).
@@ -48,5 +49,4 @@ jobs:
         run: go install gotest.tools/gotestsum@latest
 
       - name: Run Tests
-        run: |
-          gotestsum --format testname -- ./... -p 1 -v
+        run: gotestsum --format testname -- ./... -p 1 -v

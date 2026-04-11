@@ -1,40 +1,25 @@
 name: Deploy Production
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [published]
 
 jobs:
-  Deploy:
-    runs-on: ubuntu-24.04
-    container: golang:1.26.0
-    env:
-      APP_PORT: 3000
-      TEST_DATABASE_HOST: postgres
+  test:
+    uses: ./.github/workflows/test.yml
 
-    services:
-      postgres:
-        image: postgres:17.6-bookworm
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+  deploy:
+    needs: [test]
+    runs-on: ubuntu-24.04
+    container: golang:1.26.1
+
+    defaults:
+      run:
+        working-directory: app
 
     steps:
       - name: Fetch Repository
-        uses: actions/checkout@v3
-
-      - name: Run Test
-        run: |
-          go run cmd/test_setup/test_setup.go &
-          sleep 5
-          go run gotest.tools/gotestsum@latest --format testname -- ./... -p 1 -v
+        uses: actions/checkout@v5
 
       - name: Generate binary
         run: go build -o rabi-food-core main.go
@@ -43,7 +28,6 @@ jobs:
         run: mv rabi-food-core rabi-food-core@latest
 
       - name: Run Migrations
-        working-directory: app
         env:
           DATABASE_HOST: ${{ secrets.DATABASE_HOST_PRODUCTION }}
           DATABASE_USER: ${{ secrets.DATABASE_USER_PRODUCTION }}
@@ -62,7 +46,7 @@ jobs:
           host: ${{ secrets.SSH_HOST_PRODUCTION }}
           username: ${{ secrets.SSH_USER_PRODUCTION }}
           key: ${{ secrets.SSH_KEY_PRODUCTION }}
-          source: "./rabi-food-core@latest"
+          source: "./app/rabi-food-core@latest"
           target: "~/"
 
       - name: Deploy script

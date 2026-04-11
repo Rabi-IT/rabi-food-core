@@ -1,0 +1,69 @@
+name: Quality
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+      - staging
+
+jobs:
+  lint:
+    name: runner / golangci-lint
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'app/go.mod'
+          cache: true
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9.2.0
+        with:
+          working-directory: app
+          version: latest
+
+      - name: Run Reviewdog
+        uses: reviewdog/action-golangci-lint@v2.8.0
+        with:
+          workdir: app
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          golangci_lint_flags: --timeout=5m
+          level: warning
+          reporter: github-pr-review
+          fail_level: any
+
+  security:
+    name: runner / gosec
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'app/go.mod'
+          cache: true
+
+      - name: Run Gosec
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          gosec -fmt sarif -out results.sarif ./...
+
+      - name: Upload Gosec SARIF report
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: app/results.sarif
