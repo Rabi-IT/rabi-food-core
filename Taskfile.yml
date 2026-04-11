@@ -2,6 +2,9 @@
 
 version: '3'
 
+vars:
+  GOOSE_VERSION: v3.27.0 # keep in sync with app/go.mod
+
 tasks:
   # =============================
   # 🛠️ Development environment
@@ -86,7 +89,8 @@ tasks:
     dotenv: ["../.env.test"]
     deps: [infra-test]
     cmds:
-      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir libs/database/migrations postgres "host=${TEST_DATABASE_HOST} user=${TEST_DATABASE_USER} password=${TEST_DATABASE_PASSWORD} port=${TEST_DATABASE_PORT} dbname=${TEST_DATABASE_NAME}" up
+      - echo "goose {{.GOOSE_VERSION}}"
+      - go run github.com/pressly/goose/v3/cmd/goose@{{.GOOSE_VERSION}} -dir libs/database/migrations postgres "host=${TEST_DATABASE_HOST} user=${TEST_DATABASE_USER} password=${TEST_DATABASE_PASSWORD} port=${TEST_DATABASE_PORT} dbname=${TEST_DATABASE_NAME}" up
     silent: false
 
   migrate-status:
@@ -94,7 +98,8 @@ tasks:
     dir: app
     dotenv: ["../.env.test"]
     cmds:
-      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir libs/database/migrations postgres "host=${TEST_DATABASE_HOST} user=${TEST_DATABASE_USER} password=${TEST_DATABASE_PASSWORD} port=${TEST_DATABASE_PORT} dbname=${TEST_DATABASE_NAME}" status
+      - echo "goose {{.GOOSE_VERSION}}"
+      - go run github.com/pressly/goose/v3/cmd/goose@{{.GOOSE_VERSION}} -dir libs/database/migrations postgres "host=${TEST_DATABASE_HOST} user=${TEST_DATABASE_USER} password=${TEST_DATABASE_PASSWORD} port=${TEST_DATABASE_PORT} dbname=${TEST_DATABASE_NAME}" status
     silent: false
 
   migrate-down:
@@ -102,7 +107,8 @@ tasks:
     dir: app
     dotenv: ["../.env.test"]
     cmds:
-      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir libs/database/migrations postgres "host=${TEST_DATABASE_HOST} user=${TEST_DATABASE_USER} password=${TEST_DATABASE_PASSWORD} port=${TEST_DATABASE_PORT} dbname=${TEST_DATABASE_NAME}" down
+      - echo "goose {{.GOOSE_VERSION}}"
+      - go run github.com/pressly/goose/v3/cmd/goose@{{.GOOSE_VERSION}} -dir libs/database/migrations postgres "host=${TEST_DATABASE_HOST} user=${TEST_DATABASE_USER} password=${TEST_DATABASE_PASSWORD} port=${TEST_DATABASE_PORT} dbname=${TEST_DATABASE_NAME}" down
     silent: false
 
   mockgen:
