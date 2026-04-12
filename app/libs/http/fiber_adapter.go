@@ -17,6 +17,7 @@ import (
 	user_routes "github.com/Rabi-IT/rabi-food-core/features/user/routes"
 	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
+	fiberprometheus "github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
@@ -47,9 +48,13 @@ func New(
 		SigningKey: jwtware.SigningKey{Key: []byte(config.AuthSecret)},
 	})
 
+	prom := fiberprometheus.New("rabi-food-core")
+	prom.RegisterAt(app, "/metrics")
+
 	app.
 		Use(cors.New()).
-		Use(requestid.New())
+		Use(requestid.New()).
+		Use(prom.Middleware)
 
 	if !config.Env.IsProduction() {
 		app.Static("/docs", "./libs/docs")

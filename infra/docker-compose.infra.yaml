@@ -41,7 +41,7 @@ services:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
       - prometheus-data:/prometheus
     command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--config.file=/etc/prometheus/prometheus.yaml"
       - "--web.enable-remote-write-receiver"
       - "--web.listen-address=:9090"
     depends_on:
