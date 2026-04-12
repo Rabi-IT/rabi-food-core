@@ -60,6 +60,7 @@ tasks:
 
   test-local:
     desc: "Run tests directly (executado dentro do container Docker via task test)"
+    dotenv: ["../.env.test"]
     dir: app
     cmds:
       - gotestsum --format testname -- ./... -p 1 -v
