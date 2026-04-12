@@ -29,21 +29,32 @@ resource "aws_iam_role_policy" "ecs_execution_secrets" {
       Resource = [
         aws_secretsmanager_secret.db_password.arn,
         aws_secretsmanager_secret.auth_secret.arn,
+        aws_secretsmanager_secret.grafana_token.arn,
       ]
     }]
   })
 }
 
-# Task role: permissions that the app needs at runtime
-resource "aws_iam_role" "ecs_task" {
-  name = "rabi-food-ecs-task-role"
+# EC2 instance role: allows ECS agent on EC2 to register and manage tasks
+resource "aws_iam_role" "ecs_instance" {
+  name = "rabi-food-ecs-instance-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Action    = "sts:AssumeRole"
       Effect    = "Allow"
-      Principal = { Service = "ecs-tasks.amazonaws.com" }
+      Principal = { Service = "ec2.amazonaws.com" }
     }]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_instance" {
+  role       = aws_iam_role.ecs_instance.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+resource "aws_iam_instance_profile" "ecs_instance" {
+  name = "rabi-food-ecs-instance-profile"
+  role = aws_iam_role.ecs_instance.name
 }

@@ -121,19 +121,19 @@ tasks:
     desc: "Preview infrastructure changes"
     dir: infra/terraform
     cmds:
-      - terraform plan -var="db_password=${DB_PASSWORD}" -var="auth_secret=${AUTH_SECRET}"
+      - terraform plan
 
   tf:apply:
     desc: "Apply infrastructure changes"
     dir: infra/terraform
     cmds:
-      - terraform apply -var="db_password=${DB_PASSWORD}" -var="auth_secret=${AUTH_SECRET}"
+      - terraform apply
 
   tf:destroy:
     desc: "Destroy all infrastructure"
     dir: infra/terraform
     cmds:
-      - terraform destroy -var="db_password=${DB_PASSWORD}" -var="auth_secret=${AUTH_SECRET}"
+      - terraform destroy
 
   # =============================
   # 🔧 Infrastructure utils

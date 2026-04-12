@@ -15,3 +15,12 @@ resource "aws_secretsmanager_secret_version" "auth_secret" {
   secret_id     = aws_secretsmanager_secret.auth_secret.id
   secret_string = var.auth_secret
 }
+
+resource "aws_secretsmanager_secret" "grafana_token" {
+  name = "rabi-food/grafana-token"
+}
+
+resource "aws_secretsmanager_secret_version" "grafana_token" {
+  secret_id     = aws_secretsmanager_secret.grafana_token.id
+  secret_string = var.grafana_token
+}
