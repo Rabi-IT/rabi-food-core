@@ -8,7 +8,7 @@ import (
 
 func (g *PgxUserGatewayAdapter) Delete(filter DeleteFilter) (bool, error) {
 	b := sq.
-		Delete("users").
+		Delete("iam.users").
 		Where(sq.Eq{"id": filter.ID}).
 		PlaceholderFormat(sq.Dollar)
 

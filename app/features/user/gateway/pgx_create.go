@@ -11,7 +11,7 @@ func (g *PgxUserGatewayAdapter) Create(input CreateInput) (string, error) {
 	id := uuid.Must(uuid.NewV7()).String()
 
 	sql, args, err := sq.
-		Insert("users").
+		Insert("iam.users").
 		Columns("id", "tenant_id", "social_id", "street", "complement", "name",
 			"email", "photo", "tax_id", "phone", "city", "state", "zip", "neighborhood", "role").
 		Values(id, input.TenantID, input.SocialID, input.Street, input.Complement, input.Name,

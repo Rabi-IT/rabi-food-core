@@ -9,7 +9,7 @@ import (
 
 func (g *PgxOrderGatewayAdapter) Delete(filter DeleteFilter) (bool, error) {
 	b := sq.
-		Update("orders").
+		Update("commerce.orders").
 		Set("deleted_at", time.Now().UTC()).
 		Where("deleted_at IS NULL").
 		Where(sq.Eq{"id": filter.ID}).

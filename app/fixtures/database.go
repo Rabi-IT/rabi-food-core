@@ -9,14 +9,14 @@ import (
 )
 
 var tables = []string{
-	"users",
-	"tenants",
-	"categories",
-	"products",
-	"orders",
-	"subscription_deliveries",
-	"subscription_configs",
-	"subscriptions",
+	"commerce.orders",
+	"subscription.subscription_deliveries",
+	"subscription.subscription_configs",
+	"subscription.subscriptions",
+	"catalog.products",
+	"catalog.categories",
+	"iam.users",
+	"iam.tenants",
 }
 
 func CleanDatabase(t *testing.T) {

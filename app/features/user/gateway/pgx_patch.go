@@ -8,7 +8,7 @@ import (
 
 func (g *PgxUserGatewayAdapter) Patch(filter PatchFilter, values PatchValues) (bool, error) {
 	b := sq.
-		Update("users").
+		Update("iam.users").
 		Where(sq.Eq{"id": filter.ID}).
 		PlaceholderFormat(sq.Dollar)
 

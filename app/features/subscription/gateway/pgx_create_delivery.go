@@ -36,7 +36,7 @@ func (g *PgxSubscriptionGatewayAdapter) createDeliveriesBatch(ctx context.Contex
 	now := time.Now().UTC()
 
 	b := sq.
-		Insert("subscription_deliveries").
+		Insert("subscription.subscription_deliveries").
 		Columns("id", "subscription_id", "scheduled_date", "start_hour", "end_hour",
 			"cutoff_at", "status", "max_delivery_attempts", "created_at", "updated_at").
 		Suffix("ON CONFLICT ON CONSTRAINT subscription_delivery_unique DO NOTHING").

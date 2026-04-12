@@ -1,12 +1,12 @@
 -- +goose Up
 CREATE TABLE
-    products (
+    catalog.products (
         id UUID PRIMARY KEY,
-        tenant_id UUID NOT NULL,
+        tenant_id UUID NOT NULL REFERENCES iam.tenants (id),
         NAME TEXT NOT NULL,
         description TEXT,
         photo TEXT,
-        category_id UUID,
+        category_id UUID REFERENCES catalog.categories (id),
         discount_rules JSONB NOT NULL DEFAULT '[]',
         unit TEXT NOT NULL,
         price BIGINT NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE
         deleted_at TIMESTAMPTZ
     );
 
-CREATE INDEX idx_products_deleted_at ON products (deleted_at);
+CREATE INDEX idx_products_deleted_at ON catalog.products (deleted_at);
 
 -- +goose Down
-DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS catalog.products;

@@ -8,7 +8,7 @@ import (
 
 func (g *PgxTenantGatewayAdapter) Patch(filter PatchFilter, values PatchValues) (bool, error) {
 	b := sq.
-		Update("tenants").
+		Update("iam.tenants").
 		Where(sq.Eq{"id": filter.ID}).
 		PlaceholderFormat(sq.Dollar)
 

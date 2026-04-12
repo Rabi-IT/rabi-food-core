@@ -26,7 +26,7 @@ func (g *PgxProductGatewayAdapter) List(filter ListFilter) ([]ListOutput, error)
 
 	b := sq.
 		Select("id", "name", "price", "discount_rules").
-		From("products").
+		From("catalog.products").
 		Where("deleted_at IS NULL").
 		Where(sq.Eq{"id": filter.IDs}).
 		PlaceholderFormat(sq.Dollar)

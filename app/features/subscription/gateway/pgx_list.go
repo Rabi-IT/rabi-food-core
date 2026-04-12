@@ -11,7 +11,7 @@ import (
 func (g *PgxSubscriptionGatewayAdapter) List(ctx context.Context, filter ListFilter) ([]ListOutput, error) {
 	qb := sq.
 		Select("id", "delivery_days", "cutoff_offset_minutes", "max_attempts_per_order").
-		From("subscriptions").
+		From("subscription.subscriptions").
 		Where(sq.Eq{"status": filter.Status}).
 		Where("remaining_cycles >= ?", filter.RemainingCyclesGTE).
 		Where("delivery_weekdays_mask & ? != 0", 1<<uint8(filter.Weekday))

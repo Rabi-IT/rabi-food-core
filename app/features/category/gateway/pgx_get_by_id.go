@@ -11,7 +11,7 @@ import (
 func (g *PgxCategoryGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutput, error) {
 	b := sq.
 		Select("id", "tenant_id", "name", "description").
-		From("categories").
+		From("catalog.categories").
 		Where(sq.Eq{"id": filter.ID}).
 		Limit(1).
 		PlaceholderFormat(sq.Dollar)

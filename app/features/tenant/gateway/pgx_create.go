@@ -11,7 +11,7 @@ func (g *PgxTenantGatewayAdapter) Create(input CreateInput) (string, error) {
 	id := uuid.Must(uuid.NewV7()).String()
 
 	sql, args, err := sq.
-		Insert("tenants").
+		Insert("iam.tenants").
 		Columns("id", "name").
 		Values(id, input.Name).
 		PlaceholderFormat(sq.Dollar).

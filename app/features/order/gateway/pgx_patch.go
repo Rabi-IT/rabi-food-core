@@ -9,7 +9,7 @@ import (
 
 func (g *PgxOrderGatewayAdapter) Patch(filter PatchFilter, values PatchValues) (bool, error) {
 	b := sq.
-		Update("orders").
+		Update("commerce.orders").
 		Set("updated_at", time.Now().UTC()).
 		Where("deleted_at IS NULL").
 		Where(sq.Eq{"id": filter.ID}).

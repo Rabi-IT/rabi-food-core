@@ -21,7 +21,7 @@ func (g *PgxOrderGatewayAdapter) Create(input CreateInput) (string, error) {
 	now := time.Now().UTC()
 
 	sql, args, err := sq.
-		Insert("orders").
+		Insert("commerce.orders").
 		Columns("id", "tenant_id", "user_id", "code", "fulfillment_status",
 			"delivery_status", "payment_status", "notes", "total_price", "items",
 			"created_at", "updated_at").

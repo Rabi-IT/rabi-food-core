@@ -18,7 +18,7 @@ func (g *PgxUserGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutput, e
 	b := sq.
 		Select("id", "tenant_id", "social_id", "street", "complement", "name",
 			"email", "photo", "tax_id", "phone", "city", "state", "zip").
-		From("users").
+		From("iam.users").
 		Limit(1).
 		PlaceholderFormat(sq.Dollar)
 

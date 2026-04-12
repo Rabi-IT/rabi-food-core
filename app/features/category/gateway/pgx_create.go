@@ -11,7 +11,7 @@ func (g *PgxCategoryGatewayAdapter) Create(input CreateInput) (string, error) {
 	id := uuid.Must(uuid.NewV7()).String()
 
 	sql, args, err := sq.
-		Insert("categories").
+		Insert("catalog.categories").
 		Columns("id", "tenant_id", "name", "description").
 		Values(id, input.TenantID, input.Name, input.Description).
 		PlaceholderFormat(sq.Dollar).

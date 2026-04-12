@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE
-    users (
+    iam.users (
         id UUID PRIMARY KEY,
         social_id TEXT,
         street TEXT,
@@ -15,8 +15,8 @@ CREATE TABLE
         zip TEXT,
         neighborhood TEXT,
         ROLE TEXT,
-        tenant_id UUID
+        tenant_id UUID REFERENCES iam.tenants (id)
     );
 
 -- +goose Down
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS iam.users;

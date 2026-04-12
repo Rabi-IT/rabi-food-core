@@ -9,7 +9,7 @@ import (
 
 func (g *PgxProductGatewayAdapter) Delete(filter DeleteFilter) (bool, error) {
 	b := sq.
-		Update("products").
+		Update("catalog.products").
 		Set("deleted_at", time.Now().UTC()).
 		Where("deleted_at IS NULL").
 		Where(sq.Eq{"id": filter.ID}).

@@ -1,10 +1,11 @@
 -- +goose Up
+CREATE SCHEMA IF NOT EXISTS commerce;
+
 CREATE TABLE
-    orders (
+    commerce.orders (
         id UUID PRIMARY KEY,
-        tenant_id UUID NOT NULL,
-        user_id UUID NOT NULL,
-        subscription_id UUID,
+        tenant_id UUID NOT NULL REFERENCES iam.tenants (id),
+        user_id UUID NOT NULL REFERENCES iam.users (id),
         code TEXT NOT NULL,
         delivery_status VARCHAR(20) NOT NULL,
         fulfillment_status VARCHAR(20) NOT NULL,
@@ -21,7 +22,9 @@ CREATE TABLE
         CONSTRAINT uq_orders_external_payment_id UNIQUE (external_payment_id)
     );
 
-CREATE INDEX idx_orders_deleted_at ON orders (deleted_at);
+CREATE INDEX idx_orders_deleted_at ON commerce.orders (deleted_at);
 
 -- +goose Down
-DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS commerce.orders;
+
+DROP SCHEMA IF EXISTS commerce;

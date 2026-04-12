@@ -12,7 +12,7 @@ func (g *PgxSubscriptionGatewayAdapter) Paginate(
 	filter PaginateFilter,
 	paginate database.PaginateInput,
 ) (PaginateOutput, error) {
-	base := sq.Select().From("subscriptions").PlaceholderFormat(sq.Dollar)
+	base := sq.Select().From("subscription.subscriptions").PlaceholderFormat(sq.Dollar)
 
 	if filter.TenantID != nil {
 		base = base.Where(sq.Eq{"tenant_id": *filter.TenantID})

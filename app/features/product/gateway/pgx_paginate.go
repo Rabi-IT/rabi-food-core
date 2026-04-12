@@ -11,7 +11,7 @@ func (g *PgxProductGatewayAdapter) Paginate(
 	filter PaginateFilter,
 	paginate database.PaginateInput,
 ) (PaginateOutput, error) {
-	base := sq.Select().From("products").
+	base := sq.Select().From("catalog.products").
 		Where("deleted_at IS NULL").
 		PlaceholderFormat(sq.Dollar)
 

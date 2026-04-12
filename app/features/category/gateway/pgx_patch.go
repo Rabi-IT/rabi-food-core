@@ -8,7 +8,7 @@ import (
 
 func (g *PgxCategoryGatewayAdapter) Patch(filter PatchFilter, values PatchValues) (bool, error) {
 	b := sq.
-		Update("categories").
+		Update("catalog.categories").
 		Where(sq.Eq{"id": filter.ID}).
 		PlaceholderFormat(sq.Dollar)
 

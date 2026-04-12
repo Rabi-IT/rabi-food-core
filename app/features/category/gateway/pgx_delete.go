@@ -8,7 +8,7 @@ import (
 
 func (g *PgxCategoryGatewayAdapter) Delete(filter DeleteFilter) (bool, error) {
 	b := sq.
-		Delete("categories").
+		Delete("catalog.categories").
 		Where(sq.Eq{"id": filter.ID}).
 		PlaceholderFormat(sq.Dollar)
 

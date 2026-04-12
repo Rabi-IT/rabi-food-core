@@ -1,6 +1,10 @@
 -- +goose Up
+CREATE SCHEMA IF NOT EXISTS iam;
+
 CREATE TABLE
-    tenants (id UUID PRIMARY KEY, NAME TEXT NOT NULL);
+    iam.tenants (id UUID PRIMARY KEY, NAME TEXT NOT NULL);
 
 -- +goose Down
-DROP TABLE IF EXISTS tenants;
+DROP TABLE IF EXISTS iam.tenants;
+
+DROP SCHEMA IF EXISTS iam;

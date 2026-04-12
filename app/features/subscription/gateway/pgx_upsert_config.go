@@ -20,7 +20,7 @@ func (g *PgxSubscriptionGatewayAdapter) UpsertConfig(
 	}
 
 	sql, args, err := sq.
-		Insert("subscription_configs").
+		Insert("subscription.subscription_configs").
 		Columns("tenant_id", "max_attempts_per_order", "discount_rules", "cutoff_offset_minutes", "is_open", "updated_at").
 		Values(tenantID, input.MaxAttemptsPerOrder, discountRules, input.CutoffOffsetMinutes, input.IsOpen, time.Now().UTC()).
 		Suffix(`ON CONFLICT (tenant_id) DO UPDATE SET

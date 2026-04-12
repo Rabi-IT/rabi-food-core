@@ -11,7 +11,7 @@ import (
 func (g *PgxTenantGatewayAdapter) GetByID(id string) (*GetByIDOutput, error) {
 	sql, args, err := sq.
 		Select("id", "name").
-		From("tenants").
+		From("iam.tenants").
 		Where(sq.Eq{"id": id}).
 		Limit(1).
 		PlaceholderFormat(sq.Dollar).

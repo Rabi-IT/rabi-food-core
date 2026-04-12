@@ -33,7 +33,7 @@ func (g *PgxOrderGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutput, 
 		Select("id", "tenant_id", "code", "payment_status", "fulfillment_status",
 			"delivery_status", "notes", "total_price", "items", "paid_at",
 			"created_at", "external_payment_id").
-		From("orders").
+		From("commerce.orders").
 		Where("deleted_at IS NULL").
 		Where(sq.Eq{"id": filter.ID}).
 		Limit(1).

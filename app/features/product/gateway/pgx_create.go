@@ -21,7 +21,7 @@ func (g *PgxProductGatewayAdapter) Create(input CreateInput) (string, error) {
 	now := time.Now().UTC()
 
 	sql, args, err := sq.
-		Insert("products").
+		Insert("catalog.products").
 		Columns("id", "tenant_id", "name", "description", "photo", "category_id",
 			"discount_rules", "unit", "price", "is_active", "created_at", "updated_at").
 		Values(id, input.TenantID, input.Name, input.Description, input.Photo, input.CategoryID,

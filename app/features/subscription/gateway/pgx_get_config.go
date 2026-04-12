@@ -20,7 +20,7 @@ type subscriptionConfigRow struct {
 func (g *PgxSubscriptionGatewayAdapter) GetConfig(ctx context.Context, tenantID string) (*GetConfigOutput, error) {
 	sql, args, err := sq.
 		Select("max_attempts_per_order", "discount_rules", "cutoff_offset_minutes", "is_open").
-		From("subscription_configs").
+		From("subscription.subscription_configs").
 		Where(sq.Eq{"tenant_id": tenantID}).
 		Limit(1).
 		PlaceholderFormat(sq.Dollar).

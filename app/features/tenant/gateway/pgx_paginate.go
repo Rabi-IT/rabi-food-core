@@ -11,7 +11,7 @@ func (g *PgxTenantGatewayAdapter) Paginate(
 	filter PaginateFilter,
 	paginate database.PaginateInput,
 ) (PaginateOutput, error) {
-	base := sq.Select().From("tenants").PlaceholderFormat(sq.Dollar)
+	base := sq.Select().From("iam.tenants").PlaceholderFormat(sq.Dollar)
 
 	if filter.Name != nil {
 		base = base.Where(sq.ILike{"name": "%" + *filter.Name + "%"})

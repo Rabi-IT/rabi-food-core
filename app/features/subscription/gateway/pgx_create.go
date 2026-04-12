@@ -31,7 +31,7 @@ func (g *PgxSubscriptionGatewayAdapter) Create(ctx context.Context, input Create
 	now := time.Now().UTC()
 
 	sql, args, err := sq.
-		Insert("subscriptions").
+		Insert("subscription.subscriptions").
 		Columns("id", "root_subscription_id", "tenant_id", "user_id", "status",
 			"items", "delivery_days", "delivery_weekdays_mask", "notes",
 			"total_cycles", "remaining_cycles", "cycle_discount", "cutoff_offset_minutes",
