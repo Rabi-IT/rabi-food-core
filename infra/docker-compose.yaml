@@ -1,59 +1,25 @@
 services:
-  postgres:
-    image: postgres:17.6-bookworm
-    container_name: postgres
-    restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=${TEST_DATABASE_USER}
-      - POSTGRES_PASSWORD=${TEST_DATABASE_PASSWORD}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - test
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    ports:
-      - "5050:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
-    volumes:
-      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
-    networks:
-      - test
-
   app-test:
-    image: golang:1.26.1-alpine
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.test
     container_name: app-test
     env_file:
       - ../.env.test
     environment:
       - TEST_DATABASE_HOST=postgres
+      - TEST_DATABASE_PORT=${TEST_DATABASE_PORT}
+      - TEST_DATABASE_USER=${TEST_DATABASE_USER}
+      - TEST_DATABASE_PASSWORD=${TEST_DATABASE_PASSWORD}
+      - TEST_DATABASE_NAME=${TEST_DATABASE_NAME}
     volumes:
-      - ../app:/app
-    working_dir: /app
+      - ..:/rabi-food-core
+    working_dir: /rabi-food-core
     networks:
       - test
-    depends_on:
-      postgres:
-        condition: service_healthy
-    command: go run gotest.tools/gotestsum@v1.13.0 --format testname -- ./... -p 1 -v
-
-volumes:
-  pgdata:
+    command: task test-local
 
 networks:
   test:
     name: test
-    driver: bridge
+    external: true

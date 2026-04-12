@@ -51,18 +51,26 @@ tasks:
   # 🧪 Tests and utilities
   # =============================
   test:
-    desc: "Start the test environment with infrastructure logs"
+    desc: "Start Postgres and pgAdmin"
     dotenv: ["../.env.test"]
     dir: infra
+    deps: [db]
     cmds:
       - docker compose up
 
+  test-local:
+    desc: "Run tests directly (executado dentro do container Docker via task test)"
+    dir: app
+    cmds:
+      - gotestsum --format testname -- ./... -p 1 -v
+    silent: false
+
   db:
-    desc: "Start Postgres and pgAdmin"
+    desc: "Run tests inside Docker"
     dir: infra
     dotenv: ["../.env.test"]
     cmds:
-      - docker compose up -d postgres pgadmin
+      - docker compose -f docker-compose.db.yaml up -d
     silent: false
 
   db-down:
