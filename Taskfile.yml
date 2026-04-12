@@ -38,16 +38,6 @@ tasks:
     silent: false
 
   # =============================
-  # 🚀 Production build and run
-  # =============================
-  build:
-    desc: "Build the production Docker image"
-    dir: app
-    cmds:
-      - docker build -t rabi-food:latest
-    silent: false
-
-  # =============================
   # 🧪 Tests and utilities
   # =============================
   test:
