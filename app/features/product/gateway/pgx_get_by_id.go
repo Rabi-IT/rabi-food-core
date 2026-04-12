@@ -12,8 +12,8 @@ func (g *PgxProductGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutput
 	b := sq.
 		Select("p.id", "p.tenant_id", "p.name", "p.description", "p.photo",
 			"p.category_id", "c.name AS category_name", "p.unit", "p.price", "p.is_active").
-		From("products p").
-		Join("categories c ON c.id = p.category_id").
+		From("catalog.products p").
+		Join("catalog.categories c ON c.id = p.category_id").
 		Where("p.deleted_at IS NULL").
 		Where(sq.Eq{"p.id": filter.ID}).
 		Limit(1).
