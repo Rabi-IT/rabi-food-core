@@ -69,6 +69,13 @@ variable "grafana_prometheus_instance_id" {
 }
 
 variable "domain_name" {
-  description = "Domínio da API (ex: api.rabi.food)"
+  description = "API Domain (ex: api.rabi.food)"
   type        = string
 }
+
+variable "gotrue_service_key" {
+  description = "Shared secret used by the app to authenticate against the GoTrue Admin API (GOTRUE_OPERATOR_TOKEN)"
+  type        = string
+  sensitive   = true
+}
+

@@ -37,17 +37,18 @@ func TestMySuite(t *testing.T) {
 
 func (t *TestSuite) Test_TenantIntegration_Create() {
 	t.Run("should be able to create", func() {
-		Body := tenant_case.CreateInput{
-			Name:     "Name",
-			UserName: "UserName",
-			Phone:    "Phone",
-			Email:    "email@email.com",
+		body := tenant_case.CreateInput{
+			Name:         "Name",
+			UserName:     "UserName",
+			UserPhone:    "11999999999",
+			UserEmail:    "email@email.com",
+			UserPassword: "password123",
 		}
 
 		var response tenant_case.CreateOutput
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodPost, fixtures.Tenant.URI).
-			WithJSON(Body).
+			WithJSON(body).
 			Expect().Status(http.StatusCreated).
 			JSON().Decode(&response)
 
@@ -60,31 +61,33 @@ func (t *TestSuite) Test_TenantIntegration_Create() {
 			JSON().Object().
 			ContainsSubset(map[string]any{
 				"id":   response.ID,
-				"name": Body.Name,
+				"name": body.Name,
 			})
 	})
 
 	t.Run("should fail if required fields are empty", func() {
-		Body := tenant_case.CreateInput{}
+		body := tenant_case.CreateInput{}
 
 		response := new(middlewares.ValidationErrorResponse)
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodPost, fixtures.Tenant.URI).
-			WithJSON(Body).
+			WithJSON(body).
 			Expect().
 			Status(http.StatusBadRequest).
 			JSON().Decode(response)
 
-		t.Len(response.Errors, 4)
+		t.Len(response.Errors, 5)
 		for _, e := range response.Errors {
 			switch e.Field {
 			case "Name":
 				t.Equal("required", e.Tag)
 			case "UserName":
 				t.Equal("required", e.Tag)
-			case "Phone":
+			case "UserPhone":
 				t.Equal("required", e.Tag)
-			case "Email":
+			case "UserEmail":
+				t.Equal("required", e.Tag)
+			case "UserPassword":
 				t.Equal("required", e.Tag)
 			default:
 				t.Fail("unexpected validation error field: " + e.Field)

@@ -18,6 +18,11 @@ resource "aws_cloudwatch_log_group" "alloy" {
   retention_in_days = 7
 }
 
+resource "aws_cloudwatch_log_group" "gotrue" {
+  name              = "/ecs/rabi-food-gotrue"
+  retention_in_days = 30
+}
+
 locals {
   alloy_config = <<-ALLOY
     prometheus.scrape "app" {
@@ -63,17 +68,53 @@ resource "aws_ecs_task_definition" "app" {
         { name = "DATABASE_NAME", value = var.db_name },
         { name = "DATABASE_USER", value = var.db_user },
         { name = "DATABASE_PORT", value = "5432" },
+        # GoTrue runs as a sidecar — reachable only on localhost within the task
+        { name = "GOTRUE_URL",    value = "http://localhost:9999" },
       ]
 
       secrets = [
-        { name = "DATABASE_PASSWORD", valueFrom = aws_secretsmanager_secret.db_password.arn },
-        { name = "AUTH_SECRET",       valueFrom = aws_secretsmanager_secret.auth_secret.arn },
+        { name = "DATABASE_PASSWORD",  valueFrom = aws_secretsmanager_secret.db_password.arn },
+        { name = "AUTH_SECRET",        valueFrom = aws_secretsmanager_secret.auth_secret.arn },
+        { name = "GOTRUE_SERVICE_KEY", valueFrom = aws_secretsmanager_secret.gotrue_service_key.arn },
       ]
 
       logConfiguration = {
         logDriver = "awslogs"
         options = {
           "awslogs-group"         = aws_cloudwatch_log_group.app.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+    },
+    {
+      name      = "gotrue"
+      image     = "supabase/gotrue:v2.189.0-rc.13"
+      essential = true
+
+      # No portMappings — GoTrue is not publicly reachable, only via localhost within the task
+      environment = [
+        { name = "GOTRUE_API_HOST",           value = "0.0.0.0" },
+        { name = "GOTRUE_API_PORT",           value = "9999" },
+        { name = "API_EXTERNAL_URL",          value = "http://localhost:9999" },
+        { name = "GOTRUE_DB_DRIVER",          value = "postgres" },
+        { name = "GOTRUE_JWT_EXP",            value = "3600" },
+        { name = "GOTRUE_DISABLE_SIGNUP",     value = "true" },
+        { name = "GOTRUE_MAILER_AUTOCONFIRM", value = "true" },
+        { name = "GOTRUE_SITE_URL",           value = "http://localhost:3000" },
+        { name = "GOTRUE_LOG_LEVEL",          value = "info" },
+      ]
+
+      secrets = [
+        { name = "GOTRUE_JWT_SECRET",      valueFrom = aws_secretsmanager_secret.auth_secret.arn },
+        { name = "GOTRUE_DB_DATABASE_URL", valueFrom = aws_secretsmanager_secret.gotrue_db_url.arn },
+        { name = "GOTRUE_OPERATOR_TOKEN",  valueFrom = aws_secretsmanager_secret.gotrue_service_key.arn },
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.gotrue.name
           "awslogs-region"        = var.aws_region
           "awslogs-stream-prefix" = "ecs"
         }

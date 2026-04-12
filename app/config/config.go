@@ -3,10 +3,12 @@ package config
 import "os"
 
 var (
-	AppPort            = os.Getenv("APP_PORT")
-	AppVersion         = os.Getenv("APP_VERSION")
-	AuthSecret         = os.Getenv("AUTH_SECRET")
-	Env                = environment(os.Getenv("ENV"))
+	AppPort           = os.Getenv("APP_PORT")
+	AppVersion        = os.Getenv("APP_VERSION")
+	AuthSecret        = os.Getenv("AUTH_SECRET")
+	Env               = environment(os.Getenv("ENV"))
+	GoTrueURL         = os.Getenv("GOTRUE_URL")
+	GoTrueServiceKey  = os.Getenv("GOTRUE_SERVICE_KEY")
 	ProductionDatabase = &DatabaseConfig{
 		Host:         os.Getenv("DATABASE_HOST"),
 		DatabaseName: os.Getenv("DATABASE_NAME"),

@@ -19,20 +19,22 @@ var Tenant = tenantFixture{"/tenant/"}
 
 func (tenantFixture) Create(t *testing.T, input *c.CreateInput) *c.CreateOutput {
 	t.Helper()
-	Body := input
-	if Body == nil {
-		Body = &c.CreateInput{
-			Name:     "Name",
-			UserName: "UserName",
-			Phone:    "http://example.com/photo.png",
-			Email:    "email@email.com",
+
+	body := input
+	if body == nil {
+		body = &c.CreateInput{
+			Name:         "Name",
+			UserName:     "UserName",
+			UserPhone:    "11999999999",
+			UserEmail:    "email@email.com",
+			UserPassword: "password123",
 		}
 	}
 
 	output := &c.CreateOutput{}
 	httpexpect.Default(t, AppURL).
 		Request(http.MethodPost, Tenant.URI).
-		WithJSON(Body).
+		WithJSON(body).
 		Expect().Status(http.StatusCreated).
 		JSON().Object().
 		Decode(output)
@@ -44,6 +46,7 @@ func (tenantFixture) Create(t *testing.T, input *c.CreateInput) *c.CreateOutput 
 
 func (tenantFixture) GetMe(t *testing.T, token string) g.GetByIDOutput {
 	t.Helper()
+
 	found := g.GetByIDOutput{}
 
 	obj := httpexpect.Default(t, AppURL).
@@ -52,7 +55,6 @@ func (tenantFixture) GetMe(t *testing.T, token string) g.GetByIDOutput {
 		Expect().Status(http.StatusOK)
 
 	response := obj.Raw()
-
 	obj.JSON().Object().Decode(&found)
 
 	err := response.Body.Close()

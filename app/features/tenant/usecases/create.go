@@ -3,18 +3,16 @@ package usecases
 import (
 	"context"
 
-	"github.com/Rabi-IT/rabi-food-core/app_context"
-	"github.com/Rabi-IT/rabi-food-core/domain/auth"
 	g "github.com/Rabi-IT/rabi-food-core/features/tenant/gateway"
-	user "github.com/Rabi-IT/rabi-food-core/features/user/usecases"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 )
 
 type CreateInput struct {
-	Name     string `validate:"required"`
-	UserName string `validate:"required"`
-	Phone    string `validate:"required"`
-	Email    string `validate:"required,email"`
+	Name         string `validate:"required"`
+	UserName     string `validate:"required"`
+	UserPhone    string `validate:"required"`
+	UserEmail    string `validate:"required,email"`
+	UserPassword string `validate:"required,min=8"`
 }
 
 type CreateOutput struct {
@@ -23,32 +21,17 @@ type CreateOutput struct {
 }
 
 func (c *TenantCase) Create(ctx context.Context, input CreateInput) (out CreateOutput, err error) {
-	tenantId, err := c.gateway.Create(g.CreateInput{
-		Name: input.Name,
-	})
-	logger.GetWideEvent(ctx).SetTenantID(tenantId)
+	tenantID, err := c.gateway.Create(g.CreateInput{Name: input.Name})
+	logger.GetWideEvent(ctx).SetTenantID(tenantID)
 
 	if err != nil {
 		return
 	}
 
-	ctx = app_context.WithSession(ctx, &app_context.UserSession{
-		TenantID: tenantId,
-		Role:     auth.User,
-	})
-
-	userId, err := c.userCase.Create(ctx, &user.CreateInput{
-		Name:  input.UserName,
-		Phone: input.Phone,
-		Email: input.Email,
-	})
-
+	userID, err := c.userCreator.SignUpTenantOwner(ctx, input.UserEmail, input.UserPassword, input.UserName, input.UserPhone, tenantID)
 	if err != nil {
 		return
 	}
 
-	return CreateOutput{
-		UserID: userId,
-		ID:     tenantId,
-	}, nil
+	return CreateOutput{ID: tenantID, UserID: userID}, nil
 }

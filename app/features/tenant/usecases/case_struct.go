@@ -1,21 +1,25 @@
 package usecases
 
 import (
+	"context"
+
 	g "github.com/Rabi-IT/rabi-food-core/features/tenant/gateway"
-	user_case "github.com/Rabi-IT/rabi-food-core/features/user/usecases"
 )
 
-type TenantCase struct {
-	gateway  g.TenantGateway
-	userCase *user_case.UserCase
+// userCreator is satisfied by auth_case.AuthCase — defined here to avoid cross-feature imports.
+// Primitive parameters are used intentionally so auth does not need to import tenant types.
+type userCreator interface {
+	SignUpTenantOwner(ctx context.Context, email, password, name, phone, tenantID string) (string, error)
 }
 
-func New(
-	gateway g.TenantGateway,
-	userCase *user_case.UserCase,
-) *TenantCase {
+type TenantCase struct {
+	gateway     g.TenantGateway
+	userCreator userCreator
+}
+
+func New(gateway g.TenantGateway, userCreator userCreator) *TenantCase {
 	return &TenantCase{
-		gateway:  gateway,
-		userCase: userCase,
+		gateway:     gateway,
+		userCreator: userCreator,
 	}
 }

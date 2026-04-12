@@ -4,6 +4,9 @@ import (
 	"errors"
 
 	"github.com/Rabi-IT/rabi-food-core/config"
+	auth_controller "github.com/Rabi-IT/rabi-food-core/features/auth/controller"
+	auth_gateway "github.com/Rabi-IT/rabi-food-core/features/auth/gateway"
+	auth_case "github.com/Rabi-IT/rabi-food-core/features/auth/usecases"
 	category_controller "github.com/Rabi-IT/rabi-food-core/features/category/controller"
 	category_gateway "github.com/Rabi-IT/rabi-food-core/features/category/gateway"
 	category_case "github.com/Rabi-IT/rabi-food-core/features/category/usecases"
@@ -19,9 +22,6 @@ import (
 	tenant_controller "github.com/Rabi-IT/rabi-food-core/features/tenant/controller"
 	tenant_gateway "github.com/Rabi-IT/rabi-food-core/features/tenant/gateway"
 	tenant_case "github.com/Rabi-IT/rabi-food-core/features/tenant/usecases"
-	user_controller "github.com/Rabi-IT/rabi-food-core/features/user/controller"
-	user_gateway "github.com/Rabi-IT/rabi-food-core/features/user/gateway"
-	user_case "github.com/Rabi-IT/rabi-food-core/features/user/usecases"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
 	"github.com/Rabi-IT/rabi-food-core/libs/http"
 
@@ -53,8 +53,8 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 
 	// HTTP Server
 	do.Provide(injector, func(i *do.Injector) (http.HTTPServer, error) {
+		authController := do.MustInvoke[*auth_controller.AuthController](i)
 		tenantController := do.MustInvoke[*tenant_controller.TenantController](i)
-		userController := do.MustInvoke[*user_controller.UserController](i)
 		productController := do.MustInvoke[*product_controller.ProductController](i)
 		categoryController := do.MustInvoke[*category_controller.CategoryController](i)
 		orderController := do.MustInvoke[*order_controller.OrderController](i)
@@ -66,8 +66,8 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 
 		return http.New(
 			config.AppPort,
+			authController,
 			tenantController,
-			userController,
 			productController,
 			categoryController,
 			orderController,
@@ -75,23 +75,21 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		), nil
 	})
 
-	// User dependencies
-	do.Provide(injector, func(i *do.Injector) (user_gateway.UserGateway, error) {
-		db := do.MustInvoke[*database.PgxAdapter](i)
-
-		return &user_gateway.PgxUserGatewayAdapter{DB: db}, nil
+	// Auth dependencies
+	do.Provide(injector, func(_ *do.Injector) (auth_gateway.AuthGateway, error) {
+		return auth_gateway.NewGoTrue(config.GoTrueURL, config.GoTrueServiceKey), nil
 	})
 
-	do.Provide(injector, func(i *do.Injector) (*user_case.UserCase, error) {
-		gw := do.MustInvoke[user_gateway.UserGateway](i)
+	do.Provide(injector, func(i *do.Injector) (*auth_case.AuthCase, error) {
+		gw := do.MustInvoke[auth_gateway.AuthGateway](i)
 
-		return user_case.New(gw), nil
+		return auth_case.New(gw), nil
 	})
 
-	do.Provide(injector, func(i *do.Injector) (*user_controller.UserController, error) {
-		c := do.MustInvoke[*user_case.UserCase](i)
+	do.Provide(injector, func(i *do.Injector) (*auth_controller.AuthController, error) {
+		c := do.MustInvoke[*auth_case.AuthCase](i)
 
-		return user_controller.New(c), nil
+		return auth_controller.New(c), nil
 	})
 
 	// Tenant dependencies
@@ -103,9 +101,9 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 
 	do.Provide(injector, func(i *do.Injector) (*tenant_case.TenantCase, error) {
 		gw := do.MustInvoke[tenant_gateway.TenantGateway](i)
-		userCase := do.MustInvoke[*user_case.UserCase](i)
+		authCase := do.MustInvoke[*auth_case.AuthCase](i)
 
-		return tenant_case.New(gw, userCase), nil
+		return tenant_case.New(gw, authCase), nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (*tenant_controller.TenantController, error) {

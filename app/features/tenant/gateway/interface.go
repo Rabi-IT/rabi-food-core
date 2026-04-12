@@ -1,12 +1,17 @@
 package gateway
 
-import "github.com/Rabi-IT/rabi-food-core/libs/database"
+import (
+	"context"
+
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
+)
 
 type TenantGateway interface {
 	Patch(filter PatchFilter, values PatchValues) (bool, error)
 	Create(input CreateInput) (string, error)
 	GetByID(id string) (*GetByIDOutput, error)
 	Paginate(filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
+	RegisterCustomer(ctx context.Context, tenantID, userID string) error
 }
 
 type PatchFilter struct {

@@ -2,19 +2,19 @@ package http
 
 import (
 	"github.com/Rabi-IT/rabi-food-core/config"
+	auth_controller "github.com/Rabi-IT/rabi-food-core/features/auth/controller"
 	category_controller "github.com/Rabi-IT/rabi-food-core/features/category/controller"
 	order_controller "github.com/Rabi-IT/rabi-food-core/features/order/controller"
 	product_controller "github.com/Rabi-IT/rabi-food-core/features/product/controller"
 	subscription_controller "github.com/Rabi-IT/rabi-food-core/features/subscription/controller"
 	tenant_controller "github.com/Rabi-IT/rabi-food-core/features/tenant/controller"
-	user_controller "github.com/Rabi-IT/rabi-food-core/features/user/controller"
 
+	auth_routes "github.com/Rabi-IT/rabi-food-core/features/auth/routes"
 	category_routes "github.com/Rabi-IT/rabi-food-core/features/category/routes"
 	order_routes "github.com/Rabi-IT/rabi-food-core/features/order/routes"
 	product_routes "github.com/Rabi-IT/rabi-food-core/features/product/routes"
 	subscription_routes "github.com/Rabi-IT/rabi-food-core/features/subscription/routes"
 	tenant_routes "github.com/Rabi-IT/rabi-food-core/features/tenant/routes"
-	user_routes "github.com/Rabi-IT/rabi-food-core/features/user/routes"
 	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
 	fiberprometheus "github.com/ansrivas/fiberprometheus/v2"
@@ -32,8 +32,8 @@ type fiberAdapter struct {
 
 func New(
 	port string,
+	authController *auth_controller.AuthController,
 	tenantController *tenant_controller.TenantController,
-	userController *user_controller.UserController,
 	productController *product_controller.ProductController,
 	categoryController *category_controller.CategoryController,
 	orderController *order_controller.OrderController,
@@ -60,13 +60,18 @@ func New(
 		app.Static("/docs", "./libs/docs")
 	}
 
+	app.Use(middlewares.Logging())
+
+	// Public routes — no JWT required
+	auth_routes.Auth(app, authController)
+	app.Post("/tenant", tenantController.Create)
+
+	// Protected routes — JWT required
 	app.
-		Use(middlewares.Logging()).
-		Post("/tenant", tenantController.Create).
 		Use(jwtMiddleware).
 		Use(middlewares.Session)
 
-	user_routes.User(app, userController)
+	auth_routes.AuthProtected(app, authController)
 	tenant_routes.Tenant(app, tenantController)
 	product_routes.Product(app, productController)
 	category_routes.Category(app, categoryController)

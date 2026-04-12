@@ -12,6 +12,7 @@ func Tenant(app *fiber.App, c *controller.TenantController) {
 	route := app.Group("/tenant")
 	route.Get("/:id", c.GetByID)
 	route.Patch("/:id", c.Patch)
+	route.Post("/:id/customers", c.RegisterCustomer)
 
 	backoffice := app.Group("/backoffice/tenant", middlewares.RequireRole(auth.Backoffice))
 	backoffice.Get("/", c.BackofficePaginate)

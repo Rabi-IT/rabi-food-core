@@ -18,7 +18,8 @@ var (
 	errInvalidClaims = errors.New("INVALID_CLAIMS")
 )
 
-// Session is a middleware that extracts user session information from the JWT token.
+// Session is a middleware that extracts user session information from a GoTrue JWT token.
+// GoTrue embeds app role and tenant_id inside app_metadata claims.
 func Session(c *fiber.Ctx) error {
 	token, ok := c.Context().UserValue("user").(*jwt.Token)
 	if !ok || !token.Valid {
@@ -30,13 +31,16 @@ func Session(c *fiber.Ctx) error {
 		return errInvalidClaims
 	}
 
+	appMeta, _ := claims["app_metadata"].(map[string]any)
+	userMeta, _ := claims["user_metadata"].(map[string]any)
+
 	session := &app_context.UserSession{
-		UserID:         fmt.Sprint(claims["user_id"]),
-		TenantID:       fmt.Sprint(claims["tenant_id"]),
-		Name:           fmt.Sprint(claims["name"]),
-		Login:          fmt.Sprint(claims["login"]),
-		OriginalUserID: fmt.Sprint(claims["original_user_id"]),
-		Role:           auth.Role(fmt.Sprint(claims["role"])),
+		UserID:         fmt.Sprint(claims["sub"]),
+		Login:          fmt.Sprint(claims["email"]),
+		TenantID:       stringFromMap(appMeta, "tenant_id"),
+		Name:           stringFromMap(userMeta, "name"),
+		Role:           auth.Role(stringFromMap(appMeta, "role")),
+		OriginalUserID: stringFromMap(appMeta, "original_user_id"),
 	}
 
 	userID, isBackoffice := session.GetOriginalUserID()
@@ -57,4 +61,17 @@ func Session(c *fiber.Ctx) error {
 	c.SetUserContext(ctx)
 
 	return c.Next()
+}
+
+func stringFromMap(m map[string]any, key string) string {
+	if m == nil {
+		return ""
+	}
+
+	v, ok := m[key]
+	if !ok {
+		return ""
+	}
+
+	return fmt.Sprint(v)
 }
