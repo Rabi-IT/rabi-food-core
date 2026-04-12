@@ -11,7 +11,6 @@ jobs:
   deploy:
     needs: [test]
     runs-on: ubuntu-24.04
-    container: golang:1.26.1
 
     defaults:
       run:
@@ -21,11 +20,31 @@ jobs:
       - name: Fetch Repository
         uses: actions/checkout@v5
 
-      - name: Generate binary
-        run: go build -o rabi-food-core main.go
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Rename binary
-        run: mv rabi-food-core rabi-food-core@latest
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          APP_VERSION: ${{ github.event.release.tag_name }}
+        run: |
+          docker build -t $ECR_REGISTRY/rabi-food-core:$APP_VERSION .
+          docker tag $ECR_REGISTRY/rabi-food-core:$APP_VERSION $ECR_REGISTRY/rabi-food-core:latest
+          docker push $ECR_REGISTRY/rabi-food-core:$APP_VERSION
+          docker push $ECR_REGISTRY/rabi-food-core:latest
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'go.mod'
 
       - name: Run Migrations
         env:
@@ -40,23 +59,20 @@ jobs:
             "host=${DATABASE_HOST} user=${DATABASE_USER} password=${DATABASE_PASSWORD} port=${DATABASE_PORT} dbname=${DATABASE_NAME}" \
             up
 
-      - name: Copy binary
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SSH_HOST_PRODUCTION }}
-          username: ${{ secrets.SSH_USER_PRODUCTION }}
-          key: ${{ secrets.SSH_KEY_PRODUCTION }}
-          source: "./app/rabi-food-core@latest"
-          target: "~/"
-
-      - name: Deploy script
+      - name: Deploy
         uses: appleboy/ssh-action@master
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          APP_VERSION: ${{ github.event.release.tag_name }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
         with:
           host: ${{ secrets.SSH_HOST_PRODUCTION }}
           username: ${{ secrets.SSH_USER_PRODUCTION }}
           key: ${{ secrets.SSH_KEY_PRODUCTION }}
+          envs: ECR_REGISTRY,APP_VERSION,AWS_REGION
           script: |
-            mv rabi-food-core@latest rabi-food-core
-            chmod 700 rabi-food-core
-            sudo systemctl set-environment APP_VERSION=${{ github.event.release.tag_name }}
-            sudo systemctl restart rabi-food-core.service
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+            sed -i "s|^APP_VERSION=.*|APP_VERSION=$APP_VERSION|" ~/rabi-food.env
+            sed -i "s|^ECR_REGISTRY=.*|ECR_REGISTRY=$ECR_REGISTRY|" ~/rabi-food.env
+            docker compose --env-file ~/rabi-food.env -f ~/docker-compose.yaml pull app
+            docker compose --env-file ~/rabi-food.env -f ~/docker-compose.yaml up -d --no-deps app
