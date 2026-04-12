@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:1.26.1-alpine AS builder
 
 WORKDIR /app
 
@@ -9,13 +9,13 @@ COPY . .
 
 RUN go build -o server ./main.go
 
-FROM debian:bookworm-slim
+FROM alpine:3.21
 
 WORKDIR /app
 
 COPY --from=builder /app/server .
 
-RUN useradd -m appuser
+RUN adduser -D appuser
 USER appuser
 
 CMD ["./server"]

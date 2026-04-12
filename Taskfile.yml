@@ -13,7 +13,7 @@ tasks:
     desc: "Start the development environment"
     dir: app
     dotenv: ["../.env.test"]
-    deps: [test-database, docs]
+    deps: [docs]
     cmds:
       - go run main.go
     silent: false
@@ -48,46 +48,36 @@ tasks:
     silent: false
 
   # =============================
-  # 🏗️ Infrastructure services
-  # =============================
-  infra:
-    desc: "Start the infrastructure services (Grafana, Prometheus, Loki, Alloy)"
-    dir: infra
-    cmds:
-      - docker compose -f docker-compose.infra.yaml up -d
-    silent: false
-
-  infra-down:
-    desc: "Stop the infrastructure"
-    dir: infra
-    cmds:
-      - docker compose -f docker-compose.infra.yaml down
-    silent: true
-
-  # =============================
   # 🧪 Tests and utilities
   # =============================
-  test-database:
-    desc: "Start only the infrastructure for tests (Postgres, pgAdmin)"
+  test:
+    desc: "Start the test environment with infrastructure logs"
+    dotenv: ["../.env.test"]
+    dir: infra
+    cmds:
+      - docker compose up
+
+  db:
+    desc: "Start Postgres and pgAdmin"
     dir: infra
     dotenv: ["../.env.test"]
     cmds:
-      - docker compose -f docker-compose.test-database.yaml up -d postgres pgadmin
+      - docker compose up -d postgres pgadmin
     silent: false
 
-  test-database-down:
-    desc: "Stop the test infrastructure"
+  db-down:
+    desc: "Stop Postgres and pgAdmin"
     dir: infra
     dotenv: ["../.env.test"]
     cmds:
-      - docker compose -f docker-compose.test-database.yaml down
+      - docker compose down
     silent: true
 
   migrate:
     desc: "Run pending database migrations"
     dir: app
     dotenv: ["../.env.test"]
-    deps: [test-database]
+    deps: [db]
     cmds:
       - echo "goose {{.GOOSE_VERSION}}"
       - go run github.com/pressly/goose/v3/cmd/goose@{{.GOOSE_VERSION}} -dir libs/database/migrations postgres "host=${TEST_DATABASE_HOST} user=${TEST_DATABASE_USER} password=${TEST_DATABASE_PASSWORD} port=${TEST_DATABASE_PORT} dbname=${TEST_DATABASE_NAME}" up
@@ -118,13 +108,32 @@ tasks:
       - go run github.com/vektra/mockery/v2@v2.53.5 --all --output fixtures/mocks
     silent: false
 
-  test:
-    desc: "Start the test environment with infrastructure logs"
-    dotenv: ["../.env.test"]
-    deps: [infra, test-database]
-    dir: infra
+  # =============================
+  # ☁️ Terraform
+  # =============================
+  tf:init:
+    desc: "Initialize Terraform"
+    dir: infra/terraform
     cmds:
-      - docker compose -f docker-compose.test.yaml up
+      - terraform init
+
+  tf:plan:
+    desc: "Preview infrastructure changes"
+    dir: infra/terraform
+    cmds:
+      - terraform plan -var="db_password=${DB_PASSWORD}" -var="auth_secret=${AUTH_SECRET}"
+
+  tf:apply:
+    desc: "Apply infrastructure changes"
+    dir: infra/terraform
+    cmds:
+      - terraform apply -var="db_password=${DB_PASSWORD}" -var="auth_secret=${AUTH_SECRET}"
+
+  tf:destroy:
+    desc: "Destroy all infrastructure"
+    dir: infra/terraform
+    cmds:
+      - terraform destroy -var="db_password=${DB_PASSWORD}" -var="auth_secret=${AUTH_SECRET}"
 
   # =============================
   # 🔧 Infrastructure utils

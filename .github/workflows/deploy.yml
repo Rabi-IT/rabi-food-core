@@ -59,20 +59,18 @@ jobs:
             "host=${DATABASE_HOST} user=${DATABASE_USER} password=${DATABASE_PASSWORD} port=${DATABASE_PORT} dbname=${DATABASE_NAME}" \
             up
 
-      - name: Deploy
-        uses: appleboy/ssh-action@master
+      - name: Update ECS task definition
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
           APP_VERSION: ${{ github.event.release.tag_name }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-        with:
-          host: ${{ secrets.SSH_HOST_PRODUCTION }}
-          username: ${{ secrets.SSH_USER_PRODUCTION }}
-          key: ${{ secrets.SSH_KEY_PRODUCTION }}
-          envs: ECR_REGISTRY,APP_VERSION,AWS_REGION
-          script: |
-            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-            sed -i "s|^APP_VERSION=.*|APP_VERSION=$APP_VERSION|" ~/rabi-food.env
-            sed -i "s|^ECR_REGISTRY=.*|ECR_REGISTRY=$ECR_REGISTRY|" ~/rabi-food.env
-            docker compose --env-file ~/rabi-food.env -f ~/docker-compose.yaml pull app
-            docker compose --env-file ~/rabi-food.env -f ~/docker-compose.yaml up -d --no-deps app
+        run: |
+          TASK_DEF=$(aws ecs describe-task-definition --task-definition rabi-food-app --query 'taskDefinition' --output json)
+          NEW_TASK_DEF=$(echo $TASK_DEF | jq \
+            --arg IMAGE "$ECR_REGISTRY/rabi-food-core:$APP_VERSION" \
+            --arg VERSION "$APP_VERSION" \
+            '.containerDefinitions[0].image = $IMAGE |
+             .containerDefinitions[0].environment += [{"name":"APP_VERSION","value":$VERSION}] |
+             del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.placementConstraints,.compatibilities,.registeredAt,.registeredBy)')
+          NEW_ARN=$(aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' --output text)
+          aws ecs update-service --cluster rabi-food --service rabi-food-app --task-definition $NEW_ARN
