@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+
 type TestSuite struct {
 	suite.Suite
 
@@ -33,6 +34,46 @@ func (t *TestSuite) TearDownSuite() {
 
 func TestMySuite(t *testing.T) {
 	suite.Run(t, new(TestSuite))
+}
+
+func (t *TestSuite) Test_TenantIntegration_RegisterCustomer() {
+	t.Run("should register a customer to a tenant", func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+
+		customerID := fixtures.Auth.SignUp(t.T(), fixtures.SignUpInput{
+			Email:    "customer@email.com",
+			Password: "password123",
+			Name:     "Customer",
+			Phone:    "11988888888",
+			TaxID:    "12345678901",
+		})
+		token := fixtures.Auth.UserToken(t.T(), customerID)
+
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/customers").
+			WithHeader("Authorization", "Bearer "+token).
+			Expect().Status(http.StatusNoContent)
+	})
+
+	t.Run("should be idempotent", func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+
+		customerID := fixtures.Auth.SignUp(t.T(), fixtures.SignUpInput{
+			Email:    "customer@email.com",
+			Password: "password123",
+			Name:     "Customer",
+			Phone:    "11988888888",
+			TaxID:    "12345678901",
+		})
+		token := fixtures.Auth.UserToken(t.T(), customerID)
+
+		for range 2 {
+			httpexpect.Default(t.T(), fixtures.AppURL).
+				Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/customers").
+				WithHeader("Authorization", "Bearer "+token).
+				Expect().Status(http.StatusNoContent)
+		}
+	})
 }
 
 func (t *TestSuite) Test_TenantIntegration_Create() {
@@ -65,7 +106,7 @@ func (t *TestSuite) Test_TenantIntegration_Create() {
 			})
 	})
 
-	t.Run("should fail if required fields are empty", func() {
+	t.Run("should fail if required fields are missing", func() {
 		body := tenant_case.CreateInput{}
 
 		response := new(middlewares.ValidationErrorResponse)

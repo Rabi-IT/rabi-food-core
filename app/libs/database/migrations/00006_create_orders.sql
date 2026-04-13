@@ -5,7 +5,7 @@ CREATE TABLE
     commerce.orders (
         id UUID PRIMARY KEY,
         tenant_id UUID NOT NULL REFERENCES iam.tenants (id),
-        user_id UUID NOT NULL REFERENCES iam.users (id),
+        user_id UUID NOT NULL REFERENCES auth.users (id),
         code TEXT NOT NULL,
         delivery_status VARCHAR(20) NOT NULL,
         fulfillment_status VARCHAR(20) NOT NULL,

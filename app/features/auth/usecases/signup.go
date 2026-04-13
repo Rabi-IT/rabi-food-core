@@ -14,7 +14,7 @@ type SignUpInput struct {
 	Phone        string `json:"phone"        validate:"required"`
 	TaxID        string `json:"taxId"        validate:"required"`
 	SocialID     string `json:"socialId"`
-	TenantID     string `json:"tenantId"     validate:"required"`
+	TenantID     string `json:"tenantId"`
 	City         string `json:"city"`
 	State        string `json:"state"`
 	ZIP          string `json:"zip"`

@@ -4,17 +4,36 @@ services:
     container_name: postgres
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "psql -U ${TEST_DATABASE_USER} -d ${TEST_DATABASE_NAME} -c 'SELECT 1' || exit 1"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_USER=${TEST_DATABASE_USER}
       - POSTGRES_PASSWORD=${TEST_DATABASE_PASSWORD}
+      - POSTGRES_DB=${TEST_DATABASE_NAME}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - test
+
+  gotrue-migration:
+    image: postgres:17.6-bookworm
+    container_name: gotrue-migration
+    restart: "no"
+    command: sh /docker-entrypoint-initdb.d/gotrue-migration.sh
+    environment:
+      - TEST_DATABASE_USER=${TEST_DATABASE_USER}
+      - TEST_DATABASE_NAME=${TEST_DATABASE_NAME}
+      - PGPASSWORD=${TEST_DATABASE_PASSWORD}
+    volumes:
+      - ./gotrue/migration.sh:/docker-entrypoint-initdb.d/gotrue-migration.sh:ro
+      - ./gotrue/migration.sql:/docker-entrypoint-initdb.d/migration.sql:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - test
 
@@ -22,6 +41,12 @@ services:
     image: supabase/gotrue:v2.189.0-rc.13
     container_name: gotrue
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9999/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     ports:
       - "9999:9999"
     environment:
@@ -29,8 +54,9 @@ services:
       GOTRUE_API_PORT: 9999
       API_EXTERNAL_URL: http://localhost:9999
       GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: postgres://${TEST_DATABASE_USER}:${TEST_DATABASE_PASSWORD}@postgres:5432/${TEST_DATABASE_NAME}?search_path=auth&sslmode=disable
+      GOTRUE_DB_DATABASE_URL: postgres://${TEST_DATABASE_USER}:${TEST_DATABASE_PASSWORD}@postgres:5432/${TEST_DATABASE_NAME}?sslmode=disable
       GOTRUE_JWT_SECRET: ${AUTH_SECRET}
+      GOTRUE_DB_NAMESPACE: auth
       GOTRUE_JWT_EXP: 3600
       GOTRUE_DISABLE_SIGNUP: "true"
       GOTRUE_SITE_URL: http://localhost:3000
@@ -40,6 +66,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      gotrue-migration:
+        condition: service_completed_successfully
     networks:
       - test
 

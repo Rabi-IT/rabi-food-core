@@ -15,8 +15,9 @@ var tables = []string{
 	"subscription.subscriptions",
 	"catalog.products",
 	"catalog.categories",
-	"iam.users",
+	"iam.tenant_customers",
 	"iam.tenants",
+	"auth.users",
 }
 
 func CleanDatabase(t *testing.T) {

@@ -6,7 +6,7 @@ CREATE TABLE
         id UUID PRIMARY KEY,
         root_subscription_id UUID REFERENCES subscription.subscriptions (id),
         tenant_id UUID NOT NULL REFERENCES iam.tenants (id),
-        user_id UUID NOT NULL REFERENCES iam.users (id),
+        user_id UUID NOT NULL REFERENCES auth.users (id),
         delivery_days JSONB,
         delivery_weekdays_mask SMALLINT NOT NULL DEFAULT 0,
         items JSONB,

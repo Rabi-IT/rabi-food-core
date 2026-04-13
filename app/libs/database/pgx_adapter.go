@@ -2,13 +2,11 @@ package database
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/Rabi-IT/rabi-food-core/config"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
@@ -54,42 +52,8 @@ func (g *PgxAdapter) Connect(ctx context.Context) error {
 	return nil
 }
 
-// CreateDatabase creates the database if it does not exist.
-func (g *PgxAdapter) CreateDatabase(ctx context.Context) error {
-	adminDSN := fmt.Sprintf("host=%s user=%s password=%s port=%s database=postgres",
-		g.config.Host, g.config.User, g.config.Password, g.config.Port)
-
-	logger.Get(ctx).Info().Msg("Ensuring database exists: " + g.config.DatabaseName)
-
-	conn, err := pgx.Connect(ctx, adminDSN)
-	if err != nil {
-		return err
-	}
-	defer conn.Close(ctx)
-
-	var exists int
-	err = conn.QueryRow(ctx, "SELECT 1 FROM pg_database WHERE datname=$1", g.config.DatabaseName).Scan(&exists)
-
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		return err
-	}
-
-	if exists > 0 {
-		return nil
-	}
-
-	//nolint:gosec
-	_, err = conn.Exec(ctx, "CREATE DATABASE "+g.config.DatabaseName)
-
-	return err
-}
-
 // Start initializes the database connection and runs migrations.
 func (g *PgxAdapter) Start(ctx context.Context) error {
-	if err := g.CreateDatabase(ctx); err != nil {
-		return fmt.Errorf("failed to create database: %w", err)
-	}
-
 	if err := g.Connect(ctx); err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}

@@ -44,6 +44,15 @@ func (tenantFixture) Create(t *testing.T, input *c.CreateInput) *c.CreateOutput 
 	return output
 }
 
+func (tenantFixture) RegisterCustomer(t *testing.T, tenantID, token string) {
+	t.Helper()
+
+	httpexpect.Default(t, AppURL).
+		Request(http.MethodPost, Tenant.URI+tenantID+"/customers").
+		WithHeader("Authorization", "Bearer "+token).
+		Expect().Status(http.StatusNoContent)
+}
+
 func (tenantFixture) GetMe(t *testing.T, token string) g.GetByIDOutput {
 	t.Helper()
 

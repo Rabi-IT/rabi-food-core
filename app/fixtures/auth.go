@@ -13,6 +13,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type SignUpInput struct {
+	Email    string
+	Password string
+	Name     string
+	Phone    string
+	TaxID    string
+	TenantID string // optional — leave empty for global customers
+}
+
 type authFixture struct{}
 
 var Auth = authFixture{}
@@ -107,6 +116,28 @@ func (a *authFixture) SystemToken(t *testing.T) string {
 	require.NoError(t, err)
 
 	return tk
+}
+
+func (a *authFixture) SignUp(t *testing.T, input SignUpInput) string {
+	t.Helper()
+
+	out := &auth_usecases.SignUpOutput{}
+	httpexpect.Default(t, AppURL).
+		Request(http.MethodPost, "/auth/signup").
+		WithJSON(auth_usecases.SignUpInput{
+			Email:    input.Email,
+			Password: input.Password,
+			Name:     input.Name,
+			Phone:    input.Phone,
+			TaxID:    input.TaxID,
+			TenantID: input.TenantID,
+		}).
+		Expect().Status(http.StatusCreated).
+		JSON().Object().Decode(out)
+
+	require.NotEmpty(t, out.ID)
+
+	return out.ID
 }
 
 // fetchUser retrieves user data from the API using a backoffice token.

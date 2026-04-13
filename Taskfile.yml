@@ -61,7 +61,7 @@ tasks:
     dir: infra
     dotenv: ["../.env.test"]
     cmds:
-      - docker compose -f docker-compose.db.yaml up -d
+      - docker compose -f docker-compose.db.yaml up -d --wait
     silent: false
 
   db-down:
