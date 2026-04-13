@@ -15,7 +15,7 @@ type adminUpdateUserRequest struct {
 	UserMetadata map[string]any `json:"user_metadata,omitempty"`
 }
 
-func (g *GoTrueGatewayAdapter) Patch(ctx context.Context, id string, input PatchInput) error {
+func (g *GoTrueGatewayAdapter) Patch(ctx context.Context, id string, input PatchInput) (bool, error) {
 	meta := map[string]any{}
 
 	if input.Name != nil {
@@ -65,12 +65,12 @@ func (g *GoTrueGatewayAdapter) Patch(ctx context.Context, id string, input Patch
 
 	raw, err := json.Marshal(body)
 	if err != nil {
-		return errs.ErrAuthServiceFailure
+		return false, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, g.baseURL+"/auth/v1/admin/users/"+id, bytes.NewReader(raw))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, g.baseURL+"/admin/users/"+id, bytes.NewReader(raw))
 	if err != nil {
-		return errs.ErrAuthServiceFailure
+		return false, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -78,17 +78,17 @@ func (g *GoTrueGatewayAdapter) Patch(ctx context.Context, id string, input Patch
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
-		return errs.ErrAuthServiceFailure
+		return false, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return errs.ErrUserNotFound
+		return false, nil
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return errs.ErrAuthServiceFailure
+		return false, wrapResponseError(errs.ErrAuthServiceFailure, resp)
 	}
 
-	return nil
+	return true, nil
 }

@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"net/http"
+
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,6 +18,9 @@ func (c *AuthController) GetByID(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	if out == nil {
+		return ctx.SendStatus(http.StatusNotFound)
+	}
 
 	return ctx.JSON(out)
 }
@@ -27,6 +32,9 @@ func (c *AuthController) GetMe(ctx *fiber.Ctx) error {
 	out, err := c.usecase.GetMe(uctx)
 	if err != nil {
 		return err
+	}
+	if out == nil {
+		return ctx.SendStatus(http.StatusNotFound)
 	}
 
 	return ctx.JSON(out)

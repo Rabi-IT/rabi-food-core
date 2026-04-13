@@ -24,7 +24,6 @@ func (u *adminUserResponse) toUserOutput() *UserOutput {
 		Phone:        stringVal(u.UserMetadata, "phone"),
 		TaxID:        stringVal(u.UserMetadata, "tax_id"),
 		SocialID:     stringVal(u.UserMetadata, "social_id"),
-		TenantID:     stringVal(u.AppMetadata, "tenant_id"),
 		City:         stringVal(u.UserMetadata, "city"),
 		State:        stringVal(u.UserMetadata, "state"),
 		ZIP:          stringVal(u.UserMetadata, "zip"),
@@ -49,30 +48,30 @@ func stringVal(m map[string]any, key string) string {
 }
 
 func (g *GoTrueGatewayAdapter) GetByID(ctx context.Context, id string) (*UserOutput, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, g.baseURL+"/auth/v1/admin/users/"+id, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, g.baseURL+"/admin/users/"+id, nil)
 	if err != nil {
-		return nil, errs.ErrAuthServiceFailure
+		return nil, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", g.serviceKey))
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
-		return nil, errs.ErrAuthServiceFailure
+		return nil, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return nil, errs.ErrUserNotFound
+		return nil, nil
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errs.ErrAuthServiceFailure
+		return nil, wrapResponseError(errs.ErrAuthServiceFailure, resp)
 	}
 
 	var result adminUserResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, errs.ErrAuthServiceFailure
+		return nil, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
 	}
 
 	return result.toUserOutput(), nil

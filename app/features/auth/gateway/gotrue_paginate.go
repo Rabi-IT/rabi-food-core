@@ -4,64 +4,65 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/libs/database"
 	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 )
 
-type adminListUsersResponse struct {
-	Users []adminUserResponse `json:"users"`
+type authUserRow struct {
+	ID           string `db:"id"`
+	Email        string `db:"email"`
+	UserMetadata []byte `db:"raw_user_meta_data"`
+	AppMetadata  []byte `db:"raw_app_meta_data"`
+}
+
+func (r authUserRow) toUserOutput() UserOutput {
+	var userMeta, appMeta map[string]any
+	_ = json.Unmarshal(r.UserMetadata, &userMeta)
+	_ = json.Unmarshal(r.AppMetadata, &appMeta)
+
+	return UserOutput{
+		ID:           r.ID,
+		Email:        r.Email,
+		Name:         stringVal(userMeta, "name"),
+		Phone:        stringVal(userMeta, "phone"),
+		TaxID:        stringVal(userMeta, "tax_id"),
+		SocialID:     stringVal(userMeta, "social_id"),
+		City:         stringVal(userMeta, "city"),
+		State:        stringVal(userMeta, "state"),
+		ZIP:          stringVal(userMeta, "zip"),
+		Street:       stringVal(userMeta, "street"),
+		Complement:   stringVal(userMeta, "complement"),
+		Neighborhood: stringVal(userMeta, "neighborhood"),
+		Role:         stringVal(appMeta, "role"),
+	}
 }
 
 func (g *GoTrueGatewayAdapter) Paginate(ctx context.Context, input PaginateInput) (*PaginateOutput, error) {
-	page := input.Page
-	if page < 1 {
-		page = 1
-	}
+	page := max(input.Page, 1)
+	pageSize := max(input.PageSize, 10)
 
-	pageSize := input.PageSize
-	if pageSize < 1 {
-		pageSize = 10
-	}
+	paginate := database.PaginateInput{Page: page - 1, PageSize: pageSize}
 
-	url := fmt.Sprintf("%s/auth/v1/admin/users?page=%d&per_page=%d", g.baseURL, page, pageSize)
+	const countSQL = `SELECT COUNT(*) FROM auth.users`
+	const dataSQL = `SELECT id, email, raw_user_meta_data, raw_app_meta_data FROM auth.users LIMIT $1 OFFSET $2`
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	data, count, err := database.Paginate[authUserRow](
+		ctx, g.db.Pool,
+		countSQL, nil,
+		dataSQL, []any{pageSize, paginate.Offset()},
+	)
 	if err != nil {
-		return nil, errs.ErrAuthServiceFailure
+		return nil, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", g.serviceKey))
-
-	resp, err := g.httpClient.Do(req)
-	if err != nil {
-		return nil, errs.ErrAuthServiceFailure
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, errs.ErrAuthServiceFailure
-	}
-
-	var result adminListUsersResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, errs.ErrAuthServiceFailure
-	}
-
-	// Filter by tenant_id client-side — GoTrue Admin API does not support metadata filtering
-	users := make([]UserOutput, 0, len(result.Users))
-	for _, u := range result.Users {
-		out := u.toUserOutput()
-
-		if input.TenantID != nil && out.TenantID != *input.TenantID {
-			continue
-		}
-
-		users = append(users, *out)
+	users := make([]UserOutput, len(data))
+	for i, row := range data {
+		users[i] = row.toUserOutput()
 	}
 
 	return &PaginateOutput{
 		Data:     users,
-		MaxPages: -1, // GoTrue does not expose total count in the Admin API
+		MaxPages: paginate.CalcMaxPages(count),
 	}, nil
 }

@@ -25,8 +25,12 @@ func (c *AuthController) Patch(ctx *fiber.Ctx) error {
 	uctx := ctx.UserContext()
 	logger.GetWideEvent(uctx).Event = "user-patch"
 
-	if err := c.usecase.Patch(uctx, id, data); err != nil {
+	ok, err := c.usecase.Patch(uctx, id, data)
+	if err != nil {
 		return err
+	}
+	if !ok {
+		return ctx.SendStatus(http.StatusNotFound)
 	}
 
 	return ctx.SendStatus(http.StatusNoContent)

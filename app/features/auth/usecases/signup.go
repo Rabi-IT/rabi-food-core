@@ -14,7 +14,6 @@ type SignUpInput struct {
 	Phone        string `json:"phone"        validate:"required"`
 	TaxID        string `json:"taxId"        validate:"required"`
 	SocialID     string `json:"socialId"`
-	TenantID     string `json:"tenantId"`
 	City         string `json:"city"`
 	State        string `json:"state"`
 	ZIP          string `json:"zip"`
@@ -36,7 +35,6 @@ func (c *AuthCase) SignUp(ctx context.Context, input *SignUpInput) (*SignUpOutpu
 		Phone:        input.Phone,
 		TaxID:        input.TaxID,
 		SocialID:     input.SocialID,
-		TenantID:     input.TenantID,
 		City:         input.City,
 		State:        input.State,
 		ZIP:          input.ZIP,

@@ -14,7 +14,6 @@ type GetByIDOutput struct {
 	Phone        string `json:"phone"`
 	TaxID        string `json:"taxId"`
 	SocialID     string `json:"socialId"`
-	TenantID     string `json:"tenantId"`
 	City         string `json:"city"`
 	State        string `json:"state"`
 	ZIP          string `json:"zip"`
@@ -36,10 +35,8 @@ func (c *AuthCase) GetByID(ctx context.Context, id string) (*GetByIDOutput, erro
 	if err != nil {
 		return nil, err
 	}
-
-	// Users cannot read data from other tenants
-	if session.Role.IsUser() && out.TenantID != session.TenantID {
-		id = session.UserID
+	if out == nil {
+		return nil, nil
 	}
 
 	return &GetByIDOutput{
@@ -49,7 +46,6 @@ func (c *AuthCase) GetByID(ctx context.Context, id string) (*GetByIDOutput, erro
 		Phone:        out.Phone,
 		TaxID:        out.TaxID,
 		SocialID:     out.SocialID,
-		TenantID:     out.TenantID,
 		City:         out.City,
 		State:        out.State,
 		ZIP:          out.ZIP,
@@ -73,7 +69,6 @@ func fromGateway(u *g.UserOutput) *GetByIDOutput {
 		Phone:        u.Phone,
 		TaxID:        u.TaxID,
 		SocialID:     u.SocialID,
-		TenantID:     u.TenantID,
 		City:         u.City,
 		State:        u.State,
 		ZIP:          u.ZIP,

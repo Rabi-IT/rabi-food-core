@@ -1,6 +1,7 @@
 package fixtures
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -8,6 +9,7 @@ import (
 	c "github.com/Rabi-IT/rabi-food-core/features/tenant/usecases"
 
 	"github.com/gavv/httpexpect/v2"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,7 +28,7 @@ func (tenantFixture) Create(t *testing.T, input *c.CreateInput) *c.CreateOutput 
 			Name:         "Name",
 			UserName:     "UserName",
 			UserPhone:    "11999999999",
-			UserEmail:    "email@email.com",
+			UserEmail:    fmt.Sprintf("%s@email.com", uuid.NewString()),
 			UserPassword: "password123",
 		}
 	}

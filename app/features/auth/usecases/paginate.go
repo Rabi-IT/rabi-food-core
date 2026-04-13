@@ -3,7 +3,6 @@ package usecases
 import (
 	"context"
 
-	"github.com/Rabi-IT/rabi-food-core/app_context"
 	g "github.com/Rabi-IT/rabi-food-core/features/auth/gateway"
 )
 
@@ -13,19 +12,10 @@ type PaginateOutput struct {
 }
 
 func (c *AuthCase) Paginate(ctx context.Context, page, pageSize int) (*PaginateOutput, error) {
-	session := app_context.GetSession(ctx)
-
-	input := g.PaginateInput{
+	out, err := c.gateway.Paginate(ctx, g.PaginateInput{
 		Page:     page,
 		PageSize: pageSize,
-	}
-
-	// Users see only their tenant; backoffice sees all
-	if session.Role.IsUser() {
-		input.TenantID = &session.TenantID
-	}
-
-	out, err := c.gateway.Paginate(ctx, input)
+	})
 	if err != nil {
 		return nil, err
 	}

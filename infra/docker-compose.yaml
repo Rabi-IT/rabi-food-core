@@ -12,6 +12,8 @@ services:
       - TEST_DATABASE_USER=${TEST_DATABASE_USER}
       - TEST_DATABASE_PASSWORD=${TEST_DATABASE_PASSWORD}
       - TEST_DATABASE_NAME=${TEST_DATABASE_NAME}
+      - GOTRUE_URL=http://gotrue:9999
+      - GOTRUE_SERVICE_KEY=${GOTRUE_SERVICE_KEY}
     volumes:
       - ..:/rabi-food-core
     working_dir: /rabi-food-core

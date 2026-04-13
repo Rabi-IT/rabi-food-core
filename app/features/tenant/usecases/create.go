@@ -28,7 +28,7 @@ func (c *TenantCase) Create(ctx context.Context, input CreateInput) (out CreateO
 		return
 	}
 
-	userID, err := c.userCreator.SignUpTenantOwner(ctx, input.UserEmail, input.UserPassword, input.UserName, input.UserPhone, tenantID)
+	userID, err := c.userCreator.SignUpTenantOwner(ctx, input.UserEmail, input.UserPassword, input.UserName, input.UserPhone)
 	if err != nil {
 		return
 	}

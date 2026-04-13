@@ -9,7 +9,7 @@ import (
 // userCreator is satisfied by auth_case.AuthCase — defined here to avoid cross-feature imports.
 // Primitive parameters are used intentionally so auth does not need to import tenant types.
 type userCreator interface {
-	SignUpTenantOwner(ctx context.Context, email, password, name, phone, tenantID string) (string, error)
+	SignUpTenantOwner(ctx context.Context, email, password, name, phone string) (string, error)
 }
 
 type TenantCase struct {

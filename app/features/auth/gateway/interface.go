@@ -8,8 +8,8 @@ type AuthGateway interface {
 	RefreshToken(ctx context.Context, refreshToken string) (*TokenOutput, error)
 	SignOut(ctx context.Context, accessToken string) error
 	GetByID(ctx context.Context, id string) (*UserOutput, error)
-	Patch(ctx context.Context, id string, input PatchInput) error
-	Delete(ctx context.Context, id string) error
+	Patch(ctx context.Context, id string, input PatchInput) (bool, error)
+	Delete(ctx context.Context, id string) (bool, error)
 	Paginate(ctx context.Context, input PaginateInput) (*PaginateOutput, error)
 }
 
@@ -20,7 +20,6 @@ type SignUpInput struct {
 	Phone        string
 	TaxID        string
 	SocialID     string
-	TenantID     string
 	City         string
 	State        string
 	ZIP          string
@@ -54,7 +53,6 @@ type UserOutput struct {
 	Phone        string `json:"phone"`
 	TaxID        string `json:"taxId"`
 	SocialID     string `json:"socialId"`
-	TenantID     string `json:"tenantId"`
 	City         string `json:"city"`
 	State        string `json:"state"`
 	ZIP          string `json:"zip"`
@@ -81,7 +79,6 @@ type PatchInput struct {
 type PaginateInput struct {
 	Page     int
 	PageSize int
-	TenantID *string
 }
 
 type PaginateOutput struct {

@@ -9,13 +9,12 @@ import (
 
 // SignUpTenantOwner satisfies the tenant.userCreator interface.
 // It creates the initial owner account when a new tenant is registered.
-func (c *AuthCase) SignUpTenantOwner(ctx context.Context, email, password, name, phone, tenantID string) (string, error) {
+func (c *AuthCase) SignUpTenantOwner(ctx context.Context, email, password, name, phone string) (string, error) {
 	out, err := c.gateway.SignUp(ctx, g.SignUpInput{
 		Email:    email,
 		Password: password,
 		Name:     name,
 		Phone:    phone,
-		TenantID: tenantID,
 		Role:     string(auth.User),
 	})
 	if err != nil {

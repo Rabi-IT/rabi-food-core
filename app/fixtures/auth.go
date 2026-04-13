@@ -19,7 +19,6 @@ type SignUpInput struct {
 	Name     string
 	Phone    string
 	TaxID    string
-	TenantID string // optional — leave empty for global customers
 }
 
 type authFixture struct{}
@@ -58,8 +57,7 @@ func (a *authFixture) UserToken(t *testing.T, id string) string {
 		"sub":   id,
 		"email": user.Email,
 		"app_metadata": map[string]any{
-			"role":      string(auth.User),
-			"tenant_id": user.TenantID,
+			"role": string(auth.User),
 		},
 		"user_metadata": map[string]any{
 			"name": user.Name,
@@ -82,8 +80,7 @@ func (a *authFixture) StaffToken(t *testing.T, id string) string {
 		"sub":   id,
 		"email": user.Email,
 		"app_metadata": map[string]any{
-			"role":      string(auth.Staff),
-			"tenant_id": user.TenantID,
+			"role": string(auth.Staff),
 		},
 		"user_metadata": map[string]any{
 			"name": user.Name,
@@ -130,7 +127,6 @@ func (a *authFixture) SignUp(t *testing.T, input SignUpInput) string {
 			Name:     input.Name,
 			Phone:    input.Phone,
 			TaxID:    input.TaxID,
-			TenantID: input.TenantID,
 		}).
 		Expect().Status(http.StatusCreated).
 		JSON().Object().Decode(out)

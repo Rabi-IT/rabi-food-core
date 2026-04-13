@@ -21,7 +21,7 @@ type PatchInput struct {
 	Neighborhood *string `json:"neighborhood"`
 }
 
-func (c *AuthCase) Patch(ctx context.Context, id string, input *PatchInput) error {
+func (c *AuthCase) Patch(ctx context.Context, id string, input *PatchInput) (bool, error) {
 	session := app_context.GetSession(ctx)
 
 	// Users can only patch themselves
