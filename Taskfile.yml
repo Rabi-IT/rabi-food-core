@@ -69,7 +69,7 @@ tasks:
     dir: infra
     dotenv: ["../.env.test"]
     cmds:
-      - docker compose down
+      - docker compose -f docker-compose.db.yaml down -v --remove-orphans
     silent: true
 
   migrate:
