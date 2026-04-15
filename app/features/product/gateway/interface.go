@@ -32,7 +32,7 @@ type ListOutput struct {
 }
 
 type CreateInput struct {
-	TenantID    string `json:"tenantId"`
+	TenantID    string `json:"-"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Photo       string `json:"photo"`
@@ -46,7 +46,7 @@ type CreateInput struct {
 
 type GetByIDFilter struct {
 	ID       string `json:"id"`
-	TenantID string `json:"tenantId"`
+	TenantID string `json:"-"`
 }
 
 type GetByIDOutput struct {
@@ -64,7 +64,7 @@ type GetByIDOutput struct {
 
 type PatchFilter struct {
 	ID       string `json:"id"`
-	TenantID string `json:"tenantId"`
+	TenantID string `json:"-"`
 }
 
 type PatchValues struct {
@@ -102,5 +102,5 @@ type PaginateOutput struct {
 
 type DeleteFilter struct {
 	ID       string `json:"id"`
-	TenantID string `json:"tenantId"`
+	TenantID string `json:"-"`
 }

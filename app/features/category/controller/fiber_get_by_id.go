@@ -22,9 +22,12 @@ var _ *gateway.GetByIDOutput
 // @Failure 500 {string} string "Internal server error"
 // @Router /category/{id} [get].
 func (c *CategoryController) GetByID(ctx *fiber.Ctx) error {
-	id := ctx.Params("id")
+	filter := gateway.GetByIDFilter{
+		ID:       ctx.Params("id"),
+		TenantID: ctx.Get("X-Tenant-ID"),
+	}
 
-	data, err := c.usecase.GetByID(ctx.UserContext(), id)
+	data, err := c.usecase.GetByID(ctx.UserContext(), filter)
 
 	if err != nil {
 		return err

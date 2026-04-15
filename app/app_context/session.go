@@ -11,20 +11,10 @@ type sessionKey string
 const SessionKey sessionKey = "session"
 
 type UserSession struct {
-	UserID         string
-	TenantID       string
-	Name           string
-	Login          string
-	OriginalUserID string
-	Role           auth.Role
-}
-
-func (u *UserSession) GetOriginalUserID() (string, bool) {
-	if u.Role.IsBackoffice() {
-		return u.OriginalUserID, true
-	}
-
-	return u.UserID, false
+	UserID string
+	Name   string
+	Login  string
+	Role   auth.Role
 }
 
 func GetSession(ctx context.Context) UserSession {
@@ -39,3 +29,4 @@ func GetSession(ctx context.Context) UserSession {
 func WithSession(ctx context.Context, s *UserSession) context.Context {
 	return context.WithValue(ctx, SessionKey, s)
 }
+

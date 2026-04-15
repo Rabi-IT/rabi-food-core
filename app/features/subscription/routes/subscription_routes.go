@@ -9,7 +9,7 @@ import (
 )
 
 func Subscription(app *fiber.App, c *controller.SubscriptionController) {
-	route := app.Group("/subscription")
+	route := app.Group("/subscription", middlewares.RequireTenantID)
 	route.Post("/", c.Create)
 	route.Get("/", c.Paginate)
 	route.Get("/:id", c.GetByID)

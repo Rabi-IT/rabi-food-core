@@ -98,6 +98,7 @@ func (t *TestSuite) Test_TenantIntegration_Create() {
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Tenant.URI+response.ID).
 			WithHeader("Authorization", "Bearer "+token).
+			WithHeader("X-Tenant-ID", response.ID).
 			Expect().Status(http.StatusOK).
 			JSON().Object().
 			ContainsSubset(map[string]any{

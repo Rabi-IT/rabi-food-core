@@ -17,11 +17,11 @@ type productFixture struct {
 
 var Product = productFixture{URI: "/product/", BackofficeURI: "/backoffice/product/"}
 
-func (productFixture) Create(t *testing.T, input *g.CreateInput, token string) string {
+func (productFixture) Create(t *testing.T, input *g.CreateInput, auth RequestContext) string {
 	t.Helper()
 	Body := input
 	if Body == nil {
-		categoryID := Category.Create(t, nil, token)
+		categoryID := Category.Create(t, nil, auth)
 		Body = &g.CreateInput{
 			Name:        "Name",
 			Photo:       "http://example.com/photo.png",
@@ -36,7 +36,8 @@ func (productFixture) Create(t *testing.T, input *g.CreateInput, token string) s
 	id := ""
 	httpexpect.Default(t, AppURL).
 		Request(http.MethodPost, Product.URI).
-		WithHeader("Authorization", "Bearer "+token).
+		WithHeader("Authorization", "Bearer "+auth.Token).
+		WithHeader("X-Tenant-ID", auth.TenantID).
 		WithJSON(Body).
 		Expect().
 		Status(http.StatusCreated).
@@ -45,13 +46,14 @@ func (productFixture) Create(t *testing.T, input *g.CreateInput, token string) s
 	return id
 }
 
-func (productFixture) GetByID(t *testing.T, id string, token string) (g.GetByIDOutput, int) {
+func (productFixture) GetByID(t *testing.T, id string, auth RequestContext) (g.GetByIDOutput, int) {
 	t.Helper()
 	found := g.GetByIDOutput{}
 
 	obj := httpexpect.Default(t, AppURL).
 		Request(http.MethodGet, Product.URI+id).
-		WithHeader("Authorization", "Bearer "+token).
+		WithHeader("Authorization", "Bearer "+auth.Token).
+		WithHeader("X-Tenant-ID", auth.TenantID).
 		Expect().Status(http.StatusOK)
 
 	response := obj.Raw()

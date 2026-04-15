@@ -34,6 +34,7 @@ func (c *CategoryController) Delete(ctx *fiber.Ctx) error {
 	logger.GetWideEvent(uctx).Event = "delete-category"
 
 	filter.ID = ctx.Params("id")
+	filter.TenantID = ctx.Get("X-Tenant-ID")
 	deleted, err := c.usecase.Delete(uctx, filter)
 
 	if err != nil {

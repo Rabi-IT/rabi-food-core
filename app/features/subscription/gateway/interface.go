@@ -175,6 +175,7 @@ type DiscountRule struct {
 }
 
 type UpsertConfigInput struct {
+	TenantID            string `json:"-"`
 	MaxAttemptsPerOrder uint8
 	DiscountRules       []DiscountRule
 	CutoffOffsetMinutes uint16

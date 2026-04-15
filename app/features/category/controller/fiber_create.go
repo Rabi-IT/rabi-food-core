@@ -33,6 +33,8 @@ func (c *CategoryController) Create(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	data.TenantID = ctx.Get("X-Tenant-ID")
+
 	uctx := ctx.UserContext()
 	logger.GetWideEvent(uctx).Event = "create-category"
 	id, err := c.usecase.Create(uctx, data)

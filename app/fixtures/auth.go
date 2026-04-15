@@ -21,6 +21,11 @@ type SignUpInput struct {
 	TaxID    string
 }
 
+type RequestContext struct {
+	Token    string
+	TenantID string
+}
+
 type authFixture struct{}
 
 var Auth = authFixture{}
@@ -32,9 +37,8 @@ func (*authFixture) BackofficeToken(t *testing.T, userID string) string {
 		"sub":   userID,
 		"email": "backoffice@backoffice.com",
 		"app_metadata": map[string]any{
-			"role":             string(auth.Backoffice),
-			"tenant_id":        "system",
-			"original_user_id": userID,
+			"role":      string(auth.Backoffice),
+			"tenant_id": "system",
 		},
 		"user_metadata": map[string]any{
 			"name": "backoffice",
@@ -50,40 +54,31 @@ func (*authFixture) BackofficeToken(t *testing.T, userID string) string {
 
 func (a *authFixture) UserToken(t *testing.T, id string) string {
 	t.Helper()
-
-	user := a.fetchUser(t, id)
-
-	claims := jwt.MapClaims{
-		"sub":   id,
-		"email": user.Email,
-		"app_metadata": map[string]any{
-			"role": string(auth.User),
-		},
-		"user_metadata": map[string]any{
-			"name": user.Name,
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tk, err := token.SignedString([]byte(config.AuthSecret))
-	require.NoError(t, err)
-
-	return tk
+	return a.signToken(t, id, auth.User)
 }
 
 func (a *authFixture) StaffToken(t *testing.T, id string) string {
 	t.Helper()
+	return a.signToken(t, id, auth.Staff)
+}
 
-	user := a.fetchUser(t, id)
+func (a *authFixture) UserAuth(t *testing.T, tenantID, userID string) RequestContext {
+	t.Helper()
+	return RequestContext{Token: a.UserToken(t, userID), TenantID: tenantID}
+}
+
+func (a *authFixture) StaffAuth(t *testing.T, tenantID, userID string) RequestContext {
+	t.Helper()
+	return RequestContext{Token: a.StaffToken(t, userID), TenantID: tenantID}
+}
+
+func (a *authFixture) signToken(t *testing.T, id string, role auth.Role) string {
+	t.Helper()
 
 	claims := jwt.MapClaims{
-		"sub":   id,
-		"email": user.Email,
+		"sub": id,
 		"app_metadata": map[string]any{
-			"role": string(auth.Staff),
-		},
-		"user_metadata": map[string]any{
-			"name": user.Name,
+			"role": string(role),
 		},
 	}
 
@@ -136,18 +131,3 @@ func (a *authFixture) SignUp(t *testing.T, input SignUpInput) string {
 	return out.ID
 }
 
-// fetchUser retrieves user data from the API using a backoffice token.
-func (a *authFixture) fetchUser(t *testing.T, id string) *auth_usecases.GetByIDOutput {
-	t.Helper()
-
-	backofficeTk := a.BackofficeToken(t, id)
-
-	out := &auth_usecases.GetByIDOutput{}
-	httpexpect.Default(t, AppURL).
-		Request(http.MethodGet, "/user/"+id).
-		WithHeader("Authorization", "Bearer "+backofficeTk).
-		Expect().Status(http.StatusOK).
-		JSON().Object().Decode(out)
-
-	return out
-}

@@ -26,7 +26,8 @@ import (
 // @Router /category/{id} [patch].
 func (c *CategoryController) Patch(ctx *fiber.Ctx) error {
 	filter := gateway.PatchFilter{
-		ID: ctx.Params("id"),
+		ID:       ctx.Params("id"),
+		TenantID: ctx.Get("X-Tenant-ID"),
 	}
 
 	data := gateway.PatchValues{}

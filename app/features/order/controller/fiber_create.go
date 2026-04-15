@@ -36,7 +36,7 @@ func (c *OrderController) Create(ctx *fiber.Ctx) error {
 
 	uctx := ctx.UserContext()
 	session := app_context.GetSession(uctx)
-	data.TenantID = session.TenantID
+	data.TenantID = ctx.Get("X-Tenant-ID")
 	data.UserID = session.UserID
 
 	logger.GetWideEvent(uctx).Event = "create-order"

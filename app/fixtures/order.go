@@ -20,14 +20,14 @@ type orderFixture struct {
 
 var Order = orderFixture{URI: "/order/", BackofficeURI: "/backoffice/order/"}
 
-func (orderFixture) Create(t *testing.T, input *c.CreateInput, token string) string {
+func (orderFixture) Create(t *testing.T, input *c.CreateInput, auth RequestContext) string {
 	t.Helper()
 	Body := input
 	if Body == nil {
 		Body = &c.CreateInput{
 			Items: []c.OrderItem{
 				{
-					ProductID: Product.Create(t, nil, token),
+					ProductID: Product.Create(t, nil, auth),
 					Quantity:  1,
 				},
 			},
@@ -38,7 +38,8 @@ func (orderFixture) Create(t *testing.T, input *c.CreateInput, token string) str
 	id := ""
 	httpexpect.Default(t, AppURL).
 		Request(http.MethodPost, Order.URI).
-		WithHeader("Authorization", "Bearer "+token).
+		WithHeader("Authorization", "Bearer "+auth.Token).
+		WithHeader("X-Tenant-ID", auth.TenantID).
 		WithJSON(Body).
 		Expect().
 		Status(http.StatusCreated).
@@ -47,7 +48,7 @@ func (orderFixture) Create(t *testing.T, input *c.CreateInput, token string) str
 	return id
 }
 
-func (orderFixture) GetByID(t *testing.T, id string, token string) (g.GetByIDOutput, int) {
+func (orderFixture) GetByID(t *testing.T, id string, auth RequestContext) (g.GetByIDOutput, int) {
 	t.Helper()
 	require.NotEmpty(t, id)
 
@@ -55,7 +56,8 @@ func (orderFixture) GetByID(t *testing.T, id string, token string) (g.GetByIDOut
 
 	obj := httpexpect.Default(t, AppURL).
 		Request(http.MethodGet, Order.URI+id).
-		WithHeader("Authorization", "Bearer "+token).
+		WithHeader("Authorization", "Bearer "+auth.Token).
+		WithHeader("X-Tenant-ID", auth.TenantID).
 		Expect().Status(http.StatusOK)
 
 	response := obj.Raw()
@@ -72,21 +74,22 @@ func (orderFixture) ExpectFulfillmentStatus(
 	t *testing.T,
 	id string,
 	expectedStatus order.FulfillmentStatus,
-	token string,
+	auth RequestContext,
 ) {
 	t.Helper()
-	found, httpStatus := Order.GetByID(t, id, token)
+	found, httpStatus := Order.GetByID(t, id, auth)
 	require.Equal(t, http.StatusOK, httpStatus)
 	require.Equal(t, expectedStatus, found.FulfillmentStatus)
 }
 
-func (orderFixture) Patch(t *testing.T, id string, input *g.PatchValues, token string) *errs.AppError {
+func (orderFixture) Patch(t *testing.T, id string, input *g.PatchValues, auth RequestContext) *errs.AppError {
 	t.Helper()
 	require.NotEmpty(t, id)
 
 	obj := httpexpect.Default(t, AppURL).
 		Request(http.MethodPatch, Order.URI+id).
-		WithHeader("Authorization", "Bearer "+token).
+		WithHeader("Authorization", "Bearer "+auth.Token).
+		WithHeader("X-Tenant-ID", auth.TenantID).
 		WithJSON(input).
 		Expect()
 

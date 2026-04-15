@@ -19,7 +19,6 @@ var (
 )
 
 // Session is a middleware that extracts user session information from a GoTrue JWT token.
-// GoTrue embeds app role and tenant_id inside app_metadata claims.
 func Session(c *fiber.Ctx) error {
 	token, ok := c.Context().UserValue("user").(*jwt.Token)
 	if !ok || !token.Valid {
@@ -35,27 +34,15 @@ func Session(c *fiber.Ctx) error {
 	userMeta, _ := claims["user_metadata"].(map[string]any)
 
 	session := &app_context.UserSession{
-		UserID:         fmt.Sprint(claims["sub"]),
-		Login:          fmt.Sprint(claims["email"]),
-		TenantID:       stringFromMap(appMeta, "tenant_id"),
-		Name:           stringFromMap(userMeta, "name"),
-		Role:           auth.Role(stringFromMap(appMeta, "role")),
-		OriginalUserID: stringFromMap(appMeta, "original_user_id"),
+		UserID: fmt.Sprint(claims["sub"]),
+		Login:  fmt.Sprint(claims["email"]),
+		Name:   stringFromMap(userMeta, "name"),
+		Role:   auth.Role(stringFromMap(appMeta, "role")),
 	}
-
-	userID, isBackoffice := session.GetOriginalUserID()
 
 	uctx := c.UserContext()
 	wd := logger.GetWideEvent(uctx)
-	wd.ActorID = userID
-
-	if isBackoffice {
-		wd.IsBackoffice = true
-	}
-
-	if session.TenantID != "" {
-		wd.ActorTenantID = session.TenantID
-	}
+	wd.ActorID = session.UserID
 
 	ctx := context.WithValue(uctx, app_context.SessionKey, session)
 	c.SetUserContext(ctx)

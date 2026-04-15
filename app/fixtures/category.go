@@ -17,7 +17,7 @@ type categoryFixture struct {
 
 var Category = categoryFixture{URI: "/category/", BackofficeURI: "/backoffice/category/"}
 
-func (categoryFixture) Create(t *testing.T, input *g.CreateInput, token string) string {
+func (categoryFixture) Create(t *testing.T, input *g.CreateInput, auth RequestContext) string {
 	t.Helper()
 	Body := input
 	if Body == nil {
@@ -30,7 +30,8 @@ func (categoryFixture) Create(t *testing.T, input *g.CreateInput, token string) 
 	id := ""
 	httpexpect.Default(t, AppURL).
 		Request(http.MethodPost, Category.URI).
-		WithHeader("Authorization", "Bearer "+token).
+		WithHeader("Authorization", "Bearer "+auth.Token).
+		WithHeader("X-Tenant-ID", auth.TenantID).
 		WithJSON(Body).
 		Expect().
 		Status(http.StatusCreated).
@@ -39,13 +40,14 @@ func (categoryFixture) Create(t *testing.T, input *g.CreateInput, token string) 
 	return id
 }
 
-func (categoryFixture) GetByID(t *testing.T, id string, token string) (g.GetByIDOutput, int) {
+func (categoryFixture) GetByID(t *testing.T, id string, auth RequestContext) (g.GetByIDOutput, int) {
 	t.Helper()
 	found := g.GetByIDOutput{}
 
 	obj := httpexpect.Default(t, AppURL).
 		Request(http.MethodGet, Category.URI+id).
-		WithHeader("Authorization", "Bearer "+token).
+		WithHeader("Authorization", "Bearer "+auth.Token).
+		WithHeader("X-Tenant-ID", auth.TenantID).
 		Expect().Status(http.StatusOK)
 
 	response := obj.Raw()

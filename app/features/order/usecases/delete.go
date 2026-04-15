@@ -12,8 +12,8 @@ func (c *OrderCase) Delete(ctx context.Context, filter g.DeleteFilter) (bool, er
 	logger.GetWideEvent(ctx).SetOrderID(filter.ID)
 
 	session := app_context.GetSession(ctx)
-	if session.Role.IsUser() {
-		filter.TenantID = session.TenantID
+	if !session.Role.IsUser() {
+		filter.TenantID = ""
 	}
 
 	return c.gateway.Delete(filter)
