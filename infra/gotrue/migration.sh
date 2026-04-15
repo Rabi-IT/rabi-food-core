@@ -2,7 +2,8 @@
 set -eu
 
 psql \
-  -h postgres \
-  -U "$TEST_DATABASE_USER" \
-  -d "$TEST_DATABASE_NAME" \
-  -f /docker-entrypoint-initdb.d/migration.sql
+  -h "${DATABASE_HOST:-postgres}" \
+  -p "${DATABASE_PORT:-5432}" \
+  -U "$DATABASE_USER" \
+  -d "$DATABASE_NAME" \
+  -c "CREATE SCHEMA IF NOT EXISTS auth;"
