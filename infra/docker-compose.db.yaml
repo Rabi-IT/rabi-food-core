@@ -15,7 +15,7 @@ services:
       - POSTGRES_PASSWORD=${TEST_DATABASE_PASSWORD}
       - POSTGRES_DB=${TEST_DATABASE_NAME}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
     networks:
       - test
 
@@ -25,12 +25,13 @@ services:
     restart: "no"
     command: sh /docker-entrypoint-initdb.d/gotrue-migration.sh
     environment:
-      - TEST_DATABASE_USER=${TEST_DATABASE_USER}
-      - TEST_DATABASE_NAME=${TEST_DATABASE_NAME}
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=${TEST_DATABASE_USER}
+      - DATABASE_NAME=${TEST_DATABASE_NAME}
       - PGPASSWORD=${TEST_DATABASE_PASSWORD}
     volumes:
       - ./gotrue/migration.sh:/docker-entrypoint-initdb.d/gotrue-migration.sh:ro
-      - ./gotrue/migration.sql:/docker-entrypoint-initdb.d/migration.sql:ro
     depends_on:
       postgres:
         condition: service_healthy
