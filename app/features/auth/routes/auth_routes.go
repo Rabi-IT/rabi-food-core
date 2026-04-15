@@ -23,8 +23,7 @@ func AuthProtected(app *fiber.App, c *controller.AuthController) {
 
 	user := app.Group("/user")
 	user.Get("/me", c.GetMe)
-	user.Get("/:id", c.GetByID)
-	user.Patch("/:id", c.Patch)
+	user.Patch("/me", c.Patch)
 	user.Get("/", c.Paginate)
 
 	backoffice := app.Group("/backoffice/user", middlewares.RequireRole(domain_auth.Backoffice))
