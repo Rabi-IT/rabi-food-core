@@ -54,7 +54,10 @@ func New(
 	app.
 		Use(cors.New()).
 		Use(requestid.New()).
-		Use(prom.Middleware)
+		Use(prom.Middleware).
+		Get("/health", func(c *fiber.Ctx) error {
+			return c.SendStatus(fiber.StatusOK)
+		})
 
 	if !config.Env.IsProduction() {
 		app.Static("/docs", "./libs/docs")
