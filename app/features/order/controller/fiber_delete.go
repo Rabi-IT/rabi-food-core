@@ -31,6 +31,7 @@ func (c *OrderController) Delete(ctx *fiber.Ctx) error {
 	}
 
 	filter.ID = ctx.Params("id")
+	filter.TenantID = ctx.Get("X-Tenant-ID")
 
 	uctx := ctx.UserContext()
 	logger.GetWideEvent(uctx).Event = "delete-order"

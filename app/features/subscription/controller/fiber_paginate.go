@@ -3,7 +3,6 @@ package controller
 import (
 	"strconv"
 
-	"github.com/Rabi-IT/rabi-food-core/app_context"
 	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
 
@@ -32,10 +31,10 @@ func (c *SubscriptionController) Paginate(ctx *fiber.Ctx) error {
 	}
 
 	uctx := ctx.UserContext()
-	session := app_context.GetSession(uctx)
+	tenantID := ctx.Get("X-Tenant-ID")
 
 	filter := g.PaginateFilter{
-		TenantID: &session.TenantID,
+		TenantID: &tenantID,
 	}
 
 	paginate := database.PaginateInput{

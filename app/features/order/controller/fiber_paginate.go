@@ -3,7 +3,6 @@ package controller
 import (
 	"strconv"
 
-	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/order/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
 
@@ -45,8 +44,8 @@ func (c *OrderController) Paginate(ctx *fiber.Ctx) error {
 	}
 
 	uctx := ctx.UserContext()
-	session := app_context.GetSession(uctx)
-	filter.TenantID = &session.TenantID
+	tenantID := ctx.Get("X-Tenant-ID")
+	filter.TenantID = &tenantID
 
 	paginate := database.PaginateInput{
 		Page:     page,

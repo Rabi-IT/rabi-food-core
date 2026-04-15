@@ -28,7 +28,6 @@ type WideEvent struct {
 
 	ActorID       string
 	ActorTenantID string
-	IsBackoffice  bool
 
 	orderID        string
 	categoryID     string
@@ -170,7 +169,6 @@ func (w *WideEvent) reset() {
 
 	w.ActorID = ""
 	w.ActorTenantID = ""
-	w.IsBackoffice = false
 
 	w.orderID = ""
 	w.categoryID = ""

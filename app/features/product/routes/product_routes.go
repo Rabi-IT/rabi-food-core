@@ -9,7 +9,7 @@ import (
 )
 
 func Product(app *fiber.App, c *controller.ProductController) {
-	route := app.Group("/product")
+	route := app.Group("/product", middlewares.RequireTenantID)
 	route.Post("/", c.Create)
 	route.Patch("/:id", c.Patch)
 	route.Delete("/:id", c.Delete)

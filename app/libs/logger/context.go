@@ -10,8 +10,6 @@ const (
 
 	// RequestID represents the request identifier context key.
 	RequestID = "request_id"
-	// IsBackoffice indicates if the request is from backoffice context key.
-	IsBackoffice = "is_backoffice"
 
 	// Domain context keys.
 

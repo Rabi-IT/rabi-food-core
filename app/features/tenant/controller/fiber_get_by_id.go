@@ -22,7 +22,7 @@ var _ *gateway.GetByIDOutput
 // @Failure 500 {string} string "Internal server error"
 // @Router /tenant/{id} [get].
 func (c *TenantController) GetByID(ctx *fiber.Ctx) error {
-	data, err := c.usecase.GetByID(ctx.UserContext(), ctx.Params("id"))
+	data, err := c.usecase.GetByID(ctx.UserContext(), ctx.Params("id"), ctx.Get("X-Tenant-ID"))
 
 	if err != nil {
 		return err

@@ -45,7 +45,7 @@ var (
 	}
 )
 
-func (subscriptionFixture) UpsertConfig(t *testing.T, input *g.UpsertConfigInput, token string) {
+func (subscriptionFixture) UpsertConfig(t *testing.T, input *g.UpsertConfigInput, auth RequestContext) {
 	t.Helper()
 	Body := input
 	if Body == nil {
@@ -60,20 +60,21 @@ func (subscriptionFixture) UpsertConfig(t *testing.T, input *g.UpsertConfigInput
 
 	DefaultHTTP(t).
 		Request(http.MethodPut, Subscription.URI+"config").
-		WithHeader("Authorization", "Bearer "+token).
+		WithHeader("Authorization", "Bearer "+auth.Token).
+		WithHeader("X-Tenant-ID", auth.TenantID).
 		WithJSON(Body).
 		Expect().
 		StatusList(http.StatusOK, http.StatusCreated)
 }
 
-func (subscriptionFixture) Create(t *testing.T, input *c.CreateInput, token string) string {
+func (subscriptionFixture) Create(t *testing.T, input *c.CreateInput, auth RequestContext) string {
 	t.Helper()
 	Body := input
 	if Body == nil {
 		Body = &c.CreateInput{
 			Items: []c.SubscriptionItemInput{
 				{
-					ProductID: Product.Create(t, nil, token),
+					ProductID: Product.Create(t, nil, auth),
 					Quantity:  1,
 				},
 			},
@@ -93,7 +94,8 @@ func (subscriptionFixture) Create(t *testing.T, input *c.CreateInput, token stri
 	id := ""
 	DefaultHTTP(t).
 		Request(http.MethodPost, Subscription.URI).
-		WithHeader("Authorization", "Bearer "+token).
+		WithHeader("Authorization", "Bearer "+auth.Token).
+		WithHeader("X-Tenant-ID", auth.TenantID).
 		WithJSON(Body).
 		Expect().
 		Status(http.StatusCreated).
@@ -102,13 +104,14 @@ func (subscriptionFixture) Create(t *testing.T, input *c.CreateInput, token stri
 	return id
 }
 
-func (subscriptionFixture) GetByID(t *testing.T, id string, token string) (g.GetByIDOutput, int) {
+func (subscriptionFixture) GetByID(t *testing.T, id string, auth RequestContext) (g.GetByIDOutput, int) {
 	t.Helper()
 	found := g.GetByIDOutput{}
 
 	obj := DefaultHTTP(t).
 		Request(http.MethodGet, Subscription.URI+id).
-		WithHeader("Authorization", "Bearer "+token).
+		WithHeader("Authorization", "Bearer "+auth.Token).
+		WithHeader("X-Tenant-ID", auth.TenantID).
 		Expect().Status(http.StatusOK)
 
 	response := obj.Raw()

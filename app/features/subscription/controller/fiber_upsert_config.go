@@ -33,6 +33,8 @@ func (c *SubscriptionController) UpsertConfig(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	data.TenantID = ctx.Get("X-Tenant-ID")
+
 	uctx := ctx.UserContext()
 	logger.GetWideEvent(uctx).Event = "upsert-subscription-config"
 	err = c.usecase.UpsertConfig(uctx, data)

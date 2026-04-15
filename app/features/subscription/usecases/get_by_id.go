@@ -7,13 +7,12 @@ import (
 	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
 )
 
-func (s *SubscriptionCase) GetByID(ctx context.Context, id string) (*g.GetByIDOutput, error) {
-	filter := g.GetByIDFilter{ID: id}
-
+func (s *SubscriptionCase) GetByID(ctx context.Context, filter g.GetByIDFilter) (*g.GetByIDOutput, error) {
 	session := app_context.GetSession(ctx)
 	if session.Role.IsUser() {
-		filter.TenantID = session.TenantID
 		filter.UserID = session.UserID
+	} else {
+		filter.TenantID = ""
 	}
 
 	return s.gateway.GetByID(ctx, filter)

@@ -9,7 +9,7 @@ import (
 )
 
 func Category(app *fiber.App, c *controller.CategoryController) {
-	route := app.Group("/category")
+	route := app.Group("/category", middlewares.RequireTenantID)
 	route.Post("/", c.Create)
 	route.Patch("/:id", c.Patch)
 	route.Delete("/:id", c.Delete)

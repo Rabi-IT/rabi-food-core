@@ -25,8 +25,11 @@ import (
 // @Failure 500 {string} string "Internal server error"
 // @Router /product/{id} [patch].
 func (c *ProductController) Patch(ctx *fiber.Ctx) error {
+	uctx := ctx.UserContext()
+
 	filter := gateway.PatchFilter{
-		ID: ctx.Params("id"),
+		ID:       ctx.Params("id"),
+		TenantID: ctx.Get("X-Tenant-ID"),
 	}
 
 	data := gateway.PatchValues{}
@@ -40,7 +43,6 @@ func (c *ProductController) Patch(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	uctx := ctx.UserContext()
 	logger.GetWideEvent(uctx).Event = "patch-product"
 	updated, err := c.usecase.Patch(uctx, filter, data)
 
