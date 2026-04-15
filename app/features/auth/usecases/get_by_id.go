@@ -3,7 +3,6 @@ package usecases
 import (
 	"context"
 
-	"github.com/Rabi-IT/rabi-food-core/app_context"
 	g "github.com/Rabi-IT/rabi-food-core/features/auth/gateway"
 )
 
@@ -24,13 +23,6 @@ type GetByIDOutput struct {
 }
 
 func (c *AuthCase) GetByID(ctx context.Context, id string) (*GetByIDOutput, error) {
-	session := app_context.GetSession(ctx)
-
-	// Users can only fetch themselves; backoffice can fetch any user
-	if session.Role.IsUser() {
-		id = session.UserID
-	}
-
 	out, err := c.gateway.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -54,11 +46,6 @@ func (c *AuthCase) GetByID(ctx context.Context, id string) (*GetByIDOutput, erro
 		Neighborhood: out.Neighborhood,
 		Role:         out.Role,
 	}, nil
-}
-
-func (c *AuthCase) GetMe(ctx context.Context) (*GetByIDOutput, error) {
-	session := app_context.GetSession(ctx)
-	return c.GetByID(ctx, session.UserID)
 }
 
 func fromGateway(u *g.UserOutput) *GetByIDOutput {

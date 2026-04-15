@@ -3,7 +3,6 @@ package usecases
 import (
 	"context"
 
-	"github.com/Rabi-IT/rabi-food-core/app_context"
 	g "github.com/Rabi-IT/rabi-food-core/features/auth/gateway"
 )
 
@@ -22,13 +21,6 @@ type PatchInput struct {
 }
 
 func (c *AuthCase) Patch(ctx context.Context, id string, input *PatchInput) (bool, error) {
-	session := app_context.GetSession(ctx)
-
-	// Users can only patch themselves
-	if session.Role.IsUser() {
-		id = session.UserID
-	}
-
 	return c.gateway.Patch(ctx, id, g.PatchInput{
 		Email:        input.Email,
 		Name:         input.Name,
