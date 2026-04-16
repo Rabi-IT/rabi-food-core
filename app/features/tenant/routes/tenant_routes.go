@@ -8,8 +8,10 @@ import (
 )
 
 func Tenant(app *fiber.App, c *controller.TenantController) {
+	// No Tenant Authorization required
 	app.Post("/tenant/:id/enroll-customers", c.EnrollCustomer)
 
+	// Tenant Authorization required
 	route := app.Group("/tenant", middlewares.RequireTenant)
 	route.Get("/me", c.GetMe)
 	route.Patch("/me", c.PatchMe)
