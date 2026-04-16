@@ -8,10 +8,11 @@ import (
 )
 
 func Tenant(app *fiber.App, c *controller.TenantController) {
+	app.Post("/tenant/:id/enroll-customers", c.EnrollCustomer)
+
 	route := app.Group("/tenant", middlewares.RequireTenant)
 	route.Get("/me", c.GetMe)
 	route.Patch("/me", c.PatchMe)
-	route.Post("/me/customers", c.EnrollCustomer)
 
 	backoffice := app.Group("/backoffice/tenant", middlewares.RequireBackoffice)
 	backoffice.Get("/", c.BackofficePaginate)
