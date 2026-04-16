@@ -68,7 +68,7 @@ func (t *TestSuite) Test_TenantIntegration_EnrollCustomer() {
 
 		for range 2 {
 			httpexpect.Default(t.T(), fixtures.AppURL).
-				Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/customers/me").
+				Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/enroll-customers").
 				WithHeader("Authorization", "Bearer "+token).
 				Expect().Status(http.StatusNoContent)
 		}
