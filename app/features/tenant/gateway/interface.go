@@ -11,7 +11,7 @@ type TenantGateway interface {
 	Create(input CreateInput) (string, error)
 	GetByID(id string) (*GetByIDOutput, error)
 	Paginate(filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
-	RegisterCustomer(ctx context.Context, tenantID, userID string) error
+	CreateCustomer(ctx context.Context, tenantID, userID string) error
 	CreateMember(ctx context.Context, input CreateMemberInput) error
 	GetMember(ctx context.Context, filter GetMemberFilter) (*GetMemberOutput, error)
 	GetCustomer(ctx context.Context, filter GetCustomerFilter) (*GetCustomerOutput, error)

@@ -35,7 +35,7 @@ func TestMySuite(t *testing.T) {
 	suite.Run(t, new(TestSuite))
 }
 
-func (t *TestSuite) Test_TenantIntegration_RegisterCustomer() {
+func (t *TestSuite) Test_TenantIntegration_CreateCustomer() {
 	t.Run("should register a customer to a tenant", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 
