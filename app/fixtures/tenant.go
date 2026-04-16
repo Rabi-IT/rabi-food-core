@@ -68,7 +68,7 @@ func (tenantFixture) Create(t *testing.T, input *TenantCreateInput) *TenantCreat
 	return &TenantCreateOutput{ID: out.TenantID, UserID: out.ID}
 }
 
-func (tenantFixture) CreateCustomer(t *testing.T, tenantID, token string) {
+func (tenantFixture) EnrollCustomer(t *testing.T, tenantID, token string) {
 	t.Helper()
 
 	httpexpect.Default(t, AppURL).
