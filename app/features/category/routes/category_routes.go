@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"github.com/Rabi-IT/rabi-food-core/domain/auth"
 	"github.com/Rabi-IT/rabi-food-core/features/category/controller"
 	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
@@ -16,6 +15,6 @@ func Category(app *fiber.App, c *controller.CategoryController) {
 	route.Get("/:id", c.GetByID)
 	route.Get("/", c.Paginate)
 
-	backoffice := app.Group("/backoffice/category", middlewares.RequireRole(auth.Backoffice))
+	backoffice := app.Group("/backoffice/category", middlewares.RequireBackoffice)
 	backoffice.Get("/", c.BackofficePaginate)
 }

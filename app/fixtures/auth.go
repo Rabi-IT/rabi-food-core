@@ -57,9 +57,22 @@ func (a *authFixture) UserToken(t *testing.T, id string) string {
 	return a.signToken(t, id, auth.User)
 }
 
-func (a *authFixture) StaffToken(t *testing.T, id string) string {
+func (a *authFixture) TenantOwnerToken(t *testing.T, id, tenantID string) string {
 	t.Helper()
-	return a.signToken(t, id, auth.Staff)
+
+	claims := jwt.MapClaims{
+		"sub": id,
+		"app_metadata": map[string]any{
+			"role":      string(auth.TenantOwner),
+			"tenant_id": tenantID,
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tk, err := token.SignedString([]byte(config.AuthSecret))
+	require.NoError(t, err)
+
+	return tk
 }
 
 func (a *authFixture) UserAuth(t *testing.T, tenantID, userID string) RequestContext {
@@ -67,9 +80,9 @@ func (a *authFixture) UserAuth(t *testing.T, tenantID, userID string) RequestCon
 	return RequestContext{Token: a.UserToken(t, userID), TenantID: tenantID}
 }
 
-func (a *authFixture) StaffAuth(t *testing.T, tenantID, userID string) RequestContext {
+func (a *authFixture) TenantOwnerAuth(t *testing.T, tenantID, userID string) RequestContext {
 	t.Helper()
-	return RequestContext{Token: a.StaffToken(t, userID), TenantID: tenantID}
+	return RequestContext{Token: a.TenantOwnerToken(t, userID, tenantID), TenantID: tenantID}
 }
 
 func (a *authFixture) signToken(t *testing.T, id string, role auth.Role) string {

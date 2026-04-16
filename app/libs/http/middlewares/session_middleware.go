@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"context"
 	"errors"
 	"fmt"
 
@@ -34,18 +33,17 @@ func Session(c *fiber.Ctx) error {
 	userMeta, _ := claims["user_metadata"].(map[string]any)
 
 	session := &app_context.UserSession{
-		UserID: fmt.Sprint(claims["sub"]),
-		Login:  fmt.Sprint(claims["email"]),
-		Name:   stringFromMap(userMeta, "name"),
-		Role:   auth.Role(stringFromMap(appMeta, "role")),
+		UserID:   fmt.Sprint(claims["sub"]),
+		TenantID: stringFromMap(appMeta, "tenant_id"),
+		Login:    fmt.Sprint(claims["email"]),
+		Name:     stringFromMap(userMeta, "name"),
+		Role:     auth.Role(stringFromMap(appMeta, "role")),
 	}
 
 	uctx := c.UserContext()
-	wd := logger.GetWideEvent(uctx)
-	wd.ActorID = session.UserID
+	logger.GetWideEvent(uctx).ActorID = session.UserID
 
-	ctx := context.WithValue(uctx, app_context.SessionKey, session)
-	c.SetUserContext(ctx)
+	c.SetUserContext(app_context.WithSession(uctx, session))
 
 	return c.Next()
 }
