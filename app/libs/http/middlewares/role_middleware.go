@@ -2,24 +2,23 @@ package middlewares
 
 import (
 	"github.com/Rabi-IT/rabi-food-core/app_context"
-	"github.com/Rabi-IT/rabi-food-core/domain/auth"
 	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-// RequireRole returns a middleware that rejects requests whose session role is not in the allowed list.
-func RequireRole(roles ...auth.Role) fiber.Handler {
-	allowed := make(map[auth.Role]struct{}, len(roles))
-	for _, r := range roles {
-		allowed[r] = struct{}{}
+// RequireBackoffice is a middleware that checks if the user has backoffice role.
+func RequireBackoffice(c *fiber.Ctx) error {
+	if !app_context.GetSession(c.UserContext()).Role.IsBackoffice() {
+		return errs.ErrForbidden
 	}
+	return c.Next()
+}
 
-	return func(c *fiber.Ctx) error {
-		session := app_context.GetSession(c.UserContext())
-		if _, ok := allowed[session.Role]; !ok {
-			return errs.ErrForbidden
-		}
-		return c.Next()
+// RequireTenant is a middleware that checks if the user has tenant owner role.
+func RequireTenant(c *fiber.Ctx) error {
+	if !app_context.GetSession(c.UserContext()).Role.IsTenantOwner() {
+		return errs.ErrForbidden
 	}
+	return c.Next()
 }
