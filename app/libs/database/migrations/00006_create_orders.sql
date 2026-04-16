@@ -22,6 +22,22 @@ CREATE TABLE
         CONSTRAINT uq_orders_external_payment_id UNIQUE (external_payment_id)
     );
 
+COMMENT ON COLUMN commerce.orders.total_price IS 'Total order value in cents.';
+
+COMMENT ON COLUMN commerce.orders.fulfillment_status IS 'Preparation lifecycle.';
+
+COMMENT ON COLUMN commerce.orders.delivery_status IS 'Last-mile delivery lifecycle.';
+
+COMMENT ON COLUMN commerce.orders.payment_status IS 'Financial lifecycle.';
+
+COMMENT ON COLUMN commerce.orders.external_payment_id IS 'Transaction ID from the external payment gateway.';
+
+COMMENT ON COLUMN commerce.orders.paid_at IS 'Timestamp of payment confirmation.';
+
+COMMENT ON COLUMN commerce.orders.items IS 'JSON array of order items with quantity and unit price at the time of purchase.';
+
+COMMENT ON COLUMN commerce.orders.notes IS 'Customer notes for preparation or delivery.';
+
 CREATE INDEX idx_orders_deleted_at ON commerce.orders (deleted_at);
 
 -- +goose Down

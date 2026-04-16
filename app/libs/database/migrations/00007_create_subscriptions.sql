@@ -1,10 +1,10 @@
 -- +goose Up
-CREATE SCHEMA IF NOT EXISTS subscription;
+CREATE SCHEMA IF NOT EXISTS SUBSCRIPTION;
 
 CREATE TABLE
-    subscription.subscriptions (
+    SUBSCRIPTION.subscriptions (
         id UUID PRIMARY KEY,
-        root_subscription_id UUID REFERENCES subscription.subscriptions (id),
+        root_subscription_id UUID REFERENCES SUBSCRIPTION.subscriptions (id),
         tenant_id UUID NOT NULL REFERENCES iam.tenants (id),
         user_id UUID NOT NULL REFERENCES auth.users (id),
         delivery_days JSONB,
@@ -28,22 +28,54 @@ CREATE TABLE
         CONSTRAINT uq_subscriptions_external_payment_id UNIQUE (external_payment_id)
     );
 
-CREATE INDEX idx_subscriptions_root_subscription_id ON subscription.subscriptions (root_subscription_id);
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.root_subscription_id IS 'Reference to the original subscription this was renewed from. NULL for subscriptions created directly.';
 
-CREATE INDEX idx_subscriptions_tenant_id ON subscription.subscriptions (tenant_id);
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.delivery_weekdays_mask IS 'Bitmask of weekdays for recurring delivery. Bit 0 = Sunday, bit 1 = Monday, ..., bit 6 = Saturday.';
 
-CREATE INDEX idx_subscriptions_user_id ON subscription.subscriptions (user_id);
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.delivery_days IS 'JSON array of specific delivery dates, used when scheduling is not based on a weekly mask.';
 
-CREATE INDEX idx_subscriptions_delivery_weekdays_mask ON subscription.subscriptions (delivery_weekdays_mask);
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.items IS 'JSON array of subscription items with quantity and unit price.';
 
-CREATE INDEX idx_subscriptions_remaining_cycles ON subscription.subscriptions (remaining_cycles);
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.total_cycles IS 'Total number of cycles contracted in the subscription.';
 
-CREATE INDEX idx_subscriptions_payment_status ON subscription.subscriptions (payment_status);
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.remaining_cycles IS 'Cycles yet to be executed. Decremented on each generated order.';
 
-CREATE INDEX idx_subscriptions_status ON subscription.subscriptions (status);
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.cycle_discount IS 'Fixed discount per cycle in cents.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.cutoff_offset_minutes IS 'Minutes before the delivery window start at which the cycle order is automatically generated.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.auto_renew IS 'When true, automatically creates a new subscription once remaining cycles reach zero.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.max_attempts_per_order IS 'Maximum number of delivery attempts per generated order for this subscription.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.items_total IS 'Gross sum of items in cents, before discounts.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.items_discount IS 'Total discount applied to items in cents.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.payment_amount IS 'Amount charged per cycle in cents.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.payment_status IS 'Financial lifecycle.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.external_payment_id IS 'Recurring contract ID from the external payment gateway.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.status IS 'Subscription lifecycle.';
+
+CREATE INDEX idx_subscriptions_root_subscription_id ON SUBSCRIPTION.subscriptions (root_subscription_id);
+
+CREATE INDEX idx_subscriptions_tenant_id ON SUBSCRIPTION.subscriptions (tenant_id);
+
+CREATE INDEX idx_subscriptions_user_id ON SUBSCRIPTION.subscriptions (user_id);
+
+CREATE INDEX idx_subscriptions_delivery_weekdays_mask ON SUBSCRIPTION.subscriptions (delivery_weekdays_mask);
+
+CREATE INDEX idx_subscriptions_remaining_cycles ON SUBSCRIPTION.subscriptions (remaining_cycles);
+
+CREATE INDEX idx_subscriptions_payment_status ON SUBSCRIPTION.subscriptions (payment_status);
+
+CREATE INDEX idx_subscriptions_status ON SUBSCRIPTION.subscriptions (status);
 
 CREATE TABLE
-    subscription.subscription_configs (
+    SUBSCRIPTION.subscription_configs (
         tenant_id UUID PRIMARY KEY NOT NULL REFERENCES iam.tenants (id),
         is_open BOOLEAN NOT NULL,
         max_attempts_per_order SMALLINT,
@@ -52,10 +84,18 @@ CREATE TABLE
         updated_at TIMESTAMPTZ
     );
 
+COMMENT ON COLUMN SUBSCRIPTION.subscription_configs.is_open IS 'Whether the tenant is accepting new subscriptions.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscription_configs.max_attempts_per_order IS 'Tenant-level override for max delivery attempts per order. Takes precedence over the individual subscription value when set.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscription_configs.discount_rules IS 'JSON array of progressive discount rules based on contracted cycle volume.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscription_configs.cutoff_offset_minutes IS 'Tenant-level override for the cutoff offset in minutes. Takes precedence over the individual subscription value when set.';
+
 CREATE TABLE
-    subscription.subscription_deliveries (
+    SUBSCRIPTION.subscription_deliveries (
         id UUID PRIMARY KEY,
-        subscription_id UUID NOT NULL REFERENCES subscription.subscriptions (id),
+        subscription_id UUID NOT NULL REFERENCES SUBSCRIPTION.subscriptions (id),
         scheduled_date TIMESTAMPTZ,
         start_hour SMALLINT NOT NULL,
         end_hour SMALLINT NOT NULL,
@@ -68,17 +108,31 @@ CREATE TABLE
         CONSTRAINT subscription_delivery_unique UNIQUE (subscription_id, scheduled_date)
     );
 
-CREATE INDEX idx_subscription_deliveries_subscription_id ON subscription.subscription_deliveries (subscription_id);
+COMMENT ON COLUMN SUBSCRIPTION.subscription_deliveries.scheduled_date IS 'Scheduled date for this delivery.';
 
-CREATE INDEX idx_subscription_deliveries_scheduled_date ON subscription.subscription_deliveries (scheduled_date);
+COMMENT ON COLUMN SUBSCRIPTION.subscription_deliveries.start_hour IS 'Start of the delivery window (0-23).';
 
-CREATE INDEX idx_subscription_deliveries_status ON subscription.subscription_deliveries (status);
+COMMENT ON COLUMN SUBSCRIPTION.subscription_deliveries.end_hour IS 'End of the delivery window (0-23).';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscription_deliveries.cutoff_at IS 'Deadline for modifications to this delivery order. The order is locked after this timestamp.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscription_deliveries.status IS 'Delivery status.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscription_deliveries.delivery_attempts IS 'Number of delivery attempts already made for this cycle.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscription_deliveries.max_delivery_attempts IS 'Maximum attempts before marking the delivery as permanently failed.';
+
+CREATE INDEX idx_subscription_deliveries_subscription_id ON SUBSCRIPTION.subscription_deliveries (subscription_id);
+
+CREATE INDEX idx_subscription_deliveries_scheduled_date ON SUBSCRIPTION.subscription_deliveries (scheduled_date);
+
+CREATE INDEX idx_subscription_deliveries_status ON SUBSCRIPTION.subscription_deliveries (status);
 
 -- +goose Down
-DROP TABLE IF EXISTS subscription.subscription_deliveries;
+DROP TABLE IF EXISTS SUBSCRIPTION.subscription_deliveries;
 
-DROP TABLE IF EXISTS subscription.subscription_configs;
+DROP TABLE IF EXISTS SUBSCRIPTION.subscription_configs;
 
-DROP TABLE IF EXISTS subscription.subscriptions;
+DROP TABLE IF EXISTS SUBSCRIPTION.subscriptions;
 
-DROP SCHEMA IF EXISTS subscription;
+DROP SCHEMA IF EXISTS SUBSCRIPTION;
