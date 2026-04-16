@@ -6,7 +6,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-func (g *PgxTenantGatewayAdapter) RegisterCustomer(ctx context.Context, tenantID, userID string) error {
+func (g *PgxTenantGatewayAdapter) CreateCustomer(ctx context.Context, tenantID, userID string) error {
 	sql, args, err := sq.
 		Insert("iam.tenant_customers").
 		Columns("tenant_id", "user_id").
