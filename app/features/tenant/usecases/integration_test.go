@@ -36,7 +36,7 @@ func TestMySuite(t *testing.T) {
 }
 
 func (t *TestSuite) Test_TenantIntegration_EnrollCustomer() {
-	t.Run("should register a customer to a tenant", func() {
+	t.Run("should enroll a customer to a tenant", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 
 		customerID := fixtures.Auth.SignUp(t.T(), fixtures.SignUpInput{
@@ -49,7 +49,7 @@ func (t *TestSuite) Test_TenantIntegration_EnrollCustomer() {
 		token := fixtures.Auth.UserToken(t.T(), customerID)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/me/customers").
+			Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/enroll-customers").
 			WithHeader("Authorization", "Bearer "+token).
 			Expect().Status(http.StatusNoContent)
 	})
@@ -68,7 +68,7 @@ func (t *TestSuite) Test_TenantIntegration_EnrollCustomer() {
 
 		for range 2 {
 			httpexpect.Default(t.T(), fixtures.AppURL).
-				Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/me/customers").
+				Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/customers/me").
 				WithHeader("Authorization", "Bearer "+token).
 				Expect().Status(http.StatusNoContent)
 		}
@@ -126,17 +126,17 @@ func (t *TestSuite) Test_TenantIntegration_SignUpWithTenant() {
 		t.Len(response.Errors, 6)
 		for _, e := range response.Errors {
 			switch e.Field {
-			case "Email":
+			case "email":
 				t.Equal("required", e.Tag)
-			case "Password":
+			case "password":
 				t.Equal("required", e.Tag)
-			case "Name":
+			case "name":
 				t.Equal("required", e.Tag)
-			case "Phone":
+			case "phone":
 				t.Equal("required", e.Tag)
-			case "TaxID":
+			case "taxId":
 				t.Equal("required", e.Tag)
-			case "Tenant.Name":
+			case "tenant.name":
 				t.Equal("required", e.Tag)
 			default:
 				t.Fail("unexpected validation error field: " + e.Field)

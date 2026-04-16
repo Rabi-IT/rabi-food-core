@@ -72,7 +72,7 @@ func (tenantFixture) EnrollCustomer(t *testing.T, tenantID, token string) {
 	t.Helper()
 
 	httpexpect.Default(t, AppURL).
-		Request(http.MethodPost, Tenant.URI+tenantID+"/customers").
+		Request(http.MethodPost, Tenant.URI+tenantID+"/enroll-customers").
 		WithHeader("Authorization", "Bearer "+token).
 		Expect().Status(http.StatusNoContent)
 }
