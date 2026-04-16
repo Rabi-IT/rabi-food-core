@@ -3,7 +3,7 @@
 ## Visão Geral
 Monolito Go para gestão de pedidos e delivery multi-tenant.
 Arquitetura: Feature-based Modular Monolith.
-Princípio central: **nenhum pacote de feature importa outro pacote de feature diretamente**.
+Princípio central: dependências entre features devem ser **unidirecionais e intencionais**.
 
 ## Stack
 - **Runtime**: Go 1.26
@@ -43,6 +43,9 @@ app/
     ├── logger/         — WideEvent pattern
     └── validator/      — wrapper do validator
 ```
+
+## Idioma
+Todo código, comentário, documentação e mensagem de commit DEVE ser em **inglês**. Isso inclui comentários inline, `COMMENT ON` em migrations, nomes de variáveis, mensagens de erro e docstrings.
 
 ## Padrões Obrigatórios
 
@@ -118,14 +121,18 @@ type OrderGateway interface {
 ```
 
 ### 7. Dependências entre use cases
-Use cases que dependem de outros use cases DEVEM usar interface, não struct concreta:
+Features podem importar outras features diretamente quando a dependência é **unidirecional e intencional** (nunca cíclica). Use interface local apenas quando testabilidade isolada for um requisito explícito.
+
 ```go
-// ERRADO — acopla ao concreto, impede mock
-type OrderCase struct {
-    productCase *product_usecases.ProductCase
+// PERMITIDO — dependência unidirecional intencional
+import tenant_usecases "github.com/.../features/tenant/usecases"
+
+type AuthCase struct {
+    gateway    gateway.AuthGateway
+    tenantCase *tenant_usecases.TenantCase
 }
 
-// CORRETO — define interface local
+// Use interface local quando precisar mockar em testes unitários
 type productLister interface {
     List(ctx context.Context, filter product_gateway.ListFilter) ([]product_gateway.ListOutput, error)
 }
@@ -134,6 +141,8 @@ type OrderCase struct {
     productCase productLister
 }
 ```
+
+Nunca crie uma interface local apenas para disfarçar um import cíclico — isso é sinal de que a direção da dependência está errada.
 
 ### 8. Registrar no DI
 Todo novo serviço deve ser registrado em `libs/di/new.go`:
@@ -160,8 +169,7 @@ func TestMySuite(t *testing.T)      { suite.Run(t, new(TestSuite)) }
 ```
 
 ## Issues Conhecidos (não replicar)
-1. `OrderCase` depende de `*ProductCase` (struct concreta) — deve ser interface
-2. `gateway.Create` em Order não recebe `context.Context` — inconsistente, novos gateways devem receber
+1. `gateway.Create` em Order não recebe `context.Context` — inconsistente, novos gateways devem receber
 3. Módulo de pagamento externo ainda não implementado
 4. Scheduling de entregas de Subscription ainda não implementado
 
