@@ -66,7 +66,6 @@ func New(
 
 	// Public routes — no JWT required
 	auth_routes.Auth(app, authController)
-	app.Post("/tenant", tenantController.Create)
 
 	// Protected routes — JWT required
 	app.

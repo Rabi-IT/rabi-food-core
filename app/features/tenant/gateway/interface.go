@@ -12,6 +12,9 @@ type TenantGateway interface {
 	GetByID(id string) (*GetByIDOutput, error)
 	Paginate(filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
 	RegisterCustomer(ctx context.Context, tenantID, userID string) error
+	CreateMember(ctx context.Context, input CreateMemberInput) error
+	GetMember(ctx context.Context, filter GetMemberFilter) (*GetMemberOutput, error)
+	GetCustomer(ctx context.Context, filter GetCustomerFilter) (*GetCustomerOutput, error)
 }
 
 type PatchFilter struct {
@@ -43,4 +46,31 @@ type PaginateData struct {
 type PaginateOutput struct {
 	Data     []PaginateData `json:"data"`
 	MaxPages int            `json:"maxPages"`
+}
+
+type CreateMemberInput struct {
+	TenantID string
+	UserID   string
+	Role     string
+}
+
+type GetCustomerFilter struct {
+	UserID   *string
+	TenantID *string
+}
+
+type GetCustomerOutput struct {
+	UserID   string
+	TenantID string
+}
+
+type GetMemberFilter struct {
+	UserID   *string
+	TenantID *string
+}
+
+type GetMemberOutput struct {
+	UserID   string
+	TenantID string
+	Role     string
 }

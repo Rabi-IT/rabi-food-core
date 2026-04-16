@@ -26,7 +26,7 @@ type SignUpInput struct {
 	Street       string
 	Complement   string
 	Neighborhood string
-	Role         string
+	Role string
 }
 
 type SignUpOutput struct {
