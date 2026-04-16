@@ -23,6 +23,11 @@ resource "aws_cloudwatch_log_group" "gotrue" {
   retention_in_days = 30
 }
 
+resource "aws_cloudwatch_log_group" "gotrue_migration" {
+  name              = "/ecs/rabi-food-gotrue-migration"
+  retention_in_days = 7
+}
+
 locals {
   alloy_config = <<-ALLOY
     prometheus.scrape "app" {
@@ -88,9 +93,40 @@ resource "aws_ecs_task_definition" "app" {
       }
     },
     {
+      name      = "gotrue-migration"
+      image     = "postgres:18.3"
+      essential = false
+
+      command = ["sh", file("${path.module}/../gotrue/migration.sh")]
+
+      environment = [
+        { name = "DATABASE_HOST", value = aws_db_instance.postgres.address },
+        { name = "DATABASE_PORT", value = "5432" },
+        { name = "DATABASE_USER", value = var.db_user },
+        { name = "DATABASE_NAME", value = var.db_name },
+      ]
+
+      secrets = [
+        { name = "PGPASSWORD", valueFrom = aws_secretsmanager_secret.db_password.arn },
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.gotrue_migration.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+    },
+    {
       name      = "gotrue"
       image     = "supabase/gotrue:v2.189.0-rc.13"
       essential = true
+
+      dependsOn = [
+        { containerName = "gotrue-migration", condition = "SUCCESS" },
+      ]
 
       # No portMappings — GoTrue is not publicly reachable, only via localhost within the task
       environment = [
@@ -98,10 +134,11 @@ resource "aws_ecs_task_definition" "app" {
         { name = "GOTRUE_API_PORT",           value = "9999" },
         { name = "API_EXTERNAL_URL",          value = "http://localhost:9999" },
         { name = "GOTRUE_DB_DRIVER",          value = "postgres" },
+        { name = "GOTRUE_DB_NAMESPACE",       value = "auth" },
         { name = "GOTRUE_JWT_EXP",            value = "3600" },
         { name = "GOTRUE_DISABLE_SIGNUP",     value = "true" },
         { name = "GOTRUE_MAILER_AUTOCONFIRM", value = "true" },
-        { name = "GOTRUE_SITE_URL",           value = "http://localhost:3000" },
+        { name = "GOTRUE_SITE_URL",           value = "https://${var.domain_name}" },
         { name = "GOTRUE_LOG_LEVEL",          value = "info" },
       ]
 
