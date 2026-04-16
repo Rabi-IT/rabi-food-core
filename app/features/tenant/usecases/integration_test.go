@@ -4,14 +4,13 @@ import (
 	"net/http"
 	"testing"
 
-	tenant_case "github.com/Rabi-IT/rabi-food-core/features/tenant/usecases"
+	auth_usecases "github.com/Rabi-IT/rabi-food-core/features/auth/usecases"
 	"github.com/Rabi-IT/rabi-food-core/fixtures"
 	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/stretchr/testify/suite"
 )
-
 
 type TestSuite struct {
 	suite.Suite
@@ -50,7 +49,7 @@ func (t *TestSuite) Test_TenantIntegration_RegisterCustomer() {
 		token := fixtures.Auth.UserToken(t.T(), customerID)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/customers").
+			Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/me/customers").
 			WithHeader("Authorization", "Bearer "+token).
 			Expect().Status(http.StatusNoContent)
 	})
@@ -69,67 +68,75 @@ func (t *TestSuite) Test_TenantIntegration_RegisterCustomer() {
 
 		for range 2 {
 			httpexpect.Default(t.T(), fixtures.AppURL).
-				Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/customers").
+				Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/me/customers").
 				WithHeader("Authorization", "Bearer "+token).
 				Expect().Status(http.StatusNoContent)
 		}
 	})
 }
 
-func (t *TestSuite) Test_TenantIntegration_Create() {
-	t.Run("should be able to create", func() {
-		body := tenant_case.CreateInput{
-			Name:         "Name",
-			UserName:     "UserName",
-			UserPhone:    "11999999999",
-			UserEmail:    "email@email.com",
-			UserPassword: "password123",
+func (t *TestSuite) Test_TenantIntegration_SignUpWithTenant() {
+	t.Run("should create tenant and owner on signup", func() {
+		body := auth_usecases.SignUpInput{
+			Email:    "owner@email.com",
+			Password: "password123",
+			Name:     "Owner Name",
+			Phone:    "11999999999",
+			TaxID:    "12345678901",
+			Tenant:   &auth_usecases.TenantInput{Name: "My Tenant"},
 		}
 
-		var response tenant_case.CreateOutput
+		var response auth_usecases.SignUpOutput
 		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodPost, fixtures.Tenant.URI).
+			Request(http.MethodPost, "/auth/signup").
 			WithJSON(body).
 			Expect().Status(http.StatusCreated).
 			JSON().Decode(&response)
 
-		token := fixtures.Auth.UserToken(t.T(), response.UserID)
+		t.NotEmpty(response.ID)
+		t.NotEmpty(response.TenantID)
+
+		token := fixtures.Auth.TenantOwnerToken(t.T(), response.ID, response.TenantID)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodGet, fixtures.Tenant.URI+response.ID).
+			Request(http.MethodGet, fixtures.Tenant.URI+"me").
 			WithHeader("Authorization", "Bearer "+token).
-			WithHeader("X-Tenant-ID", response.ID).
+			WithHeader("X-Tenant-ID", response.TenantID).
 			Expect().Status(http.StatusOK).
 			JSON().Object().
 			ContainsSubset(map[string]any{
-				"id":   response.ID,
-				"name": body.Name,
+				"id":   response.TenantID,
+				"name": body.Tenant.Name,
 			})
 	})
 
 	t.Run("should fail if required fields are missing", func() {
-		body := tenant_case.CreateInput{}
+		body := auth_usecases.SignUpInput{
+			Tenant: &auth_usecases.TenantInput{},
+		}
 
 		response := new(middlewares.ValidationErrorResponse)
 		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodPost, fixtures.Tenant.URI).
+			Request(http.MethodPost, "/auth/signup").
 			WithJSON(body).
 			Expect().
 			Status(http.StatusBadRequest).
 			JSON().Decode(response)
 
-		t.Len(response.Errors, 5)
+		t.Len(response.Errors, 6)
 		for _, e := range response.Errors {
 			switch e.Field {
+			case "Email":
+				t.Equal("required", e.Tag)
+			case "Password":
+				t.Equal("required", e.Tag)
 			case "Name":
 				t.Equal("required", e.Tag)
-			case "UserName":
+			case "Phone":
 				t.Equal("required", e.Tag)
-			case "UserPhone":
+			case "TaxID":
 				t.Equal("required", e.Tag)
-			case "UserEmail":
-				t.Equal("required", e.Tag)
-			case "UserPassword":
+			case "Tenant.Name":
 				t.Equal("required", e.Tag)
 			default:
 				t.Fail("unexpected validation error field: " + e.Field)

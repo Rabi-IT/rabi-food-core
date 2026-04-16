@@ -81,19 +81,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		return auth_gateway.NewGoTrue(config.GoTrueURL, config.GoTrueServiceKey, db), nil
 	})
 
-	do.Provide(injector, func(i *do.Injector) (*auth_case.AuthCase, error) {
-		gw := do.MustInvoke[auth_gateway.AuthGateway](i)
-
-		return auth_case.New(gw), nil
-	})
-
-	do.Provide(injector, func(i *do.Injector) (*auth_controller.AuthController, error) {
-		c := do.MustInvoke[*auth_case.AuthCase](i)
-
-		return auth_controller.New(c), nil
-	})
-
-	// Tenant dependencies
+	// Tenant dependencies (registered before AuthCase — AuthCase depends on TenantCase)
 	do.Provide(injector, func(i *do.Injector) (tenant_gateway.TenantGateway, error) {
 		db := do.MustInvoke[*database.PgxAdapter](i)
 
@@ -102,9 +90,21 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 
 	do.Provide(injector, func(i *do.Injector) (*tenant_case.TenantCase, error) {
 		gw := do.MustInvoke[tenant_gateway.TenantGateway](i)
-		authCase := do.MustInvoke[*auth_case.AuthCase](i)
 
-		return tenant_case.New(gw, authCase), nil
+		return tenant_case.New(gw), nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (*auth_case.AuthCase, error) {
+		gw := do.MustInvoke[auth_gateway.AuthGateway](i)
+		tc := do.MustInvoke[*tenant_case.TenantCase](i)
+
+		return auth_case.New(gw, tc), nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (*auth_controller.AuthController, error) {
+		c := do.MustInvoke[*auth_case.AuthCase](i)
+
+		return auth_controller.New(c), nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (*tenant_controller.TenantController, error) {

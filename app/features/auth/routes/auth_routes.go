@@ -19,6 +19,7 @@ func Auth(app *fiber.App, c *controller.AuthController) {
 func AuthProtected(app *fiber.App, c *controller.AuthController) {
 	authGroup := app.Group("/auth")
 	authGroup.Post("/signout", c.SignOut)
+	authGroup.Post("/token/exchange", c.ExchangeToken)
 
 	user := app.Group("/user")
 	user.Get("/me", c.GetMe)
