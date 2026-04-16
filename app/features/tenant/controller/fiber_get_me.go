@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/tenant/gateway"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,16 +22,25 @@ var _ *gateway.GetByIDOutput
 // @Failure 404 {string} string "Not found"
 // @Failure 500 {string} string "Internal server error"
 // @Router /tenant/{id} [get].
-func (c *TenantController) GetByID(ctx *fiber.Ctx) error {
-	data, err := c.usecase.GetByID(ctx.UserContext(), ctx.Params("id"), ctx.Get("X-Tenant-ID"))
-
+func (c *TenantController) GetMe(ctx *fiber.Ctx) error {
+	uctx := ctx.UserContext()
+	data, err := c.usecase.GetByID(uctx, app_context.GetSession(uctx).TenantID)
 	if err != nil {
 		return err
 	}
-
 	if data == nil {
 		return ctx.SendStatus(http.StatusNotFound)
 	}
+	return ctx.JSON(data)
+}
 
+func (c *TenantController) GetByID(ctx *fiber.Ctx) error {
+	data, err := c.usecase.GetByID(ctx.UserContext(), ctx.Params("id"))
+	if err != nil {
+		return err
+	}
+	if data == nil {
+		return ctx.SendStatus(http.StatusNotFound)
+	}
 	return ctx.JSON(data)
 }

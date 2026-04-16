@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"github.com/Rabi-IT/rabi-food-core/domain/auth"
 	"github.com/Rabi-IT/rabi-food-core/features/subscription/controller"
 	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
@@ -15,6 +14,6 @@ func Subscription(app *fiber.App, c *controller.SubscriptionController) {
 	route.Get("/:id", c.GetByID)
 	route.Put("/config", c.UpsertConfig)
 
-	backoffice := app.Group("/backoffice/subscription", middlewares.RequireRole(auth.Backoffice))
+	backoffice := app.Group("/backoffice/subscription", middlewares.RequireBackoffice)
 	backoffice.Get("/", c.BackofficePaginate)
 }

@@ -1,7 +1,6 @@
 package routes
 
 import (
-	domain_auth "github.com/Rabi-IT/rabi-food-core/domain/auth"
 	"github.com/Rabi-IT/rabi-food-core/features/auth/controller"
 	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
@@ -26,6 +25,6 @@ func AuthProtected(app *fiber.App, c *controller.AuthController) {
 	user.Patch("/me", c.Patch)
 	user.Get("/", c.Paginate)
 
-	backoffice := app.Group("/backoffice/user", middlewares.RequireRole(domain_auth.Backoffice))
+	backoffice := app.Group("/backoffice/user", middlewares.RequireBackoffice)
 	backoffice.Get("/", c.Paginate)
 }

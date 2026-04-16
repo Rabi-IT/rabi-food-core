@@ -498,9 +498,9 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		t.Require().Equal(errs.ErrForbidden.Code, err.Code)
 	})
 
-	t.Run("should return forbidden when user role is staff", func() {
+	t.Run("should return forbidden when user role is tenant_owner", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		staffAuth := fixtures.Auth.StaffAuth(t.T(), tenant.ID, tenant.UserID)
+		staffAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 		orderID := fixtures.Order.Create(t.T(), nil, staffAuth)
 
 		body := usecases.ConfirmPaymentInput{

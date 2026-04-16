@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"github.com/Rabi-IT/rabi-food-core/domain/auth"
 	"github.com/Rabi-IT/rabi-food-core/features/tenant/controller"
 	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
@@ -9,11 +8,12 @@ import (
 )
 
 func Tenant(app *fiber.App, c *controller.TenantController) {
-	route := app.Group("/tenant")
-	route.Get("/:id", c.GetByID)
-	route.Patch("/:id", c.Patch)
-	route.Post("/:id/customers", c.RegisterCustomer)
+	route := app.Group("/tenant", middlewares.RequireTenant)
+	route.Get("/me", c.GetMe)
+	route.Patch("/me", c.PatchMe)
+	route.Post("/me/customers", c.RegisterCustomer)
 
-	backoffice := app.Group("/backoffice/tenant", middlewares.RequireRole(auth.Backoffice))
+	backoffice := app.Group("/backoffice/tenant", middlewares.RequireBackoffice)
 	backoffice.Get("/", c.BackofficePaginate)
+	backoffice.Get("/:id", c.GetByID)
 }
