@@ -7,7 +7,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Subscription(app *fiber.App, c *controller.SubscriptionController) {
+// SubscriptionProtected registers subscription routes that require a valid JWT.
+func SubscriptionProtected(app *fiber.App, c *controller.SubscriptionController) {
 	route := app.Group("/subscription", middlewares.RequireTenantID)
 	route.Post("/", c.Create)
 	route.Get("/", c.Paginate)

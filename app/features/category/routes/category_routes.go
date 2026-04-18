@@ -7,7 +7,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Category(app *fiber.App, c *controller.CategoryController) {
+// CategoryProtected registers category routes that require a valid JWT.
+func CategoryProtected(app *fiber.App, c *controller.CategoryController) {
 	route := app.Group("/category", middlewares.RequireTenantID)
 	route.Post("/", c.Create)
 	route.Patch("/:id", c.Patch)
