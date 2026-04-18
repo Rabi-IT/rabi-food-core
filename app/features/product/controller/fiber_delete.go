@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 
@@ -20,9 +21,10 @@ import (
 // @Failure 500 {string} string "Internal server error"
 // @Router /product/{id} [delete].
 func (c *ProductController) Delete(ctx *fiber.Ctx) error {
+	session := app_context.GetSession(ctx.UserContext())
 	filter := gateway.DeleteFilter{
 		ID:       ctx.Params("id"),
-		TenantID: ctx.Get("X-Tenant-ID"),
+		TenantID: session.TenantID,
 	}
 
 	uctx := ctx.UserContext()
