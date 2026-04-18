@@ -7,7 +7,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Tenant(app *fiber.App, c *controller.TenantController) {
+// TenantProtected registers tenant routes that require a valid JWT.
+func TenantProtected(app *fiber.App, c *controller.TenantController) {
 	// No Tenant Authorization required
 	app.Post("/tenant/:id/enroll-customers", c.EnrollCustomer)
 

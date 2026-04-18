@@ -7,7 +7,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Order(app *fiber.App, c *controller.OrderController) {
+// OrderProtected registers order routes that require a valid JWT.
+func OrderProtected(app *fiber.App, c *controller.OrderController) {
 	route := app.Group("/order")
 	route.Post("/", middlewares.RequireTenantID, c.Create)
 	route.Delete("/:id", middlewares.RequireTenantID, c.Delete)

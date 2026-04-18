@@ -73,11 +73,11 @@ func New(
 		Use(middlewares.Session)
 
 	auth_routes.AuthProtected(app, authController)
-	tenant_routes.Tenant(app, tenantController)
-	product_routes.Product(app, productController)
-	category_routes.Category(app, categoryController)
-	order_routes.Order(app, orderController)
-	subscription_routes.Subscription(app, subscriptionController)
+	tenant_routes.TenantProtected(app, tenantController)
+	product_routes.ProductProtected(app, productController)
+	category_routes.CategoryProtected(app, categoryController)
+	order_routes.OrderProtected(app, orderController)
+	subscription_routes.SubscriptionProtected(app, subscriptionController)
 
 	return &fiberAdapter{
 		app:  app,
