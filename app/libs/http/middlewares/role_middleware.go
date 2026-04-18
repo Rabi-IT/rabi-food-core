@@ -15,9 +15,9 @@ func RequireBackoffice(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-// RequireTenant is a middleware that checks if the user has tenant owner role.
+// RequireTenant is a middleware that checks if the user has tenant role.
 func RequireTenant(c *fiber.Ctx) error {
-	if !app_context.GetSession(c.UserContext()).Role.IsTenantOwner() {
+	if !app_context.GetSession(c.UserContext()).Role.IsTenant() {
 		return errs.ErrForbidden
 	}
 	return c.Next()
