@@ -47,6 +47,16 @@ app/
 ## Idioma
 Todo código, comentário, documentação e mensagem de commit DEVE ser em **inglês**. Isso inclui comentários inline, `COMMENT ON` em migrations, nomes de variáveis, mensagens de erro e docstrings.
 
+## Desvios de Padrão
+
+Os padrões definidos neste documento refletem as decisões de design atuais — não são imutáveis. Se durante o desenvolvimento você identificar que um padrão não se aplica bem a um caso concreto, **não o ignore silenciosamente nem o contorne com gambiarras**. Em vez disso:
+
+1. Sinalize o desvio de forma explícita no PR/commit.
+2. Descreva objetivamente o tradeoff: o que o padrão atual sacrifica nesse cenário e o que a alternativa ganha (e perde).
+3. Se o desvio for pontual, documente-o no próprio código com um comentário direto. Se indicar uma falha no padrão em si, proponha a atualização deste documento.
+
+Exemplos de justificativas aceitáveis: "o padrão X adiciona indireção desnecessária aqui porque Y nunca será reutilizado"; "seguir o padrão Z neste caso obriga a duplicar lógica em N lugares". Exemplos inaceitáveis: preferência estética, pressa, ou "é só uma exceção".
+
 ## Padrões Obrigatórios
 
 ### 1. Criar nova feature
@@ -69,6 +79,24 @@ session.UserID   // string
 session.TenantID // string
 session.Role     // auth.Role
 ```
+
+A extração da sessão (`app_context.GetSession`) é responsabilidade da **controller**. Use cases recebem os dados já extraídos como parâmetros explícitos, mantendo-os agnósticos ao transporte HTTP e reutilizáveis por outros use cases.
+
+```go
+// controller — extrai da sessão e repassa explicitamente
+func (c *ProductController) Delete(ctx *fiber.Ctx) error {
+    session := app_context.GetSession(ctx.UserContext())
+    filter := gateway.DeleteFilter{ID: ctx.Params("id"), TenantID: session.TenantID}
+    ...
+}
+
+// use case — recebe os dados, não conhece a origem deles
+func (c *ProductCase) Delete(ctx context.Context, filter g.DeleteFilter) (bool, error) {
+    ...
+}
+```
+
+**Exceção aceitável:** use cases que precisam de rastreabilidade (ex: `logger.GetWideEvent`) ou propagação de contexto de cancelamento continuam usando `ctx context.Context` — isso é infraestrutura, não acoplamento ao transporte. O que deve ser evitado é usar o contexto para extrair dados de negócio (TenantID, Role) que deveriam ser parâmetros explícitos.
 
 ### 3. Erros de domínio
 SEMPRE em `libs/errs/`, nunca inline:

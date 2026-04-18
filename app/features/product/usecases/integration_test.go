@@ -307,13 +307,12 @@ func (t *TestSuite) Test_ProductIntegration_BackofficePaginate() {
 func (t *TestSuite) Test_ProductIntegration_Delete() {
 	t.Run("should be able to delete", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		productID := fixtures.Product.Create(t.T(), nil, auth)
+		auth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		productID := fixtures.Product.Create(t.T(), nil, fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID))
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodDelete, fixtures.Product.URI+productID).
 			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
 			Expect().
 			Status(http.StatusNoContent)
 
@@ -331,14 +330,26 @@ func (t *TestSuite) Test_ProductIntegration_Delete() {
 		anotherProductID := fixtures.Product.Create(t.T(), nil, anotherAuth)
 
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		auth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodDelete, fixtures.Product.URI+anotherProductID).
 			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
 			Expect().
 			Status(http.StatusNotFound).
 			Body().NotEmpty()
+	})
+
+	t.Run("should not be able to delete as a regular user", func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		productID := fixtures.Product.Create(t.T(), nil, userAuth)
+
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodDelete, fixtures.Product.URI+productID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
+			Expect().
+			Status(http.StatusForbidden)
 	})
 }
