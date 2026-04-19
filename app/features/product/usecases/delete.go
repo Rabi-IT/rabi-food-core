@@ -9,5 +9,5 @@ import (
 
 func (c *ProductCase) Delete(ctx context.Context, filter g.DeleteFilter) (bool, error) {
 	logger.GetWideEvent(ctx).SetProductID(filter.ID)
-	return c.gateway.Delete(filter)
+	return c.gateway.Delete(ctx, filter)
 }

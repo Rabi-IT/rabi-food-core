@@ -8,7 +8,7 @@ import (
 )
 
 func (c *TenantCase) Create(ctx context.Context, name string) (string, error) {
-	id, err := c.gateway.Create(g.CreateInput{Name: name})
+	id, err := c.gateway.Create(ctx, g.CreateInput{Name: name})
 	logger.GetWideEvent(ctx).SetTenantID(id)
 	return id, err
 }

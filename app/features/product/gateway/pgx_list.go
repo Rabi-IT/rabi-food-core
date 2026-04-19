@@ -19,7 +19,7 @@ type productListRow struct {
 	DiscountRules []byte `db:"discount_rules"`
 }
 
-func (g *PgxProductGatewayAdapter) List(filter ListFilter) ([]ListOutput, error) {
+func (g *PgxProductGatewayAdapter) List(ctx context.Context, filter ListFilter) ([]ListOutput, error) {
 	if len(filter.IDs) == 0 {
 		return nil, ErrIDsRequired
 	}
@@ -44,7 +44,7 @@ func (g *PgxProductGatewayAdapter) List(filter ListFilter) ([]ListOutput, error)
 		return nil, err
 	}
 
-	rows, err := g.DB.Pool.Query(context.Background(), sql, args...)
+	rows, err := g.DB.Pool.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}

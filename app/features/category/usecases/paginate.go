@@ -12,5 +12,5 @@ func (c *CategoryCase) Paginate(
 	input g.PaginateFilter,
 	paginate database.PaginateInput,
 ) (g.PaginateOutput, error) {
-	return c.gateway.Paginate(input, paginate)
+	return c.gateway.Paginate(ctx, input, paginate)
 }

@@ -7,7 +7,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-func (g *PgxOrderGatewayAdapter) Patch(filter PatchFilter, values PatchValues) (bool, error) {
+func (g *PgxOrderGatewayAdapter) Patch(ctx context.Context, filter PatchFilter, values PatchValues) (bool, error) {
 	b := sq.
 		Update("commerce.orders").
 		Set("updated_at", time.Now().UTC()).
@@ -44,7 +44,7 @@ func (g *PgxOrderGatewayAdapter) Patch(filter PatchFilter, values PatchValues) (
 		return false, err
 	}
 
-	tag, err := g.DB.Pool.Exec(context.Background(), sql, args...)
+	tag, err := g.DB.Pool.Exec(context.WithoutCancel(ctx), sql, args...)
 
 	return tag.RowsAffected() > 0, err
 }

@@ -7,5 +7,5 @@ import (
 )
 
 func (c *OrderCase) GetByID(ctx context.Context, filter g.GetByIDFilter) (*g.GetByIDOutput, error) {
-	return c.gateway.GetByID(filter)
+	return c.gateway.GetByID(ctx, filter)
 }

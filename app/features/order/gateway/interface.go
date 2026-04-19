@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"context"
 	"time"
 
 	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
@@ -9,11 +10,11 @@ import (
 )
 
 type OrderGateway interface {
-	Create(input CreateInput) (string, error)
-	GetByID(filter GetByIDFilter) (*GetByIDOutput, error)
-	Patch(filter PatchFilter, values PatchValues) (bool, error)
-	Paginate(filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
-	Delete(filter DeleteFilter) (bool, error)
+	Create(ctx context.Context, input CreateInput) (string, error)
+	GetByID(ctx context.Context, filter GetByIDFilter) (*GetByIDOutput, error)
+	Patch(ctx context.Context, filter PatchFilter, values PatchValues) (bool, error)
+	Paginate(ctx context.Context, filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
+	Delete(ctx context.Context, filter DeleteFilter) (bool, error)
 }
 
 type OrderItem struct {

@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (g *PgxTenantGatewayAdapter) GetByID(id string) (*GetByIDOutput, error) {
+func (g *PgxTenantGatewayAdapter) GetByID(ctx context.Context, id string) (*GetByIDOutput, error) {
 	sql, args, err := sq.
 		Select("id", "name").
 		From("iam.tenants").
@@ -20,7 +20,7 @@ func (g *PgxTenantGatewayAdapter) GetByID(id string) (*GetByIDOutput, error) {
 		return nil, err
 	}
 
-	rows, err := g.DB.Pool.Query(context.Background(), sql, args...)
+	rows, err := g.DB.Pool.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}

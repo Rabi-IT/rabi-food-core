@@ -18,7 +18,7 @@ func (g *PgxTenantGatewayAdapter) CreateCustomer(ctx context.Context, tenantID, 
 		return err
 	}
 
-	_, err = g.DB.Pool.Exec(ctx, sql, args...)
+	_, err = g.DB.Pool.Exec(context.WithoutCancel(ctx), sql, args...)
 
 	return err
 }

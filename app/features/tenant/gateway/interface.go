@@ -7,10 +7,10 @@ import (
 )
 
 type TenantGateway interface {
-	Patch(filter PatchFilter, values PatchValues) (bool, error)
-	Create(input CreateInput) (string, error)
-	GetByID(id string) (*GetByIDOutput, error)
-	Paginate(filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
+	Patch(ctx context.Context, filter PatchFilter, values PatchValues) (bool, error)
+	Create(ctx context.Context, input CreateInput) (string, error)
+	GetByID(ctx context.Context, id string) (*GetByIDOutput, error)
+	Paginate(ctx context.Context, filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
 	CreateCustomer(ctx context.Context, tenantID, userID string) error
 	CreateMember(ctx context.Context, input CreateMemberInput) error
 	GetMember(ctx context.Context, filter GetMemberFilter) (*GetMemberOutput, error)

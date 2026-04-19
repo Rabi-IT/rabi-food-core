@@ -6,7 +6,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-func (g *PgxCategoryGatewayAdapter) Patch(filter PatchFilter, values PatchValues) (bool, error) {
+func (g *PgxCategoryGatewayAdapter) Patch(ctx context.Context, filter PatchFilter, values PatchValues) (bool, error) {
 	b := sq.
 		Update("catalog.categories").
 		Where(sq.Eq{"id": filter.ID}).
@@ -28,7 +28,7 @@ func (g *PgxCategoryGatewayAdapter) Patch(filter PatchFilter, values PatchValues
 		return false, err
 	}
 
-	tag, err := g.DB.Pool.Exec(context.Background(), sql, args...)
+	tag, err := g.DB.Pool.Exec(context.WithoutCancel(ctx), sql, args...)
 
 	return tag.RowsAffected() > 0, err
 }

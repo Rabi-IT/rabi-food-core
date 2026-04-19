@@ -8,7 +8,7 @@ import (
 )
 
 func (c *CategoryCase) Create(ctx context.Context, input g.CreateInput) (string, error) {
-	id, err := c.gateway.Create(input)
+	id, err := c.gateway.Create(ctx, input)
 	logger.GetWideEvent(ctx).SetCategoryID(id)
 	if err != nil {
 		return "", err

@@ -7,5 +7,5 @@ import (
 )
 
 func (c *ProductCase) List(ctx context.Context, filter g.ListFilter) ([]g.ListOutput, error) {
-	return c.gateway.List(filter)
+	return c.gateway.List(ctx, filter)
 }

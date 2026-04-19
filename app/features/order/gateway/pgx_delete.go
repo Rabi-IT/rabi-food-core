@@ -7,7 +7,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-func (g *PgxOrderGatewayAdapter) Delete(filter DeleteFilter) (bool, error) {
+func (g *PgxOrderGatewayAdapter) Delete(ctx context.Context, filter DeleteFilter) (bool, error) {
 	b := sq.
 		Update("commerce.orders").
 		Set("deleted_at", time.Now().UTC()).
@@ -27,7 +27,7 @@ func (g *PgxOrderGatewayAdapter) Delete(filter DeleteFilter) (bool, error) {
 		return false, err
 	}
 
-	tag, err := g.DB.Pool.Exec(context.Background(), sql, args...)
+	tag, err := g.DB.Pool.Exec(context.WithoutCancel(ctx), sql, args...)
 
 	return tag.RowsAffected() > 0, err
 }

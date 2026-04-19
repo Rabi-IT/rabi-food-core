@@ -70,7 +70,7 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 		totalPrice += itemTotal
 	}
 
-	id, err := c.gateway.Create(g.CreateInput{
+	id, err := c.gateway.Create(ctx, g.CreateInput{
 		UserID:   input.UserID,
 		TenantID: input.TenantID,
 
