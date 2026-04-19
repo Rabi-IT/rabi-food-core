@@ -14,8 +14,8 @@ func (g *PgxTenantGatewayAdapter) Paginate(
 ) (PaginateOutput, error) {
 	base := sq.Select().From("iam.tenants").PlaceholderFormat(sq.Dollar)
 
-	if filter.Name != nil {
-		base = base.Where(sq.ILike{"name": "%" + *filter.Name + "%"})
+	if filter.Name != "" {
+		base = base.Where(sq.ILike{"name": "%" + filter.Name + "%"})
 	}
 
 	countSQL, countArgs, err := base.Column("COUNT(*)").ToSql()

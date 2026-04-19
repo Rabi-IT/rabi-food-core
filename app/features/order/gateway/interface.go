@@ -74,13 +74,13 @@ type PatchValues struct {
 }
 
 type PaginateFilter struct {
-	UserID            *string                 `json:"userId"`
-	TenantID          *string                 `json:"tenantId"`
+	UserID            string                  `json:"userId"`
+	TenantID          string                  `json:"tenantId"`
 	PaymentStatus     payment_status.Status   `json:"paymentStatus"`
 	FulfillmentStatus order.FulfillmentStatus `json:"fulfillmentStatus"`
 	DeliveryStatus    order.DeliveryStatus    `json:"deliveryStatus"`
-	CreatedAtFrom     *time.Time              `json:"createdAtFrom"`
-	CreatedAtTo       *time.Time              `json:"createdAtTo"`
+	CreatedAtFrom     time.Time               `json:"createdAtFrom"`
+	CreatedAtTo       time.Time               `json:"createdAtTo"`
 }
 
 type PaginateData struct {

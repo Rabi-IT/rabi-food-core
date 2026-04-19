@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"strconv"
-
 	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
 
@@ -20,26 +18,16 @@ import (
 // @Failure 500 {string} string "Internal server error"
 // @Router /subscription/ [get].
 func (c *SubscriptionController) Paginate(ctx *fiber.Ctx) error {
-	page, err := strconv.Atoi(ctx.Query("Page", "0"))
-	if err != nil {
-		return err
-	}
-
-	pageSize, err := strconv.Atoi(ctx.Query("PageSize", "10"))
-	if err != nil {
-		return err
-	}
-
 	uctx := ctx.UserContext()
 	tenantID := ctx.Get("X-Tenant-ID")
 
 	filter := g.PaginateFilter{
-		TenantID: &tenantID,
+		TenantID: tenantID,
 	}
 
 	paginate := database.PaginateInput{
-		Page:     page,
-		PageSize: pageSize,
+		Page:     ctx.QueryInt("Page", database.DefaultPage),
+		PageSize: ctx.QueryInt("PageSize", database.DefaultPageSize),
 	}
 
 	result, err := c.usecase.Paginate(uctx, filter, paginate)

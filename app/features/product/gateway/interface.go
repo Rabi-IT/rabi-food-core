@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
+	"github.com/Rabi-IT/rabi-food-core/libs/database/filter"
 )
 
 type ProductGateway interface {
@@ -16,9 +17,9 @@ type ProductGateway interface {
 }
 
 type ListFilter struct {
-	IDs      []string `json:"ids"`
-	IsActive *bool    `json:"isActive"`
-	TenantID *string  `json:"tenantId"`
+	IDs      []string    `json:"ids"`
+	IsActive filter.Bool `json:"isActive"`
+	TenantID string      `json:"tenantId"`
 }
 
 type DiscountRule struct {
@@ -80,10 +81,10 @@ type PatchValues struct {
 }
 
 type PaginateFilter struct {
-	TenantID   *string `json:"tenantId"`
-	Name       *string `json:"name"`
-	CategoryID *string `json:"categoryId"`
-	IsActive   *bool   `json:"isActive"`
+	TenantID   string      `json:"tenantId"`
+	Name       string      `json:"name"`
+	CategoryID string      `json:"categoryId"`
+	IsActive   filter.Bool `json:"isActive"`
 }
 
 type PaginateData struct {

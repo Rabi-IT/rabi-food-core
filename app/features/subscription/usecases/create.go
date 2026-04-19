@@ -7,6 +7,7 @@ import (
 	"github.com/Rabi-IT/rabi-food-core/domain/payment_status"
 	product_gateway "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 	"github.com/Rabi-IT/rabi-food-core/features/subscription"
+	"github.com/Rabi-IT/rabi-food-core/libs/database/filter"
 	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
@@ -70,8 +71,8 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 
 	products, err := s.productCase.List(ctx, product_gateway.ListFilter{
 		IDs:      productIds,
-		IsActive: new(true),
-		TenantID: &input.TenantID,
+		IsActive: filter.True,
+		TenantID: input.TenantID,
 	})
 
 	if err != nil {

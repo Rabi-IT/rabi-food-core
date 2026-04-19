@@ -16,16 +16,16 @@ func (g *PgxOrderGatewayAdapter) Paginate(
 		Where("deleted_at IS NULL").
 		PlaceholderFormat(sq.Dollar)
 
-	if filter.UserID != nil {
-		base = base.Where(sq.Eq{"user_id": *filter.UserID})
+	if filter.UserID != "" {
+		base = base.Where(sq.Eq{"user_id": filter.UserID})
 	}
 
-	if filter.CreatedAtFrom != nil {
-		base = base.Where(sq.GtOrEq{"created_at": *filter.CreatedAtFrom})
+	if !filter.CreatedAtFrom.IsZero() {
+		base = base.Where(sq.GtOrEq{"created_at": filter.CreatedAtFrom})
 	}
 
-	if filter.CreatedAtTo != nil {
-		base = base.Where(sq.LtOrEq{"created_at": *filter.CreatedAtTo})
+	if !filter.CreatedAtTo.IsZero() {
+		base = base.Where(sq.LtOrEq{"created_at": filter.CreatedAtTo})
 	}
 
 	if filter.FulfillmentStatus != "" {
@@ -40,8 +40,8 @@ func (g *PgxOrderGatewayAdapter) Paginate(
 		base = base.Where(sq.Eq{"payment_status": filter.PaymentStatus})
 	}
 
-	if filter.TenantID != nil {
-		base = base.Where(sq.Eq{"tenant_id": *filter.TenantID})
+	if filter.TenantID != "" {
+		base = base.Where(sq.Eq{"tenant_id": filter.TenantID})
 	}
 
 	countSQL, countArgs, err := base.Column("COUNT(*)").ToSql()

@@ -16,8 +16,8 @@ func (g *PgxSubscriptionGatewayAdapter) List(ctx context.Context, filter ListFil
 		Where("remaining_cycles >= ?", filter.RemainingCyclesGTE).
 		Where("delivery_weekdays_mask & ? != 0", 1<<uint8(filter.Weekday))
 
-	if filter.ID != nil {
-		qb = qb.Where(sq.Eq{"id": *filter.ID})
+	if filter.ID != "" {
+		qb = qb.Where(sq.Eq{"id": filter.ID})
 	}
 
 	query, args, err := qb.

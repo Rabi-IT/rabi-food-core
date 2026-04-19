@@ -14,12 +14,12 @@ func (g *PgxCategoryGatewayAdapter) Paginate(
 ) (PaginateOutput, error) {
 	base := sq.Select().From("catalog.categories").PlaceholderFormat(sq.Dollar)
 
-	if filter.Name != nil {
-		base = base.Where(sq.ILike{"name": "%" + *filter.Name + "%"})
+	if filter.Name != "" {
+		base = base.Where(sq.ILike{"name": "%" + filter.Name + "%"})
 	}
 
-	if filter.TenantID != nil {
-		base = base.Where(sq.Eq{"tenant_id": *filter.TenantID})
+	if filter.TenantID != "" {
+		base = base.Where(sq.Eq{"tenant_id": filter.TenantID})
 	}
 
 	countSQL, countArgs, err := base.Column("COUNT(*)").ToSql()

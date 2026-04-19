@@ -1,10 +1,9 @@
 package controller
 
 import (
-	"strconv"
-
 	"github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
+	"github.com/Rabi-IT/rabi-food-core/libs/database/filter"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,34 +18,26 @@ import (
 // @Param tenantId query string false "Optional tenant ID filter"
 // @Param name query string false "Product name"
 // @Param categoryId query string false "Category ID"
-// @Param isActive query bool false "Filter by active products"
+// @Param isActive query int false "Filter by active status: 1=active, -1=inactive"
 // @Success 200 {object} gateway.PaginateOutput
 // @Failure 500 {string} string "Internal server error"
 // @Router /backoffice/product/ [get].
 func (c *ProductController) BackofficePaginate(ctx *fiber.Ctx) error {
-	page, err := strconv.Atoi(ctx.Query("Page", "0"))
-	if err != nil {
-		return err
-	}
-
-	pageSize, err := strconv.Atoi(ctx.Query("PageSize", "10"))
-	if err != nil {
-		return err
-	}
-
-	filter := gateway.PaginateFilter{}
-	if err = ctx.QueryParser(&filter); err != nil {
-		return err
-	}
-
 	uctx := ctx.UserContext()
 
-	paginate := database.PaginateInput{
-		Page:     page,
-		PageSize: pageSize,
+	f := gateway.PaginateFilter{
+		TenantID:   ctx.Query("tenantId"),
+		Name:       ctx.Query("name"),
+		CategoryID: ctx.Query("categoryId"),
+		IsActive:   filter.Bool(ctx.QueryInt("isActive", 0)),
 	}
 
-	result, err := c.usecase.Paginate(uctx, filter, paginate)
+	paginate := database.PaginateInput{
+		Page:     ctx.QueryInt("Page", database.DefaultPage),
+		PageSize: ctx.QueryInt("PageSize", database.DefaultPageSize),
+	}
+
+	result, err := c.usecase.Paginate(uctx, f, paginate)
 	if err != nil {
 		return err
 	}

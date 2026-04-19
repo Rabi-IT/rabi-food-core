@@ -9,6 +9,7 @@ import (
 	g "github.com/Rabi-IT/rabi-food-core/features/order/gateway"
 	"github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 	product_gateway "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
+	"github.com/Rabi-IT/rabi-food-core/libs/database/filter"
 	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 
@@ -35,8 +36,8 @@ func (c *OrderCase) Create(ctx context.Context, input CreateInput) (string, erro
 
 	products, err := c.productCase.List(ctx, product_gateway.ListFilter{
 		IDs:      productIds,
-		IsActive: new(true),
-		TenantID: &input.TenantID,
+		IsActive: filter.True,
+		TenantID: input.TenantID,
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch products: %w", err)

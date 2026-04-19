@@ -26,7 +26,7 @@ import (
 func (c *TenantController) Patch(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 	filter := usecases.PatchFilter{
-		ID: &id,
+		ID: id,
 	}
 
 	data := usecases.PatchValues{}
