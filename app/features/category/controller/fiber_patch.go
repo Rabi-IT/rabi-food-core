@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/category/gateway"
 	parser "github.com/Rabi-IT/rabi-food-core/libs/http/parser"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
@@ -25,9 +26,10 @@ import (
 // @Failure 500 {string} string "Internal server error"
 // @Router /category/{id} [patch].
 func (c *CategoryController) Patch(ctx *fiber.Ctx) error {
+	uctx := ctx.UserContext()
 	filter := gateway.PatchFilter{
 		ID:       ctx.Params("id"),
-		TenantID: ctx.Get("X-Tenant-ID"),
+		TenantID: app_context.GetSession(uctx).TenantID,
 	}
 
 	data := gateway.PatchValues{}
@@ -41,7 +43,6 @@ func (c *CategoryController) Patch(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	uctx := ctx.UserContext()
 	logger.GetWideEvent(uctx).Event = "patch-category"
 	updated, err := c.usecase.Patch(uctx, filter, data)
 

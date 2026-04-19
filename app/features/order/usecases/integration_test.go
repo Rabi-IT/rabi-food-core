@@ -54,7 +54,7 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 		productID := fixtures.Product.Create(t.T(), &product_gateway.CreateInput{
 			Name:       "Product Name",
-			CategoryID: fixtures.Category.Create(t.T(), nil, userAuth),
+			CategoryID: fixtures.Category.Create(t.T(), nil, tenantAuth),
 			Price:      100,
 			IsActive:   true,
 		}, tenantAuth)
@@ -220,7 +220,7 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 
 		productID := fixtures.Product.Create(t.T(), &product_gateway.CreateInput{
 			Name:       "Inactive Product",
-			CategoryID: fixtures.Category.Create(t.T(), nil, userAuth),
+			CategoryID: fixtures.Category.Create(t.T(), nil, tenantAuth),
 			Price:      100,
 			IsActive:   false,
 		}, tenantAuth)
