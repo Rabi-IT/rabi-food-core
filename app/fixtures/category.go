@@ -40,14 +40,12 @@ func (categoryFixture) Create(t *testing.T, input *g.CreateInput, auth RequestCo
 	return id
 }
 
-func (categoryFixture) GetByID(t *testing.T, id string, auth RequestContext) (g.GetByIDOutput, int) {
+func (categoryFixture) GetByID(t *testing.T, id string) (g.GetByIDOutput, int) {
 	t.Helper()
 	found := g.GetByIDOutput{}
 
 	obj := httpexpect.Default(t, AppURL).
 		Request(http.MethodGet, Category.URI+id).
-		WithHeader("Authorization", "Bearer "+auth.Token).
-		WithHeader("X-Tenant-ID", auth.TenantID).
 		Expect().Status(http.StatusOK)
 
 	response := obj.Raw()
