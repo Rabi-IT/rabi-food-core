@@ -148,6 +148,20 @@ type OrderGateway interface {
 }
 ```
 
+### 7. Context nas queries do gateway
+**Leituras (SELECT):** passam `ctx` diretamente — canceláveis pelo client.
+**Escritas (INSERT/UPDATE/DELETE):** usam `context.WithoutCancel(ctx)` — preserva valores do contexto (trace, request ID) mas não propaga cancel nem deadline do request, evitando que um disconnect do client interrompa uma operação de escrita em andamento.
+
+```go
+// leitura — cancelável
+rows, err := g.DB.Pool.Query(ctx, sql, args...)
+
+// escrita — não cancelável por disconnect
+_, err = g.DB.Pool.Exec(context.WithoutCancel(ctx), sql, args...)
+```
+
+**Nota:** `context.WithoutCancel` remove tanto o cancel quanto o deadline do contexto pai. A proteção contra queries travadas indefinidamente fica por conta do `statement_timeout` configurado no PostgreSQL.
+
 ### 7. Dependências entre use cases
 Features podem importar outras features diretamente quando a dependência é **unidirecional e intencional** (nunca cíclica). Use interface local apenas quando testabilidade isolada for um requisito explícito.
 
