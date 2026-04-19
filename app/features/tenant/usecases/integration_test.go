@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"testing"
 
-	auth_usecases "github.com/Rabi-IT/rabi-food-core/features/auth/usecases"
 	"github.com/Rabi-IT/rabi-food-core/fixtures"
 	"github.com/Rabi-IT/rabi-food-core/libs/http/middlewares"
 
@@ -75,72 +74,51 @@ func (t *TestSuite) Test_TenantIntegration_EnrollCustomer() {
 	})
 }
 
-func (t *TestSuite) Test_TenantIntegration_SignUpWithTenant() {
-	t.Run("should create tenant and owner on signup", func() {
-		body := auth_usecases.SignUpInput{
+func (t *TestSuite) Test_TenantIntegration_Create() {
+	t.Run("should create tenant with owner as member", func() {
+		tenant := fixtures.Tenant.Create(t.T(), &fixtures.TenantCreateInput{
+			Name:         "My Tenant",
+			UserName:     "Owner Name",
+			UserPhone:    "11999999999",
+			UserEmail:    "owner@email.com",
+			UserPassword: "password123",
+			UserTaxID:    "12345678901",
+		})
+
+		token := fixtures.Auth.TenantOwnerToken(t.T(), tenant.UserID, tenant.ID)
+
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodGet, fixtures.Tenant.URI+"me").
+			WithHeader("Authorization", "Bearer "+token).
+			WithHeader("X-Tenant-ID", tenant.ID).
+			Expect().Status(http.StatusOK).
+			JSON().Object().
+			ContainsSubset(map[string]any{
+				"id":   tenant.ID,
+				"name": "My Tenant",
+			})
+	})
+
+	t.Run("should fail if name is missing", func() {
+		userID := fixtures.Auth.SignUp(t.T(), fixtures.SignUpInput{
 			Email:    "owner@email.com",
 			Password: "password123",
 			Name:     "Owner Name",
 			Phone:    "11999999999",
 			TaxID:    "12345678901",
-			Tenant:   &auth_usecases.TenantInput{Name: "My Tenant"},
-		}
-
-		var response auth_usecases.SignUpOutput
-		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodPost, "/auth/signup").
-			WithJSON(body).
-			Expect().Status(http.StatusCreated).
-			JSON().Decode(&response)
-
-		t.NotEmpty(response.ID)
-		t.NotEmpty(response.TenantID)
-
-		token := fixtures.Auth.TenantOwnerToken(t.T(), response.ID, response.TenantID)
-
-		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodGet, fixtures.Tenant.URI+"me").
-			WithHeader("Authorization", "Bearer "+token).
-			WithHeader("X-Tenant-ID", response.TenantID).
-			Expect().Status(http.StatusOK).
-			JSON().Object().
-			ContainsSubset(map[string]any{
-				"id":   response.TenantID,
-				"name": body.Tenant.Name,
-			})
-	})
-
-	t.Run("should fail if required fields are missing", func() {
-		body := auth_usecases.SignUpInput{
-			Tenant: &auth_usecases.TenantInput{},
-		}
+		})
+		token := fixtures.Auth.UserToken(t.T(), userID)
 
 		response := new(middlewares.ValidationErrorResponse)
 		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodPost, "/auth/signup").
-			WithJSON(body).
-			Expect().
-			Status(http.StatusBadRequest).
+			Request(http.MethodPost, "/tenant").
+			WithHeader("Authorization", "Bearer "+token).
+			WithJSON(map[string]string{"name": ""}).
+			Expect().Status(http.StatusBadRequest).
 			JSON().Decode(response)
 
-		t.Len(response.Errors, 6)
-		for _, e := range response.Errors {
-			switch e.Field {
-			case "email":
-				t.Equal("required", e.Tag)
-			case "password":
-				t.Equal("required", e.Tag)
-			case "name":
-				t.Equal("required", e.Tag)
-			case "phone":
-				t.Equal("required", e.Tag)
-			case "taxId":
-				t.Equal("required", e.Tag)
-			case "tenant.name":
-				t.Equal("required", e.Tag)
-			default:
-				t.Fail("unexpected validation error field: " + e.Field)
-			}
-		}
+		t.Len(response.Errors, 1)
+		t.Equal("name", response.Errors[0].Field)
+		t.Equal("required", response.Errors[0].Tag)
 	})
 }
