@@ -110,7 +110,7 @@ func (t *TestSuite) Test_CategoryIntegration_Create() {
 
 		categoryID := fixtures.Category.Create(t.T(), &body, tenantAuth)
 
-		categoryFound, httpStatus := fixtures.Category.GetByID(t.T(), categoryID, tenantAuth)
+		categoryFound, httpStatus := fixtures.Category.GetByID(t.T(), categoryID)
 		t.Equal(http.StatusOK, httpStatus)
 		t.Equal(tenant.ID, categoryFound.TenantID)
 	})
@@ -135,10 +135,9 @@ func (t *TestSuite) Test_CategoryIntegration_GetByID() {
 	t.Run("should be able to get by id", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
-		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 		categoryID := fixtures.Category.Create(t.T(), nil, tenantAuth)
 
-		found, status := fixtures.Category.GetByID(t.T(), categoryID, userAuth)
+		found, status := fixtures.Category.GetByID(t.T(), categoryID)
 
 		t.Equal(http.StatusOK, status)
 		t.Equal(categoryID, found.ID)
@@ -147,12 +146,8 @@ func (t *TestSuite) Test_CategoryIntegration_GetByID() {
 	})
 
 	t.Run("should return NotFound when get by id not found", func() {
-		tenant := fixtures.Tenant.Create(t.T(), nil)
-		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Category.URI+uuid.New().String()).
-			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			Expect().
 			Status(http.StatusNotFound).
 			Body().NotEmpty()
@@ -162,7 +157,6 @@ func (t *TestSuite) Test_CategoryIntegration_GetByID() {
 func (t *TestSuite) Test_CategoryIntegration_Paginate() {
 	t.Run("should be able to paginate", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
 		for range 15 {
@@ -172,8 +166,7 @@ func (t *TestSuite) Test_CategoryIntegration_Paginate() {
 		response := new(gateway.PaginateOutput)
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Category.URI).
-			WithHeader("Authorization", "Bearer "+userAuth.Token).
-			WithHeader("X-Tenant-ID", userAuth.TenantID).
+			WithHeader("X-Tenant-ID", tenantAuth.TenantID).
 			WithQueryObject(database.PaginateInput{
 				Page:     0,
 				PageSize: 10,
@@ -201,13 +194,11 @@ func (t *TestSuite) Test_CategoryIntegration_Paginate() {
 		}
 
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 
 		response := new(gateway.PaginateOutput)
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Category.URI).
-			WithHeader("Authorization", "Bearer "+userAuth.Token).
-			WithHeader("X-Tenant-ID", userAuth.TenantID).
+			WithHeader("X-Tenant-ID", tenant.ID).
 			WithQueryObject(database.PaginateInput{
 				Page:     0,
 				PageSize: 10,
@@ -224,7 +215,6 @@ func (t *TestSuite) Test_CategoryIntegration_Paginate() {
 func (t *TestSuite) Test_CategoryIntegration_Patch() {
 	t.Run("should be able to patch", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 		categoryID := fixtures.Category.Create(t.T(), nil, tenantAuth)
 
@@ -241,7 +231,7 @@ func (t *TestSuite) Test_CategoryIntegration_Patch() {
 			Status(http.StatusOK).
 			Body().NotEmpty()
 
-		found, status := fixtures.Category.GetByID(t.T(), categoryID, userAuth)
+		found, status := fixtures.Category.GetByID(t.T(), categoryID)
 
 		t.Equal(http.StatusOK, status)
 		t.Equal(categoryID, found.ID)
