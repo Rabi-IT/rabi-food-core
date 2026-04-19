@@ -25,9 +25,12 @@ type ExchangeTokenOutput struct {
 func (c *AuthCase) ExchangeToken(ctx context.Context, input *ExchangeTokenInput) (*ExchangeTokenOutput, error) {
 	session := app_context.GetSession(ctx)
 
-	role, err := c.tenantCase.GetMembership(ctx, session.UserID, input.TenantID)
+	member, err := c.tenantCase.GetMembership(ctx, session.UserID, input.TenantID)
 	if err != nil {
 		return nil, err
+	}
+	if member == nil {
+		return nil, errs.ErrForbidden
 	}
 
 	now := time.Now()
@@ -38,8 +41,9 @@ func (c *AuthCase) ExchangeToken(ctx context.Context, input *ExchangeTokenInput)
 		"iat":   now.Unix(),
 		"exp":   now.Add(scopedTokenTTL).Unix(),
 		"app_metadata": map[string]any{
-			"role":      role,
-			"tenant_id": input.TenantID,
+			"role":        session.Role,
+			"tenant_role": member.Role,
+			"tenant_id":   input.TenantID,
 		},
 		"user_metadata": map[string]any{
 			"name": session.Name,

@@ -3,7 +3,7 @@ package gateway
 import (
 	"context"
 
-	"github.com/Rabi-IT/rabi-food-core/domain/auth"
+	"github.com/Rabi-IT/rabi-food-core/domain/tenant"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
 )
 
@@ -28,7 +28,7 @@ type PatchValues struct {
 
 type InitialMemberInput struct {
 	UserID string
-	Role   auth.Role
+	Role   tenant.Role
 }
 
 type CreateInput struct {
@@ -58,7 +58,7 @@ type PaginateOutput struct {
 type CreateMemberInput struct {
 	TenantID string
 	UserID   string
-	Role     string
+	Role     tenant.Role
 }
 
 type GetCustomerFilter struct {
@@ -79,5 +79,5 @@ type GetMemberFilter struct {
 type GetMemberOutput struct {
 	UserID   string
 	TenantID string
-	Role     string
+	Role     tenant.Role
 }

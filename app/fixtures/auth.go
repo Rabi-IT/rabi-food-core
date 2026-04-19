@@ -6,6 +6,7 @@ import (
 
 	"github.com/Rabi-IT/rabi-food-core/config"
 	"github.com/Rabi-IT/rabi-food-core/domain/auth"
+	"github.com/Rabi-IT/rabi-food-core/domain/tenant"
 	auth_usecases "github.com/Rabi-IT/rabi-food-core/features/auth/usecases"
 
 	"github.com/gavv/httpexpect/v2"
@@ -63,8 +64,9 @@ func (a *authFixture) TenantOwnerToken(t *testing.T, id, tenantID string) string
 	claims := jwt.MapClaims{
 		"sub": id,
 		"app_metadata": map[string]any{
-			"role":      string(auth.TenantOwner),
-			"tenant_id": tenantID,
+			"role":        string(auth.User),
+			"tenant_role": string(tenant.Owner),
+			"tenant_id":   tenantID,
 		},
 	}
 

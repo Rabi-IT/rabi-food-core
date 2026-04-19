@@ -36,7 +36,7 @@ func (c *OrderController) Delete(ctx *fiber.Ctx) error {
 	session := app_context.GetSession(uctx)
 
 	filter.ID = ctx.Params("id")
-	if session.Role.IsTenant() {
+	if session.IsTenant() {
 		filter.TenantID = session.TenantID
 	} else if session.Role.IsUser() {
 		filter.UserID = session.UserID
