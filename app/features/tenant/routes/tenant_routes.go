@@ -10,6 +10,7 @@ import (
 // TenantProtected registers tenant routes that require a valid JWT.
 func TenantProtected(app *fiber.App, c *controller.TenantController) {
 	// No Tenant Authorization required
+	app.Post("/tenant", c.Create)
 	app.Post("/tenant/:id/enroll-customers", c.EnrollCustomer)
 
 	// Tenant Authorization required

@@ -1,6 +1,10 @@
 package gateway
 
-import "context"
+import (
+	"context"
+
+	"github.com/Rabi-IT/rabi-food-core/domain/auth"
+)
 
 type AuthGateway interface {
 	SignUp(ctx context.Context, input SignUpInput) (*SignUpOutput, error)
@@ -26,7 +30,7 @@ type SignUpInput struct {
 	Street       string
 	Complement   string
 	Neighborhood string
-	Role string
+	Role auth.Role
 }
 
 type SignUpOutput struct {

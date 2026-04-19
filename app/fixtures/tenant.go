@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"testing"
 
-	auth_usecases "github.com/Rabi-IT/rabi-food-core/features/auth/usecases"
 	g "github.com/Rabi-IT/rabi-food-core/features/tenant/gateway"
 
 	"github.com/gavv/httpexpect/v2"
@@ -48,24 +47,26 @@ func (tenantFixture) Create(t *testing.T, input *TenantCreateInput) *TenantCreat
 		}
 	}
 
-	out := &auth_usecases.SignUpOutput{}
-	httpexpect.Default(t, AppURL).
-		Request(http.MethodPost, "/auth/signup").
-		WithJSON(auth_usecases.SignUpInput{
-			Email:    body.UserEmail,
-			Password: body.UserPassword,
-			Name:     body.UserName,
-			Phone:    body.UserPhone,
-			TaxID:    body.UserTaxID,
-			Tenant:   &auth_usecases.TenantInput{Name: body.Name},
-		}).
+	userID := Auth.SignUp(t, SignUpInput{
+		Email:    body.UserEmail,
+		Password: body.UserPassword,
+		Name:     body.UserName,
+		Phone:    body.UserPhone,
+		TaxID:    body.UserTaxID,
+	})
+
+	token := Auth.UserToken(t, userID)
+
+	tenantID := httpexpect.Default(t, AppURL).
+		Request(http.MethodPost, "/tenant").
+		WithHeader("Authorization", "Bearer "+token).
+		WithJSON(map[string]string{"name": body.Name}).
 		Expect().Status(http.StatusCreated).
-		JSON().Object().Decode(out)
+		Body().Raw()
 
-	require.NotEmpty(t, out.ID)
-	require.NotEmpty(t, out.TenantID)
+	require.NotEmpty(t, tenantID)
 
-	return &TenantCreateOutput{ID: out.TenantID, UserID: out.ID}
+	return &TenantCreateOutput{ID: tenantID, UserID: userID}
 }
 
 func (tenantFixture) EnrollCustomer(t *testing.T, tenantID, token string) {

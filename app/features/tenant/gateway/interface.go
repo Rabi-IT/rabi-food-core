@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 
+	"github.com/Rabi-IT/rabi-food-core/domain/auth"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
 )
 
@@ -25,8 +26,14 @@ type PatchValues struct {
 	Name *string
 }
 
+type InitialMemberInput struct {
+	UserID string
+	Role   auth.Role
+}
+
 type CreateInput struct {
-	Name string
+	Name          string
+	InitialMember InitialMemberInput
 }
 
 type GetByIDOutput struct {
