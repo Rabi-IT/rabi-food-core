@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 	"github.com/Rabi-IT/rabi-food-core/libs/validator"
@@ -34,7 +35,7 @@ func (c *ProductController) Create(ctx *fiber.Ctx) error {
 	}
 
 	uctx := ctx.UserContext()
-	data.TenantID = ctx.Get("X-Tenant-ID")
+	data.TenantID = app_context.GetSession(uctx).TenantID
 
 	logger.GetWideEvent(uctx).Event = "create-product"
 	id, err := c.usecase.Create(uctx, data)

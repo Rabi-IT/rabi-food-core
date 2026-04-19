@@ -9,12 +9,13 @@ import (
 
 // ProductProtected registers product routes that require a valid JWT.
 func ProductProtected(app *fiber.App, c *controller.ProductController) {
-	route := app.Group("/product", middlewares.RequireTenantID)
-	route.Post("/", c.Create)
-	route.Patch("/:id", c.Patch)
+	route := app.Group("/product")
+	route.Get("/", middlewares.RequireTenantID, c.Paginate)
+	route.Get("/:id", middlewares.RequireTenantID, c.GetByID)
+
+	route.Post("/", middlewares.RequireTenant, c.Create)
+	route.Patch("/:id", middlewares.RequireTenant, c.Patch)
 	route.Delete("/:id", middlewares.RequireTenant, c.Delete)
-	route.Get("/:id", c.GetByID)
-	route.Get("/", c.Paginate)
 
 	backoffice := app.Group("/backoffice/product", middlewares.RequireBackoffice)
 	backoffice.Get("/", c.BackofficePaginate)
