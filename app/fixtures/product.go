@@ -11,7 +11,7 @@ import (
 )
 
 type productFixture struct {
-	URI          string
+	URI           string
 	BackofficeURI string
 }
 
@@ -53,7 +53,6 @@ func (productFixture) GetByID(t *testing.T, id string, auth RequestContext) (g.G
 	obj := httpexpect.Default(t, AppURL).
 		Request(http.MethodGet, Product.URI+id).
 		WithHeader("Authorization", "Bearer "+auth.Token).
-		WithHeader("X-Tenant-ID", auth.TenantID).
 		Expect().Status(http.StatusOK)
 
 	response := obj.Raw()

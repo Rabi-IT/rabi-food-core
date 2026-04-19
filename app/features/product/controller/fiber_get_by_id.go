@@ -23,8 +23,7 @@ var _ *gateway.GetByIDOutput
 // @Router /product/{id} [get].
 func (c *ProductController) GetByID(ctx *fiber.Ctx) error {
 	filter := gateway.GetByIDFilter{
-		ID:       ctx.Params("id"),
-		TenantID: ctx.Get("X-Tenant-ID"),
+		ID: ctx.Params("id"),
 	}
 
 	data, err := c.usecase.GetByID(ctx.UserContext(), filter)

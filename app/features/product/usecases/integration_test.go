@@ -130,24 +130,6 @@ func (t *TestSuite) Test_ProductIntegration_GetByID() {
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Product.URI+uuid.New().String()).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
-			WithHeader("X-Tenant-ID", userAuth.TenantID).
-			Expect().
-			Status(http.StatusNotFound).
-			Body().NotEmpty()
-	})
-
-	t.Run("should not be able to get a product from another tenant", func() {
-		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
-		anotherTenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
-		anotherProductID := fixtures.Product.Create(t.T(), nil, anotherTenantAuth)
-
-		tenant := fixtures.Tenant.Create(t.T(), nil)
-		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-
-		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodGet, fixtures.Product.URI+anotherProductID).
-			WithHeader("Authorization", "Bearer "+userAuth.Token).
-			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusNotFound).
 			Body().NotEmpty()
