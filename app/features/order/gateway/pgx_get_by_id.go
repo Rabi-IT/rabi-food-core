@@ -39,6 +39,9 @@ func (g *PgxOrderGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutput, 
 		Limit(1).
 		PlaceholderFormat(sq.Dollar)
 
+	if filter.UserID != "" {
+		b = b.Where(sq.Eq{"user_id": filter.UserID})
+	}
 	if filter.TenantID != "" {
 		b = b.Where(sq.Eq{"tenant_id": filter.TenantID})
 	}

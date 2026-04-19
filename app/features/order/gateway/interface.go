@@ -38,6 +38,7 @@ type CreateInput struct {
 
 type GetByIDFilter struct {
 	ID       string `json:"id"`
+	UserID   string `json:"-"`
 	TenantID string `json:"-"`
 }
 
@@ -100,5 +101,6 @@ type PaginateOutput struct {
 
 type DeleteFilter struct {
 	ID       string `json:"id"`
+	UserID   string `json:"-"`
 	TenantID string `json:"-"`
 }
