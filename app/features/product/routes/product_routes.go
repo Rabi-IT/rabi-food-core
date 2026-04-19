@@ -11,7 +11,7 @@ import (
 func ProductProtected(app *fiber.App, c *controller.ProductController) {
 	route := app.Group("/product")
 	route.Get("/", middlewares.RequireTenantID, c.Paginate)
-	route.Get("/:id", middlewares.RequireTenantID, c.GetByID)
+	route.Get("/:id", c.GetByID)
 
 	route.Post("/", middlewares.RequireTenant, c.Create)
 	route.Patch("/:id", middlewares.RequireTenant, c.Patch)
