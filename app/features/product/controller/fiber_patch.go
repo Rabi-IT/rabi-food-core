@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/http/parser"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
@@ -27,9 +28,10 @@ import (
 func (c *ProductController) Patch(ctx *fiber.Ctx) error {
 	uctx := ctx.UserContext()
 
+	session := app_context.GetSession(uctx)
 	filter := gateway.PatchFilter{
 		ID:       ctx.Params("id"),
-		TenantID: ctx.Get("X-Tenant-ID"),
+		TenantID: session.TenantID,
 	}
 
 	data := gateway.PatchValues{}

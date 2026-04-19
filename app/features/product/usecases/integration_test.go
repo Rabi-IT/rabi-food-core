@@ -39,10 +39,11 @@ func TestMySuite(t *testing.T) {
 func (t *TestSuite) Test_ProductIntegration_Create() {
 	t.Run("should be able to create", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		categoryID := fixtures.Category.Create(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		categoryID := fixtures.Category.Create(t.T(), nil, userAuth)
 
-		Body := product_gateway.CreateInput{
+		body := product_gateway.CreateInput{
 			Name:        "Name",
 			Photo:       "http://example.com/photo.png",
 			Description: "Description",
@@ -54,18 +55,18 @@ func (t *TestSuite) Test_ProductIntegration_Create() {
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodPost, fixtures.Product.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
-			WithJSON(Body).
+			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
+			WithJSON(body).
 			Expect().
 			Status(http.StatusCreated).
 			Body().NotEmpty()
 	})
 
-	t.Run("should use X-Tenant-ID header, ignoring tenantID in body", func() {
+	t.Run("should use session TenantID, ignoring tenantID in body", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		categoryID := fixtures.Category.Create(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		categoryID := fixtures.Category.Create(t.T(), nil, userAuth)
 
 		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
 		body := product_gateway.CreateInput{
@@ -73,23 +74,46 @@ func (t *TestSuite) Test_ProductIntegration_Create() {
 			Name:        "Name",
 			Description: "Description",
 			CategoryID:  categoryID,
+			Price:       100,
 		}
 
-		productID := fixtures.Product.Create(t.T(), &body, auth)
+		productID := fixtures.Product.Create(t.T(), &body, tenantAuth)
 
-		productFound, httpStatus := fixtures.Product.GetByID(t.T(), productID, auth)
+		productFound, httpStatus := fixtures.Product.GetByID(t.T(), productID, userAuth)
 		t.Equal(http.StatusOK, httpStatus)
 		t.Equal(tenant.ID, productFound.TenantID)
+	})
+
+	t.Run("should not be able to create as a regular user", func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		categoryID := fixtures.Category.Create(t.T(), nil, userAuth)
+
+		body := product_gateway.CreateInput{
+			Name:        "Name",
+			Description: "Description",
+			CategoryID:  categoryID,
+			Price:       100,
+		}
+
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodPost, fixtures.Product.URI).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
+			WithJSON(body).
+			Expect().
+			Status(http.StatusForbidden)
 	})
 }
 
 func (t *TestSuite) Test_ProductIntegration_GetByID() {
 	t.Run("should be able to get by id", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		productID := fixtures.Product.Create(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		productID := fixtures.Product.Create(t.T(), nil, tenantAuth)
 
-		found, status := fixtures.Product.GetByID(t.T(), productID, auth)
+		found, status := fixtures.Product.GetByID(t.T(), productID, userAuth)
 
 		t.Equal(http.StatusOK, status)
 		t.Equal(productID, found.ID)
@@ -99,15 +123,14 @@ func (t *TestSuite) Test_ProductIntegration_GetByID() {
 
 	t.Run("should return NotFound when get by id not found", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		_ = fixtures.Product.Create(t.T(), nil, auth)
-
-		NON_EXISTING_ID := uuid.New().String()
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		_ = fixtures.Product.Create(t.T(), nil, tenantAuth)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodGet, fixtures.Product.URI+NON_EXISTING_ID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			Request(http.MethodGet, fixtures.Product.URI+uuid.New().String()).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusNotFound).
 			Body().NotEmpty()
@@ -115,16 +138,16 @@ func (t *TestSuite) Test_ProductIntegration_GetByID() {
 
 	t.Run("should not be able to get a product from another tenant", func() {
 		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
-		anotherAuth := fixtures.Auth.UserAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
-		anotherProductID := fixtures.Product.Create(t.T(), nil, anotherAuth)
+		anotherTenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
+		anotherProductID := fixtures.Product.Create(t.T(), nil, anotherTenantAuth)
 
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Product.URI+anotherProductID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusNotFound).
 			Body().NotEmpty()
@@ -134,17 +157,18 @@ func (t *TestSuite) Test_ProductIntegration_GetByID() {
 func (t *TestSuite) Test_ProductIntegration_Paginate() {
 	t.Run("should be able to paginate", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
 		for range 15 {
-			fixtures.Product.Create(t.T(), nil, auth)
+			fixtures.Product.Create(t.T(), nil, tenantAuth)
 		}
 
 		response := new(product_gateway.PaginateOutput)
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Product.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithQueryObject(database.PaginateInput{
 				Page:     0,
 				PageSize: 10,
@@ -163,22 +187,22 @@ func (t *TestSuite) Test_ProductIntegration_Paginate() {
 		}
 	})
 
-	t.Run("should not be able to paginate categories from another tenant", func() {
+	t.Run("should not be able to paginate products from another tenant", func() {
 		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
-		anotherAuth := fixtures.Auth.UserAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
+		anotherTenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
 
 		for range 5 {
-			fixtures.Product.Create(t.T(), nil, anotherAuth)
+			fixtures.Product.Create(t.T(), nil, anotherTenantAuth)
 		}
 
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 
 		response := new(product_gateway.PaginateOutput)
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Product.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithQueryObject(database.PaginateInput{
 				Page:     0,
 				PageSize: 10,
@@ -195,24 +219,24 @@ func (t *TestSuite) Test_ProductIntegration_Paginate() {
 func (t *TestSuite) Test_ProductIntegration_Patch() {
 	t.Run("should be able to patch", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		productID := fixtures.Product.Create(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		productID := fixtures.Product.Create(t.T(), nil, tenantAuth)
 
-		Body := product_gateway.PatchValues{
+		body := product_gateway.PatchValues{
 			Name:        new("Updated Name"),
 			Description: new("Updated Description"),
 		}
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodPatch, fixtures.Product.URI+productID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
-			WithJSON(Body).
+			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
+			WithJSON(body).
 			Expect().
 			Status(http.StatusOK).
 			Body().NotEmpty()
 
-		found, status := fixtures.Product.GetByID(t.T(), productID, auth)
+		found, status := fixtures.Product.GetByID(t.T(), productID, userAuth)
 
 		t.Equal(http.StatusOK, status)
 		t.Equal(productID, found.ID)
@@ -222,40 +246,58 @@ func (t *TestSuite) Test_ProductIntegration_Patch() {
 
 	t.Run("should not be able to patch a product from another tenant", func() {
 		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
-		anotherAuth := fixtures.Auth.UserAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
-		anotherProductID := fixtures.Product.Create(t.T(), nil, anotherAuth)
+		anotherTenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
+		anotherProductID := fixtures.Product.Create(t.T(), nil, anotherTenantAuth)
 
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
-		Body := product_gateway.PatchValues{
+		body := product_gateway.PatchValues{
 			Name:        new("Updated Name"),
 			Description: new("Updated Description"),
 		}
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodPatch, fixtures.Product.URI+anotherProductID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
-			WithJSON(Body).
+			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
+			WithJSON(body).
 			Expect().
 			Status(http.StatusNotFound).
 			Body().NotEmpty()
+	})
+
+	t.Run("should not be able to patch as a regular user", func() {
+		tenant := fixtures.Tenant.Create(t.T(), nil)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		productID := fixtures.Product.Create(t.T(), nil, tenantAuth)
+
+		body := product_gateway.PatchValues{
+			Name: new("Updated Name"),
+		}
+
+		httpexpect.Default(t.T(), fixtures.AppURL).
+			Request(http.MethodPatch, fixtures.Product.URI+productID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
+			WithJSON(body).
+			Expect().
+			Status(http.StatusForbidden)
 	})
 }
 
 func (t *TestSuite) Test_ProductIntegration_BackofficePaginate() {
 	t.Run("should see products from all tenants", func() {
 		tenant1 := fixtures.Tenant.Create(t.T(), nil)
-		auth1 := fixtures.Auth.UserAuth(t.T(), tenant1.ID, tenant1.UserID)
+		tenantAuth1 := fixtures.Auth.TenantOwnerAuth(t.T(), tenant1.ID, tenant1.UserID)
 		tenant2 := fixtures.Tenant.Create(t.T(), nil)
-		auth2 := fixtures.Auth.UserAuth(t.T(), tenant2.ID, tenant2.UserID)
+		tenantAuth2 := fixtures.Auth.TenantOwnerAuth(t.T(), tenant2.ID, tenant2.UserID)
 
 		for range 3 {
-			fixtures.Product.Create(t.T(), nil, auth1)
+			fixtures.Product.Create(t.T(), nil, tenantAuth1)
 		}
 		for range 3 {
-			fixtures.Product.Create(t.T(), nil, auth2)
+			fixtures.Product.Create(t.T(), nil, tenantAuth2)
 		}
 
 		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
@@ -274,15 +316,15 @@ func (t *TestSuite) Test_ProductIntegration_BackofficePaginate() {
 
 	t.Run("should filter by tenantId when provided", func() {
 		tenant1 := fixtures.Tenant.Create(t.T(), nil)
-		auth1 := fixtures.Auth.UserAuth(t.T(), tenant1.ID, tenant1.UserID)
+		tenantAuth1 := fixtures.Auth.TenantOwnerAuth(t.T(), tenant1.ID, tenant1.UserID)
 		tenant2 := fixtures.Tenant.Create(t.T(), nil)
-		auth2 := fixtures.Auth.UserAuth(t.T(), tenant2.ID, tenant2.UserID)
+		tenantAuth2 := fixtures.Auth.TenantOwnerAuth(t.T(), tenant2.ID, tenant2.UserID)
 
 		for range 3 {
-			fixtures.Product.Create(t.T(), nil, auth1)
+			fixtures.Product.Create(t.T(), nil, tenantAuth1)
 		}
 		for range 2 {
-			fixtures.Product.Create(t.T(), nil, auth2)
+			fixtures.Product.Create(t.T(), nil, tenantAuth2)
 		}
 
 		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
@@ -307,34 +349,35 @@ func (t *TestSuite) Test_ProductIntegration_BackofficePaginate() {
 func (t *TestSuite) Test_ProductIntegration_Delete() {
 	t.Run("should be able to delete", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
-		productID := fixtures.Product.Create(t.T(), nil, fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID))
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		productID := fixtures.Product.Create(t.T(), nil, tenantAuth)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodDelete, fixtures.Product.URI+productID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
+			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			Expect().
 			Status(http.StatusNoContent)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Product.URI+productID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusNotFound)
 	})
 
 	t.Run("should not be able to delete a product from another tenant", func() {
 		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
-		anotherAuth := fixtures.Auth.UserAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
-		anotherProductID := fixtures.Product.Create(t.T(), nil, anotherAuth)
+		anotherTenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
+		anotherProductID := fixtures.Product.Create(t.T(), nil, anotherTenantAuth)
 
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodDelete, fixtures.Product.URI+anotherProductID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
+			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			Expect().
 			Status(http.StatusNotFound).
 			Body().NotEmpty()
@@ -343,7 +386,8 @@ func (t *TestSuite) Test_ProductIntegration_Delete() {
 	t.Run("should not be able to delete as a regular user", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		productID := fixtures.Product.Create(t.T(), nil, userAuth)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		productID := fixtures.Product.Create(t.T(), nil, tenantAuth)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodDelete, fixtures.Product.URI+productID).

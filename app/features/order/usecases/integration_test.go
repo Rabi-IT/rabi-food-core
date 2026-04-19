@@ -50,13 +50,14 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 		EXPECTED_TOTAL_PRICE := 100
 
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 		productID := fixtures.Product.Create(t.T(), &product_gateway.CreateInput{
 			Name:       "Product Name",
-			CategoryID: fixtures.Category.Create(t.T(), nil, auth),
+			CategoryID: fixtures.Category.Create(t.T(), nil, userAuth),
 			Price:      100,
 			IsActive:   true,
-		}, auth)
+		}, tenantAuth)
 
 		Body := usecases.CreateInput{
 			Notes: "Notes",
@@ -67,14 +68,14 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 
 		orderID := httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodPost, fixtures.Order.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithJSON(Body).
 			Expect().
 			Status(http.StatusCreated).
 			Body().NotEmpty().Raw()
 
-		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, auth)
+		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, userAuth)
 		t.Equal(http.StatusOK, httpStatus)
 		t.Equal("Notes", orderFound.Notes)
 
@@ -87,10 +88,11 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 
 	t.Run("should correctly calculate total price from multiple items", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
-		productID1 := fixtures.Product.Create(t.T(), nil, auth)
-		productID2 := fixtures.Product.Create(t.T(), nil, auth)
+		productID1 := fixtures.Product.Create(t.T(), nil, tenantAuth)
+		productID2 := fixtures.Product.Create(t.T(), nil, tenantAuth)
 
 		Body := usecases.CreateInput{
 			Notes: "Notes",
@@ -102,14 +104,14 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 
 		orderID := httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodPost, fixtures.Order.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithJSON(Body).
 			Expect().
 			Status(http.StatusCreated).
 			Body().NotEmpty().Raw()
 
-		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, auth)
+		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, userAuth)
 		t.Equal(http.StatusOK, httpStatus)
 		t.Equal("Notes", orderFound.Notes)
 
@@ -129,7 +131,7 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 
 	t.Run("should fail when no products are found for given IDs", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 		nonExistingProductID := uuid.NewString()
 
 		Body := usecases.CreateInput{
@@ -142,8 +144,8 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 		expectedError := errs.ProductNotFound(nonExistingProductID)
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodPost, fixtures.Order.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithJSON(Body).
 			Expect().
 			Status(http.StatusNotFound).
@@ -153,9 +155,10 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 
 	t.Run("should fail when some product IDs are missing in the database", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
-		existingProductID := fixtures.Product.Create(t.T(), nil, auth)
+		existingProductID := fixtures.Product.Create(t.T(), nil, tenantAuth)
 
 		nonExistingProductID := uuid.NewString()
 		Body := usecases.CreateInput{
@@ -169,8 +172,8 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 		expectedError := errs.ProductNotFound(nonExistingProductID)
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodPost, fixtures.Order.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithJSON(Body).
 			Expect().
 			Status(http.StatusNotFound).
@@ -181,9 +184,10 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 	t.Run("should use X-Tenant-ID header, ignoring tenantID in body", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
-		productID := fixtures.Product.Create(t.T(), nil, auth)
+		productID := fixtures.Product.Create(t.T(), nil, tenantAuth)
 		Body := map[string]any{
 			"tenantId": anotherTenant.ID,
 			"notes":    "Notes",
@@ -194,14 +198,14 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 
 		orderID := httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodPost, fixtures.Order.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithJSON(Body).
 			Expect().
 			Status(http.StatusCreated).
 			Body().NotEmpty().Raw()
 
-		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, auth)
+		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, userAuth)
 		t.Equal(http.StatusOK, httpStatus)
 		t.Equal("Notes", orderFound.Notes)
 
@@ -211,14 +215,15 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 
 	t.Run("should not be able to create an order with inactive products", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
 		productID := fixtures.Product.Create(t.T(), &product_gateway.CreateInput{
 			Name:       "Inactive Product",
-			CategoryID: fixtures.Category.Create(t.T(), nil, auth),
+			CategoryID: fixtures.Category.Create(t.T(), nil, userAuth),
 			Price:      100,
 			IsActive:   false,
-		}, auth)
+		}, tenantAuth)
 
 		Body := usecases.CreateInput{
 			Notes: "Notes",
@@ -230,8 +235,8 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 		execpectedError := errs.ProductNotFound(productID)
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodPost, fixtures.Order.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithJSON(Body).
 			Expect().
 			Status(http.StatusNotFound).
@@ -243,10 +248,11 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 func (t *TestSuite) Test_OrderIntegration_GetByID() {
 	t.Run("should be able to get by id", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		orderID := fixtures.Order.Create(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		orderID := fixtures.Order.Create(t.T(), nil, tenantAuth)
 
-		found, status := fixtures.Order.GetByID(t.T(), orderID, auth)
+		found, status := fixtures.Order.GetByID(t.T(), orderID, userAuth)
 
 		t.Equal(http.StatusOK, status)
 		t.Equal(orderID, found.ID)
@@ -255,15 +261,14 @@ func (t *TestSuite) Test_OrderIntegration_GetByID() {
 
 	t.Run("should return NotFound when get by id not found", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		_ = fixtures.Order.Create(t.T(), nil, auth)
-
-		NON_EXISTING_ID := uuid.New().String()
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		_ = fixtures.Order.Create(t.T(), nil, tenantAuth)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
-			Request(http.MethodGet, fixtures.Order.URI+NON_EXISTING_ID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			Request(http.MethodGet, fixtures.Order.URI+uuid.New().String()).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusNotFound).
 			Body().NotEmpty()
@@ -271,16 +276,16 @@ func (t *TestSuite) Test_OrderIntegration_GetByID() {
 
 	t.Run("should not be able to get a order from another tenant", func() {
 		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
-		anotherAuth := fixtures.Auth.UserAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
-		anotherOrderID := fixtures.Order.Create(t.T(), nil, anotherAuth)
+		anotherTenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
+		anotherOrderID := fixtures.Order.Create(t.T(), nil, anotherTenantAuth)
 
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Order.URI+anotherOrderID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusNotFound).
 			Body().NotEmpty()
@@ -290,17 +295,18 @@ func (t *TestSuite) Test_OrderIntegration_GetByID() {
 func (t *TestSuite) Test_OrderIntegration_Paginate() {
 	t.Run("should be able to paginate", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
 		for range 15 {
-			fixtures.Order.Create(t.T(), nil, auth)
+			fixtures.Order.Create(t.T(), nil, tenantAuth)
 		}
 
 		response := new(gateway.PaginateOutput)
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Order.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithQueryObject(database.PaginateInput{
 				Page:     0,
 				PageSize: 10,
@@ -320,20 +326,20 @@ func (t *TestSuite) Test_OrderIntegration_Paginate() {
 
 	t.Run("should not be able to paginate orders from another tenant", func() {
 		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
-		anotherAuth := fixtures.Auth.UserAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
+		anotherTenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
 
 		for range 5 {
-			fixtures.Order.Create(t.T(), nil, anotherAuth)
+			fixtures.Order.Create(t.T(), nil, anotherTenantAuth)
 		}
 
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 
 		response := new(gateway.PaginateOutput)
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Order.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithQueryObject(database.PaginateInput{
 				Page:     0,
 				PageSize: 10,
@@ -350,8 +356,9 @@ func (t *TestSuite) Test_OrderIntegration_Paginate() {
 func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 	t.Run("should confirm payment when order is pending", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		orderID := fixtures.Order.Create(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		orderID := fixtures.Order.Create(t.T(), nil, tenantAuth)
 		systemToken := fixtures.Auth.SystemToken(t.T())
 
 		body := usecases.ConfirmPaymentInput{
@@ -364,7 +371,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		err := fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
 		t.Require().Nil(err)
 
-		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, auth)
+		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, userAuth)
 		t.Require().Equal(http.StatusOK, httpStatus)
 		t.Require().Equal(payment_status.StatusPaid, orderFound.PaymentStatus)
 		t.Require().NotNil(orderFound.PaidAt)
@@ -375,8 +382,9 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 
 	t.Run("should return ok when confirming payment again with same external payment id (idempotency)", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		orderID := fixtures.Order.Create(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		orderID := fixtures.Order.Create(t.T(), nil, tenantAuth)
 		systemToken := fixtures.Auth.SystemToken(t.T())
 
 		body := usecases.ConfirmPaymentInput{
@@ -405,7 +413,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 			t.Require().Nil(err)
 		}
 
-		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, auth)
+		orderFound, httpStatus := fixtures.Order.GetByID(t.T(), orderID, userAuth)
 		t.Require().Equal(http.StatusOK, httpStatus)
 		t.Require().Equal(payment_status.StatusPaid, orderFound.PaymentStatus)
 		t.Require().NotNil(orderFound.PaidAt)
@@ -416,8 +424,8 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 
 	t.Run("should return conflict when confirming payment with different external payment id", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		orderID := fixtures.Order.Create(t.T(), nil, auth)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		orderID := fixtures.Order.Create(t.T(), nil, tenantAuth)
 		systemToken := fixtures.Auth.SystemToken(t.T())
 		body := usecases.ConfirmPaymentInput{
 			OrderID:           orderID,
@@ -428,7 +436,6 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 
 		err := fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
 		t.Require().Nil(err)
-		// Confirm payment again with different external payment id
 		body.ExternalPaymentID = "different-id"
 		err = fixtures.Order.ConfirmPayment(t.T(), orderID, &body, systemToken)
 		t.Require().NotNil(err)
@@ -437,9 +444,9 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 
 	t.Run("should return conflict when external payment id is already used by another order", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		orderID1 := fixtures.Order.Create(t.T(), nil, auth)
-		orderID2 := fixtures.Order.Create(t.T(), nil, auth)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		orderID1 := fixtures.Order.Create(t.T(), nil, tenantAuth)
+		orderID2 := fixtures.Order.Create(t.T(), nil, tenantAuth)
 		systemToken := fixtures.Auth.SystemToken(t.T())
 
 		body1 := usecases.ConfirmPaymentInput{
@@ -452,7 +459,6 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 		err := fixtures.Order.ConfirmPayment(t.T(), orderID1, &body1, systemToken)
 		t.Require().Nil(err)
 
-		// Confirm payment for another order with same external payment id
 		body2 := usecases.ConfirmPaymentInput{
 			OrderID:           orderID2,
 			ExternalPaymentID: "any-id",
@@ -484,7 +490,8 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 	t.Run("should return forbidden when user role is "+string(auth.User), func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		orderID := fixtures.Order.Create(t.T(), nil, userAuth)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		orderID := fixtures.Order.Create(t.T(), nil, tenantAuth)
 
 		body := usecases.ConfirmPaymentInput{
 			OrderID:           orderID,
@@ -527,15 +534,15 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 func (t *TestSuite) Test_OrderIntegration_BackofficePaginate() {
 	t.Run("should see orders from all tenants", func() {
 		tenant1 := fixtures.Tenant.Create(t.T(), nil)
-		auth1 := fixtures.Auth.UserAuth(t.T(), tenant1.ID, tenant1.UserID)
+		tenantAuth1 := fixtures.Auth.TenantOwnerAuth(t.T(), tenant1.ID, tenant1.UserID)
 		tenant2 := fixtures.Tenant.Create(t.T(), nil)
-		auth2 := fixtures.Auth.UserAuth(t.T(), tenant2.ID, tenant2.UserID)
+		tenantAuth2 := fixtures.Auth.TenantOwnerAuth(t.T(), tenant2.ID, tenant2.UserID)
 
 		for range 3 {
-			fixtures.Order.Create(t.T(), nil, auth1)
+			fixtures.Order.Create(t.T(), nil, tenantAuth1)
 		}
 		for range 3 {
-			fixtures.Order.Create(t.T(), nil, auth2)
+			fixtures.Order.Create(t.T(), nil, tenantAuth2)
 		}
 
 		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
@@ -554,15 +561,15 @@ func (t *TestSuite) Test_OrderIntegration_BackofficePaginate() {
 
 	t.Run("should filter by tenantId when provided", func() {
 		tenant1 := fixtures.Tenant.Create(t.T(), nil)
-		auth1 := fixtures.Auth.UserAuth(t.T(), tenant1.ID, tenant1.UserID)
+		tenantAuth1 := fixtures.Auth.TenantOwnerAuth(t.T(), tenant1.ID, tenant1.UserID)
 		tenant2 := fixtures.Tenant.Create(t.T(), nil)
-		auth2 := fixtures.Auth.UserAuth(t.T(), tenant2.ID, tenant2.UserID)
+		tenantAuth2 := fixtures.Auth.TenantOwnerAuth(t.T(), tenant2.ID, tenant2.UserID)
 
 		for range 3 {
-			fixtures.Order.Create(t.T(), nil, auth1)
+			fixtures.Order.Create(t.T(), nil, tenantAuth1)
 		}
 		for range 2 {
-			fixtures.Order.Create(t.T(), nil, auth2)
+			fixtures.Order.Create(t.T(), nil, tenantAuth2)
 		}
 
 		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
@@ -587,36 +594,37 @@ func (t *TestSuite) Test_OrderIntegration_BackofficePaginate() {
 func (t *TestSuite) Test_OrderIntegration_Delete() {
 	t.Run("should be able to delete", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		orderID := fixtures.Order.Create(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		orderID := fixtures.Order.Create(t.T(), nil, tenantAuth)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodDelete, fixtures.Order.URI+orderID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusNoContent)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodGet, fixtures.Order.URI+orderID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusNotFound)
 	})
 
 	t.Run("should not be able to delete a order from another tenant", func() {
 		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
-		anotherAuth := fixtures.Auth.UserAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
-		anotherOrderID := fixtures.Order.Create(t.T(), nil, anotherAuth)
+		anotherTenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
+		anotherOrderID := fixtures.Order.Create(t.T(), nil, anotherTenantAuth)
 
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 
 		httpexpect.Default(t.T(), fixtures.AppURL).
 			Request(http.MethodDelete, fixtures.Order.URI+anotherOrderID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusNotFound).
 			Body().NotEmpty()

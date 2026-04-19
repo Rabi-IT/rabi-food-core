@@ -40,13 +40,14 @@ func TestMySuite(t *testing.T) {
 func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 	t.Run("should be able to create", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		fixtures.Subscription.UpsertConfig(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, userAuth)
 
 		Body := &usecases.CreateInput{
 			Items: []usecases.SubscriptionItemInput{
 				{
-					ProductID: fixtures.Product.Create(t.T(), nil, auth),
+					ProductID: fixtures.Product.Create(t.T(), nil, tenantAuth),
 					Quantity:  1,
 				},
 			},
@@ -65,8 +66,8 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 		id := ""
 		fixtures.DefaultHTTP(t.T()).
 			Request(http.MethodPost, fixtures.Subscription.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithJSON(Body).
 			Expect().
 			Status(http.StatusCreated).
@@ -75,11 +76,10 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 
 	t.Run("should fail if required fields are empty", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		fixtures.Subscription.UpsertConfig(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, userAuth)
 
 		Body := map[string]any{
-			// Optional fields
 			"autoRenew": false,
 			"notes":     "",
 		}
@@ -87,8 +87,8 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 		response := new(middlewares.ValidationErrorResponse)
 		fixtures.DefaultHTTP(t.T()).
 			Request(http.MethodPost, fixtures.Subscription.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithJSON(Body).
 			Expect().
 			Status(http.StatusBadRequest).
@@ -104,13 +104,14 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 
 	t.Run("should not fail if optional fields are empty", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		fixtures.Subscription.UpsertConfig(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, userAuth)
 
 		Body := map[string]any{
 			"items": []usecases.SubscriptionItemInput{
 				{
-					ProductID: fixtures.Product.Create(t.T(), nil, auth),
+					ProductID: fixtures.Product.Create(t.T(), nil, tenantAuth),
 					Quantity:  1,
 				},
 			},
@@ -126,8 +127,8 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 
 		fixtures.DefaultHTTP(t.T()).
 			Request(http.MethodPost, fixtures.Subscription.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithJSON(Body).
 			Expect().
 			Status(http.StatusCreated).
@@ -138,15 +139,16 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 func (t *TestSuite) Test_SubscriptionIntegration_GetByID() {
 	t.Run("should be able to get by id", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		fixtures.Subscription.UpsertConfig(t.T(), nil, auth)
-		subscriptionID := fixtures.Subscription.Create(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, userAuth)
+		subscriptionID := fixtures.Subscription.Create(t.T(), nil, tenantAuth)
 
 		response := new(g.GetByIDOutput)
 		fixtures.DefaultHTTP(t.T()).
 			Request(http.MethodGet, fixtures.Subscription.URI+subscriptionID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusOK).
 			JSON().Decode(&response)
@@ -173,16 +175,15 @@ func (t *TestSuite) Test_SubscriptionIntegration_GetByID() {
 
 	t.Run("should return NotFound when get by id not found", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		fixtures.Subscription.UpsertConfig(t.T(), nil, auth)
-		fixtures.Subscription.Create(t.T(), nil, auth)
-
-		NON_EXISTING_ID := uuid.New().String()
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, userAuth)
+		fixtures.Subscription.Create(t.T(), nil, tenantAuth)
 
 		fixtures.DefaultHTTP(t.T()).
-			Request(http.MethodGet, fixtures.Subscription.URI+NON_EXISTING_ID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			Request(http.MethodGet, fixtures.Subscription.URI+uuid.New().String()).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusNotFound).
 			Body().NotEmpty()
@@ -192,18 +193,19 @@ func (t *TestSuite) Test_SubscriptionIntegration_GetByID() {
 func (t *TestSuite) Test_SubscriptionIntegration_Paginate() {
 	t.Run("should paginate own subscriptions", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		fixtures.Subscription.UpsertConfig(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, userAuth)
 
 		for range 3 {
-			fixtures.Subscription.Create(t.T(), nil, auth)
+			fixtures.Subscription.Create(t.T(), nil, tenantAuth)
 		}
 
 		response := new(g.PaginateOutput)
 		fixtures.DefaultHTTP(t.T()).
 			Request(http.MethodGet, fixtures.Subscription.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithQueryObject(map[string]any{"Page": 0, "PageSize": 10}).
 			Expect().
 			Status(http.StatusOK).
@@ -214,21 +216,21 @@ func (t *TestSuite) Test_SubscriptionIntegration_Paginate() {
 
 	t.Run("should not see subscriptions from another tenant", func() {
 		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
-		anotherAuth := fixtures.Auth.UserAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
-		fixtures.Subscription.UpsertConfig(t.T(), nil, anotherAuth)
+		anotherTenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, anotherTenantAuth)
 
 		for range 3 {
-			fixtures.Subscription.Create(t.T(), nil, anotherAuth)
+			fixtures.Subscription.Create(t.T(), nil, anotherTenantAuth)
 		}
 
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 
 		response := new(g.PaginateOutput)
 		fixtures.DefaultHTTP(t.T()).
 			Request(http.MethodGet, fixtures.Subscription.URI).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			WithQueryObject(map[string]any{"Page": 0, "PageSize": 10}).
 			Expect().
 			Status(http.StatusOK).
@@ -241,18 +243,18 @@ func (t *TestSuite) Test_SubscriptionIntegration_Paginate() {
 func (t *TestSuite) Test_SubscriptionIntegration_BackofficePaginate() {
 	t.Run("should see subscriptions from all tenants", func() {
 		tenant1 := fixtures.Tenant.Create(t.T(), nil)
-		auth1 := fixtures.Auth.UserAuth(t.T(), tenant1.ID, tenant1.UserID)
-		fixtures.Subscription.UpsertConfig(t.T(), nil, auth1)
+		tenantAuth1 := fixtures.Auth.TenantOwnerAuth(t.T(), tenant1.ID, tenant1.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, tenantAuth1)
 
 		tenant2 := fixtures.Tenant.Create(t.T(), nil)
-		auth2 := fixtures.Auth.UserAuth(t.T(), tenant2.ID, tenant2.UserID)
-		fixtures.Subscription.UpsertConfig(t.T(), nil, auth2)
+		tenantAuth2 := fixtures.Auth.TenantOwnerAuth(t.T(), tenant2.ID, tenant2.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, tenantAuth2)
 
 		for range 2 {
-			fixtures.Subscription.Create(t.T(), nil, auth1)
+			fixtures.Subscription.Create(t.T(), nil, tenantAuth1)
 		}
 		for range 2 {
-			fixtures.Subscription.Create(t.T(), nil, auth2)
+			fixtures.Subscription.Create(t.T(), nil, tenantAuth2)
 		}
 
 		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
@@ -271,17 +273,17 @@ func (t *TestSuite) Test_SubscriptionIntegration_BackofficePaginate() {
 
 	t.Run("should filter by tenantId when provided", func() {
 		tenant1 := fixtures.Tenant.Create(t.T(), nil)
-		auth1 := fixtures.Auth.UserAuth(t.T(), tenant1.ID, tenant1.UserID)
-		fixtures.Subscription.UpsertConfig(t.T(), nil, auth1)
+		tenantAuth1 := fixtures.Auth.TenantOwnerAuth(t.T(), tenant1.ID, tenant1.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, tenantAuth1)
 
 		tenant2 := fixtures.Tenant.Create(t.T(), nil)
-		auth2 := fixtures.Auth.UserAuth(t.T(), tenant2.ID, tenant2.UserID)
-		fixtures.Subscription.UpsertConfig(t.T(), nil, auth2)
+		tenantAuth2 := fixtures.Auth.TenantOwnerAuth(t.T(), tenant2.ID, tenant2.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, tenantAuth2)
 
 		for range 2 {
-			fixtures.Subscription.Create(t.T(), nil, auth1)
+			fixtures.Subscription.Create(t.T(), nil, tenantAuth1)
 		}
-		fixtures.Subscription.Create(t.T(), nil, auth2)
+		fixtures.Subscription.Create(t.T(), nil, tenantAuth2)
 
 		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
 
@@ -305,14 +307,15 @@ func (t *TestSuite) Test_SubscriptionIntegration_BackofficePaginate() {
 func (t *TestSuite) Test_SubscriptionIntegration_Delete() {
 	t.Run("should not be able to delete", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		auth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		fixtures.Subscription.UpsertConfig(t.T(), nil, auth)
-		subscriptionID := fixtures.Subscription.Create(t.T(), nil, auth)
+		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		fixtures.Subscription.UpsertConfig(t.T(), nil, userAuth)
+		subscriptionID := fixtures.Subscription.Create(t.T(), nil, tenantAuth)
 
 		fixtures.DefaultHTTP(t.T()).
 			Request(http.MethodDelete, fixtures.Subscription.URI+subscriptionID).
-			WithHeader("Authorization", "Bearer "+auth.Token).
-			WithHeader("X-Tenant-ID", auth.TenantID).
+			WithHeader("Authorization", "Bearer "+userAuth.Token).
+			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusMethodNotAllowed)
 	})
