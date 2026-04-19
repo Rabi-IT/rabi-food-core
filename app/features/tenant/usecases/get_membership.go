@@ -9,8 +9,8 @@ import (
 
 func (c *TenantCase) GetMembership(ctx context.Context, userID, tenantID string) (string, error) {
 	out, err := c.gateway.GetMember(ctx, g.GetMemberFilter{
-		UserID:   &userID,
-		TenantID: &tenantID,
+		UserID:   userID,
+		TenantID: tenantID,
 	})
 	if err != nil {
 		return "", err

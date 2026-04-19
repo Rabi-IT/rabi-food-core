@@ -31,12 +31,12 @@ func (g *PgxProductGatewayAdapter) List(ctx context.Context, filter ListFilter) 
 		Where(sq.Eq{"id": filter.IDs}).
 		PlaceholderFormat(sq.Dollar)
 
-	if filter.TenantID != nil {
-		b = b.Where(sq.Eq{"tenant_id": *filter.TenantID})
+	if filter.TenantID != "" {
+		b = b.Where(sq.Eq{"tenant_id": filter.TenantID})
 	}
 
-	if filter.IsActive != nil {
-		b = b.Where(sq.Eq{"is_active": *filter.IsActive})
+	if !filter.IsActive.IsEmpty() {
+		b = b.Where(sq.Eq{"is_active": filter.IsActive.Value()})
 	}
 
 	sql, args, err := b.ToSql()

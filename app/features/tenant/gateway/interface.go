@@ -18,7 +18,7 @@ type TenantGateway interface {
 }
 
 type PatchFilter struct {
-	ID *string
+	ID string
 }
 
 type PatchValues struct {
@@ -35,7 +35,7 @@ type GetByIDOutput struct {
 }
 
 type PaginateFilter struct {
-	Name *string `json:"name"`
+	Name string `json:"name"`
 }
 
 type PaginateData struct {
@@ -55,8 +55,8 @@ type CreateMemberInput struct {
 }
 
 type GetCustomerFilter struct {
-	UserID   *string
-	TenantID *string
+	UserID   string
+	TenantID string
 }
 
 type GetCustomerOutput struct {
@@ -65,8 +65,8 @@ type GetCustomerOutput struct {
 }
 
 type GetMemberFilter struct {
-	UserID   *string
-	TenantID *string
+	UserID   string
+	TenantID string
 }
 
 type GetMemberOutput struct {

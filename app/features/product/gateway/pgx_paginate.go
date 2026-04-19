@@ -16,20 +16,20 @@ func (g *PgxProductGatewayAdapter) Paginate(
 		Where("deleted_at IS NULL").
 		PlaceholderFormat(sq.Dollar)
 
-	if filter.Name != nil {
-		base = base.Where(sq.ILike{"name": "%" + *filter.Name + "%"})
+	if filter.Name != "" {
+		base = base.Where(sq.ILike{"name": "%" + filter.Name + "%"})
 	}
 
-	if filter.CategoryID != nil {
-		base = base.Where(sq.Eq{"category_id": *filter.CategoryID})
+	if filter.CategoryID != "" {
+		base = base.Where(sq.Eq{"category_id": filter.CategoryID})
 	}
 
-	if filter.IsActive != nil {
-		base = base.Where(sq.Eq{"is_active": *filter.IsActive})
+	if !filter.IsActive.IsEmpty() {
+		base = base.Where(sq.Eq{"is_active": filter.IsActive.Value()})
 	}
 
-	if filter.TenantID != nil {
-		base = base.Where(sq.Eq{"tenant_id": *filter.TenantID})
+	if filter.TenantID != "" {
+		base = base.Where(sq.Eq{"tenant_id": filter.TenantID})
 	}
 
 	countSQL, countArgs, err := base.Column("COUNT(*)").ToSql()

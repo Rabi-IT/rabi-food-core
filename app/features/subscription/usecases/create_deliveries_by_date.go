@@ -10,7 +10,7 @@ import (
 )
 
 type CreateDeliveriesByDateInput struct {
-	SubscriptionID *string
+	SubscriptionID string
 	Date           time.Time
 }
 

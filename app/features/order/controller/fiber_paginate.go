@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"strconv"
-
 	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/order/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
@@ -29,35 +27,24 @@ import (
 // @Failure 500 {string} string "Internal server error"
 // @Router /order/ [get].
 func (c *OrderController) Paginate(ctx *fiber.Ctx) error {
-	page, err := strconv.Atoi(ctx.Query("Page", "0"))
-	if err != nil {
-		return err
-	}
-
-	pageSize, err := strconv.Atoi(ctx.Query("PageSize", "10"))
-	if err != nil {
-		return err
-	}
-
 	filter := gateway.PaginateFilter{}
-	err = ctx.QueryParser(&filter)
-	if err != nil {
+	if err := ctx.QueryParser(&filter); err != nil {
 		return err
 	}
 
 	uctx := ctx.UserContext()
 	session := app_context.GetSession(uctx)
 	if session.Role.IsTenant() {
-		filter.TenantID = &session.TenantID
+		filter.TenantID = session.TenantID
 	} else if session.Role.IsUser() {
-		filter.UserID = &session.UserID
+		filter.UserID = session.UserID
 	} else {
 		return errs.ErrForbidden
 	}
 
 	paginate := database.PaginateInput{
-		Page:     page,
-		PageSize: pageSize,
+		Page:     ctx.QueryInt("Page", database.DefaultPage),
+		PageSize: ctx.QueryInt("PageSize", database.DefaultPageSize),
 	}
 
 	result, err := c.usecase.Paginate(uctx, filter, paginate)

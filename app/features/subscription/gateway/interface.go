@@ -123,8 +123,8 @@ type PatchValues struct {
 }
 
 type PaginateFilter struct {
-	UserID   *string
-	TenantID *string
+	UserID   string
+	TenantID string
 	Status   subscription.Status
 }
 
@@ -156,7 +156,7 @@ type CreateDeliveryInput struct {
 }
 
 type ListFilter struct {
-	ID                 *string
+	ID                 string
 	Status             subscription.Status
 	RemainingCyclesGTE uint
 	Weekday            time.Weekday

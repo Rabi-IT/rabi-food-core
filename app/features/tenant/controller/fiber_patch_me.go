@@ -15,7 +15,7 @@ func (c *TenantController) PatchMe(ctx *fiber.Ctx) error {
 	uctx := ctx.UserContext()
 	id := app_context.GetSession(uctx).TenantID
 	filter := usecases.PatchFilter{
-		ID: &id,
+		ID: id,
 	}
 
 	data := usecases.PatchValues{}

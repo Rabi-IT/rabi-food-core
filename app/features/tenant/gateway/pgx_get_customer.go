@@ -14,12 +14,12 @@ func (g *PgxTenantGatewayAdapter) GetCustomer(ctx context.Context, filter GetCus
 		From("iam.tenant_customers").
 		PlaceholderFormat(sq.Dollar)
 
-	if filter.UserID != nil {
-		q = q.Where(sq.Eq{"user_id": *filter.UserID})
+	if filter.UserID != "" {
+		q = q.Where(sq.Eq{"user_id": filter.UserID})
 	}
 
-	if filter.TenantID != nil {
-		q = q.Where(sq.Eq{"tenant_id": *filter.TenantID})
+	if filter.TenantID != "" {
+		q = q.Where(sq.Eq{"tenant_id": filter.TenantID})
 	}
 
 	sql, args, err := q.ToSql()

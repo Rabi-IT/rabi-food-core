@@ -8,7 +8,7 @@ import (
 )
 
 type PatchFilter struct {
-	ID *string
+	ID string
 }
 
 type PatchValues struct {
@@ -16,7 +16,7 @@ type PatchValues struct {
 }
 
 func (c *TenantCase) Patch(ctx context.Context, filter PatchFilter, values PatchValues) (bool, error) {
-	logger.GetWideEvent(ctx).SetTenantID(*filter.ID)
+	logger.GetWideEvent(ctx).SetTenantID(filter.ID)
 
 	return c.gateway.Patch(
 		ctx,
