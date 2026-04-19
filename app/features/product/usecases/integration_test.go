@@ -39,9 +39,8 @@ func TestMySuite(t *testing.T) {
 func (t *TestSuite) Test_ProductIntegration_Create() {
 	t.Run("should be able to create", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
-		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
-		categoryID := fixtures.Category.Create(t.T(), nil, userAuth)
+		categoryID := fixtures.Category.Create(t.T(), nil, tenantAuth)
 
 		body := product_gateway.CreateInput{
 			Name:        "Name",
@@ -66,7 +65,7 @@ func (t *TestSuite) Test_ProductIntegration_Create() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
-		categoryID := fixtures.Category.Create(t.T(), nil, userAuth)
+		categoryID := fixtures.Category.Create(t.T(), nil, tenantAuth)
 
 		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
 		body := product_gateway.CreateInput{
@@ -87,7 +86,8 @@ func (t *TestSuite) Test_ProductIntegration_Create() {
 	t.Run("should not be able to create as a regular user", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
-		categoryID := fixtures.Category.Create(t.T(), nil, userAuth)
+		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
+		categoryID := fixtures.Category.Create(t.T(), nil, tenantAuth)
 
 		body := product_gateway.CreateInput{
 			Name:        "Name",

@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/category/gateway"
 	parser "github.com/Rabi-IT/rabi-food-core/libs/http/parser"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
@@ -34,7 +35,7 @@ func (c *CategoryController) Delete(ctx *fiber.Ctx) error {
 	logger.GetWideEvent(uctx).Event = "delete-category"
 
 	filter.ID = ctx.Params("id")
-	filter.TenantID = ctx.Get("X-Tenant-ID")
+	filter.TenantID = app_context.GetSession(uctx).TenantID
 	deleted, err := c.usecase.Delete(uctx, filter)
 
 	if err != nil {

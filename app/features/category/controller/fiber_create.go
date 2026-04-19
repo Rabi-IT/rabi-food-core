@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/category/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 	"github.com/Rabi-IT/rabi-food-core/libs/validator"
@@ -33,9 +34,8 @@ func (c *CategoryController) Create(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	data.TenantID = ctx.Get("X-Tenant-ID")
-
 	uctx := ctx.UserContext()
+	data.TenantID = app_context.GetSession(uctx).TenantID
 	logger.GetWideEvent(uctx).Event = "create-category"
 	id, err := c.usecase.Create(uctx, data)
 
