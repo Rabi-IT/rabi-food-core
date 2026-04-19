@@ -36,7 +36,8 @@ app/
 │       └── usecases/       — lógica de negócio + integration_test.go
 ├── fixtures/           — helpers para testes de integração
 └── libs/
-    ├── database/       — GormAdapter, interface Database, paginate
+    ├── database/       — GormAdapter, interface Database, paginate, DefaultPage/DefaultPageSize
+    │   └── filter/     — filter.Bool (optional boolean filter type)
     ├── di/             — wiring do DI (new.go)
     ├── errs/           — AppError + erros de domínio por feature
     ├── http/           — FiberAdapter + middlewares
@@ -162,7 +163,7 @@ _, err = g.DB.Pool.Exec(context.WithoutCancel(ctx), sql, args...)
 
 **Nota:** `context.WithoutCancel` remove tanto o cancel quanto o deadline do contexto pai. A proteção contra queries travadas indefinidamente fica por conta do `statement_timeout` configurado no PostgreSQL.
 
-### 7. Dependências entre use cases
+### 8. Dependências entre use cases
 Features podem importar outras features diretamente quando a dependência é **unidirecional e intencional** (nunca cíclica). Use interface local apenas quando testabilidade isolada for um requisito explícito.
 
 ```go
@@ -186,7 +187,7 @@ type OrderCase struct {
 
 Nunca crie uma interface local apenas para disfarçar um import cíclico — isso é sinal de que a direção da dependência está errada.
 
-### 8. Registrar no DI
+### 9. Registrar no DI
 Todo novo serviço deve ser registrado em `libs/di/new.go`:
 ```go
 do.Provide(injector, func(i *do.Injector) (*feature_case.FeatureCase, error) {
@@ -195,7 +196,7 @@ do.Provide(injector, func(i *do.Injector) (*feature_case.FeatureCase, error) {
 })
 ```
 
-### 9. Testes de integração
+### 10. Testes de integração
 ```go
 package usecases_test
 
@@ -208,6 +209,61 @@ func (t *TestSuite) SetupSuite()    { t.app = fixtures.NewApp(); t.app.Start(t.T
 func (t *TestSuite) SetupSubTest()  { fixtures.CleanDatabase(t.T()) }
 func (t *TestSuite) TearDownSuite() { t.app.Stop(t.T()) }
 func TestMySuite(t *testing.T)      { suite.Run(t, new(TestSuite)) }
+```
+
+### 11. Filter structs (gateway)
+
+Campos de filtro em structs de gateway **nunca usam ponteiros**. Ponteiros em structs de curta duração (como filtros de request) forçam escape para heap, aumentando pressão no GC. Zero value é o sentinela de "sem filtro" — elimina o ponteiro sem perder a semântica de "não informado":
+
+| Tipo | Zero value | Check no gateway |
+|------|-----------|-----------------|
+| `string` | `""` | `if filter.TenantID != ""` |
+| `time.Time` | `time.Time{}` | `if !filter.CreatedAtFrom.IsZero()` |
+| `bool` opcional | — | use `filter.Bool` de `libs/database/filter/` |
+
+Para filtros booleanos opcionais, use o tipo `filter.Bool` (int8) com constantes `filter.True`, `filter.False`, `filter.BoolEmpty`. O zero value (`BoolEmpty`) significa sem filtro, sem precisar de campo auxiliar.
+
+```go
+// gateway/interface.go
+import "github.com/Rabi-IT/rabi-food-core/libs/database/filter"
+
+type PaginateFilter struct {
+    TenantID string      // "" = no filter
+    IsActive filter.Bool // BoolEmpty = no filter
+}
+
+// gateway/pgx_paginate.go
+if filter.TenantID != "" {
+    base = base.Where(sq.Eq{"tenant_id": filter.TenantID})
+}
+if !filter.IsActive.IsEmpty() {
+    base = base.Where(sq.Eq{"is_active": filter.IsActive.Value()})
+}
+
+// controller
+f := gateway.PaginateFilter{
+    TenantID: ctx.Get("X-Tenant-ID"),
+    IsActive: filter.Bool(ctx.QueryInt("isActive", 0)),
+}
+
+// use case
+products, err := productCase.List(ctx, product_gateway.ListFilter{
+    IsActive: filter.True,
+    TenantID: tenantID,
+})
+```
+
+**PatchValues continuam usando ponteiros** — nil significa "não atualizar este campo" e é semanticamente necessário. Esse é o único caso onde ponteiros em structs de gateway são aceitáveis. Em todos os outros casos (filters, inputs, outputs com colunas NOT NULL), evite ponteiros para não forçar escape para heap.
+
+### 12. Paginação em controllers
+
+Use `ctx.QueryInt` com as constantes de `libs/database` — nunca magic numbers nem `strconv.Atoi`:
+
+```go
+paginate := database.PaginateInput{
+    Page:     ctx.QueryInt("Page", database.DefaultPage),
+    PageSize: ctx.QueryInt("PageSize", database.DefaultPageSize),
+}
 ```
 
 ## Issues Conhecidos (não replicar)
