@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (g *PgxProductGatewayAdapter) Create(input CreateInput) (string, error) {
+func (g *PgxProductGatewayAdapter) Create(ctx context.Context, input CreateInput) (string, error) {
 	id := uuid.Must(uuid.NewV7()).String()
 
 	discountRules, err := json.Marshal(input.DiscountRules)
@@ -32,7 +32,7 @@ func (g *PgxProductGatewayAdapter) Create(input CreateInput) (string, error) {
 		return "", err
 	}
 
-	_, err = g.DB.Pool.Exec(context.Background(), sql, args...)
+	_, err = g.DB.Pool.Exec(context.WithoutCancel(ctx), sql, args...)
 
 	return id, err
 }

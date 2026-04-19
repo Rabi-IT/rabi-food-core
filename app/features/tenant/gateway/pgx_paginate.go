@@ -8,6 +8,7 @@ import (
 )
 
 func (g *PgxTenantGatewayAdapter) Paginate(
+	ctx context.Context,
 	filter PaginateFilter,
 	paginate database.PaginateInput,
 ) (PaginateOutput, error) {
@@ -32,7 +33,7 @@ func (g *PgxTenantGatewayAdapter) Paginate(
 	}
 
 	data, count, err := database.Paginate[PaginateData](
-		context.Background(), g.DB.Pool,
+		ctx, g.DB.Pool,
 		countSQL, countArgs,
 		dataSQL, dataArgs,
 	)

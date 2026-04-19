@@ -12,5 +12,5 @@ func (c *TenantCase) Paginate(
 	filter g.PaginateFilter,
 	paginate database.PaginateInput,
 ) (g.PaginateOutput, error) {
-	return c.gateway.Paginate(filter, paginate)
+	return c.gateway.Paginate(ctx, filter, paginate)
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (g *PgxCategoryGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutput, error) {
+func (g *PgxCategoryGatewayAdapter) GetByID(ctx context.Context, filter GetByIDFilter) (*GetByIDOutput, error) {
 	b := sq.
 		Select("id", "tenant_id", "name", "description").
 		From("catalog.categories").
@@ -25,7 +25,7 @@ func (g *PgxCategoryGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutpu
 		return nil, err
 	}
 
-	rows, err := g.DB.Pool.Query(context.Background(), sql, args...)
+	rows, err := g.DB.Pool.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}

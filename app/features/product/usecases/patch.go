@@ -13,5 +13,5 @@ func (c *ProductCase) Patch(
 	values g.PatchValues,
 ) (bool, error) {
 	logger.GetWideEvent(ctx).SetProductID(filter.ID)
-	return c.gateway.Patch(filter, values)
+	return c.gateway.Patch(ctx, filter, values)
 }

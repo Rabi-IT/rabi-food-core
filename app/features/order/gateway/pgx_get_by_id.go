@@ -28,7 +28,7 @@ type orderGetByIDRow struct {
 	ExternalPaymentID *string                 `db:"external_payment_id"`
 }
 
-func (g *PgxOrderGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutput, error) {
+func (g *PgxOrderGatewayAdapter) GetByID(ctx context.Context, filter GetByIDFilter) (*GetByIDOutput, error) {
 	b := sq.
 		Select("id", "tenant_id", "code", "payment_status", "fulfillment_status",
 			"delivery_status", "notes", "total_price", "items", "paid_at",
@@ -51,7 +51,7 @@ func (g *PgxOrderGatewayAdapter) GetByID(filter GetByIDFilter) (*GetByIDOutput, 
 		return nil, err
 	}
 
-	rows, err := g.DB.Pool.Query(context.Background(), sql, args...)
+	rows, err := g.DB.Pool.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}

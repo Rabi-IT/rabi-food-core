@@ -8,7 +8,7 @@ import (
 )
 
 func (c *ProductCase) Create(ctx context.Context, input g.CreateInput) (string, error) {
-	id, err := c.gateway.Create(input)
+	id, err := c.gateway.Create(ctx, input)
 	logger.GetWideEvent(ctx).SetProductID(id)
 	if err != nil {
 		return "", err

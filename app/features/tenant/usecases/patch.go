@@ -19,6 +19,7 @@ func (c *TenantCase) Patch(ctx context.Context, filter PatchFilter, values Patch
 	logger.GetWideEvent(ctx).SetTenantID(*filter.ID)
 
 	return c.gateway.Patch(
+		ctx,
 		g.PatchFilter{ID: filter.ID},
 		g.PatchValues{Name: values.Name},
 	)

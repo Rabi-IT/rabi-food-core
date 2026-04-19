@@ -7,5 +7,5 @@ import (
 )
 
 func (c *TenantCase) GetByID(ctx context.Context, id string) (*g.GetByIDOutput, error) {
-	return c.gateway.GetByID(id)
+	return c.gateway.GetByID(ctx, id)
 }

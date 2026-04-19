@@ -29,7 +29,7 @@ func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) 
 	}
 
 	paidStatus := payment_status.StatusPaid
-	updated, err := c.gateway.Patch(g.PatchFilter{
+	updated, err := c.gateway.Patch(ctx, g.PatchFilter{
 		ID:            in.OrderID,
 		PaymentStatus: payment_status.StatusPending,
 	}, g.PatchValues{
@@ -57,7 +57,7 @@ func (c *OrderCase) ConfirmPayment(ctx context.Context, in ConfirmPaymentInput) 
 func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPaymentInput) (bool, error) {
 	wd := logger.GetWideEvent(ctx)
 
-	orderFound, err := c.gateway.GetByID(g.GetByIDFilter{ID: in.OrderID})
+	orderFound, err := c.gateway.GetByID(ctx, g.GetByIDFilter{ID: in.OrderID})
 	if err != nil {
 		return false, fmt.Errorf("%w: %w", errs.ErrOrderStateVerificationFailed, err)
 	}
