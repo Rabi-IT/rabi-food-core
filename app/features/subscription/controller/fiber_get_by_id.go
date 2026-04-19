@@ -30,7 +30,7 @@ func (c *SubscriptionController) GetByID(ctx *fiber.Ctx) error {
 	switch {
 	case session.Role.IsUser():
 		filter.UserID = session.UserID
-	case session.Role.IsTenant():
+	case session.IsTenant():
 		filter.TenantID = session.TenantID
 	}
 

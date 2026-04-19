@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Rabi-IT/rabi-food-core/domain/auth"
+	"github.com/Rabi-IT/rabi-food-core/domain/tenant"
 )
 
 type sessionKey string
@@ -11,13 +12,16 @@ type sessionKey string
 const sessionCtxKey sessionKey = "session"
 
 type UserSession struct {
-	UserID string
-	// The tenant this user manages.
-	// Empty if the user has no tenant (e.g. User, Backoffice).
-	TenantID string
-	Name     string
-	Login    string
-	Role     auth.Role
+	UserID     string
+	TenantID   string
+	TenantRole tenant.Role
+	Name       string
+	Login      string
+	Role       auth.Role
+}
+
+func (s UserSession) IsTenant() bool {
+	return s.TenantRole != "" && s.TenantID != ""
 }
 
 func GetSession(ctx context.Context) UserSession {

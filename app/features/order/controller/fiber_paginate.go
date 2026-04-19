@@ -34,7 +34,7 @@ func (c *OrderController) Paginate(ctx *fiber.Ctx) error {
 
 	uctx := ctx.UserContext()
 	session := app_context.GetSession(uctx)
-	if session.Role.IsTenant() {
+	if session.IsTenant() {
 		filter.TenantID = session.TenantID
 	} else if session.Role.IsUser() {
 		filter.UserID = session.UserID
