@@ -13,7 +13,7 @@ func OrderProtected(app *fiber.App, c *controller.OrderController) {
 	route.Post("/", middlewares.RequireTenantID, c.Create)
 	route.Delete("/:id", c.Delete)
 	route.Get("/:id", c.GetByID)
-	route.Get("/", middlewares.RequireTenantID, c.Paginate)
+	route.Get("/", c.Paginate)
 	route.Post("/:id/payments/confirm", c.ConfirmPayment)
 
 	backoffice := app.Group("/backoffice/order", middlewares.RequireBackoffice)
