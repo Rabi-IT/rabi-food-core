@@ -3,7 +3,9 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/order/gateway"
+	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -22,12 +24,19 @@ var _ *gateway.GetByIDOutput
 // @Failure 500 {string} string "Internal server error"
 // @Router /order/{id} [get].
 func (c *OrderController) GetByID(ctx *fiber.Ctx) error {
-	filter := gateway.GetByIDFilter{
-		ID:       ctx.Params("id"),
-		TenantID: ctx.Get("X-Tenant-ID"),
+	uctx := ctx.UserContext()
+	session := app_context.GetSession(uctx)
+
+	filter := gateway.GetByIDFilter{ID: ctx.Params("id")}
+	if session.Role.IsTenant() {
+		filter.TenantID = session.TenantID
+	} else if session.Role.IsUser() {
+		filter.UserID = session.UserID
+	} else {
+		return errs.ErrForbidden
 	}
 
-	data, err := c.usecase.GetByID(ctx.UserContext(), filter)
+	data, err := c.usecase.GetByID(uctx, filter)
 
 	if err != nil {
 		return err

@@ -3,9 +3,11 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Rabi-IT/rabi-food-core/app_context"
 	"github.com/Rabi-IT/rabi-food-core/features/order/gateway"
-	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 	parser "github.com/Rabi-IT/rabi-food-core/libs/http/parser"
+	"github.com/Rabi-IT/rabi-food-core/libs/errs"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -30,10 +32,17 @@ func (c *OrderController) Delete(ctx *fiber.Ctx) error {
 		return ctx.JSON(err)
 	}
 
-	filter.ID = ctx.Params("id")
-	filter.TenantID = ctx.Get("X-Tenant-ID")
-
 	uctx := ctx.UserContext()
+	session := app_context.GetSession(uctx)
+
+	filter.ID = ctx.Params("id")
+	if session.Role.IsTenant() {
+		filter.TenantID = session.TenantID
+	} else if session.Role.IsUser() {
+		filter.UserID = session.UserID
+	} else {
+		return errs.ErrForbidden
+	}
 	logger.GetWideEvent(uctx).Event = "delete-order"
 	deleted, err := c.usecase.Delete(uctx, filter)
 

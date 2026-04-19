@@ -15,6 +15,9 @@ func (g *PgxOrderGatewayAdapter) Delete(filter DeleteFilter) (bool, error) {
 		Where(sq.Eq{"id": filter.ID}).
 		PlaceholderFormat(sq.Dollar)
 
+	if filter.UserID != "" {
+		b = b.Where(sq.Eq{"user_id": filter.UserID})
+	}
 	if filter.TenantID != "" {
 		b = b.Where(sq.Eq{"tenant_id": filter.TenantID})
 	}
