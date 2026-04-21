@@ -12,8 +12,8 @@ func (g *PgxTenantGatewayAdapter) Create(ctx context.Context, input CreateInput)
 
 	tenantSQL, tenantArgs, err := sq.
 		Insert("iam.tenants").
-		Columns("id", "name").
-		Values(id, input.Name).
+		Columns("id", "name", "slug", "language").
+		Values(id, input.Name, input.Slug, input.Language).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {

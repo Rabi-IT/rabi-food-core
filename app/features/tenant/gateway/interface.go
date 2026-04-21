@@ -11,6 +11,7 @@ type TenantGateway interface {
 	Patch(ctx context.Context, filter PatchFilter, values PatchValues) (bool, error)
 	Create(ctx context.Context, input CreateInput) (string, error)
 	GetByID(ctx context.Context, id string) (*GetByIDOutput, error)
+	GetBySlug(ctx context.Context, slug string) (*GetBySlugOutput, error)
 	Paginate(ctx context.Context, filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
 	CreateCustomer(ctx context.Context, tenantID, userID string) error
 	CreateMember(ctx context.Context, input CreateMemberInput) error
@@ -33,7 +34,16 @@ type InitialMemberInput struct {
 
 type CreateInput struct {
 	Name          string
+	Slug          string
+	Language      string
 	InitialMember InitialMemberInput
+}
+
+type GetBySlugOutput struct {
+	ID       string `db:"id"`
+	Name     string `db:"name"`
+	Slug     string `db:"slug"`
+	Language string `db:"language"`
 }
 
 type GetByIDOutput struct {

@@ -10,7 +10,9 @@ import (
 
 func (c *TenantCase) Create(ctx context.Context, name, ownerUserID string) (string, error) {
 	input := g.CreateInput{
-		Name: name,
+		Name:     name,
+		Slug:     slugify(name),
+		Language: "pt-BR",
 		InitialMember: g.InitialMemberInput{
 			UserID: ownerUserID,
 			Role:   tenant.Owner,

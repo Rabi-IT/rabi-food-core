@@ -7,6 +7,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// Tenant registers public tenant routes (before JWT middleware).
+func Tenant(app *fiber.App, c *controller.TenantController) {
+	app.Get("/tenant/slug/:slug", c.GetBySlug)
+}
+
 // TenantProtected registers tenant routes that require a valid JWT.
 func TenantProtected(app *fiber.App, c *controller.TenantController) {
 	// No Tenant Authorization required

@@ -66,6 +66,7 @@ func New(
 
 	// Public routes — no JWT required
 	auth_routes.Auth(app, authController)
+	tenant_routes.Tenant(app, tenantController)
 	product_routes.Product(app, productController)
 	category_routes.Category(app, categoryController)
 
