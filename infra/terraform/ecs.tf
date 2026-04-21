@@ -8,8 +8,8 @@ resource "aws_ecs_cluster" "main" {
   tags = { Name = "rabi-food-cluster" }
 }
 
-resource "aws_cloudwatch_log_group" "app" {
-  name              = "/ecs/rabi-food-app"
+resource "aws_cloudwatch_log_group" "api" {
+  name              = "/ecs/rabi-food-api"
   retention_in_days = 30
 }
 
@@ -30,7 +30,7 @@ resource "aws_cloudwatch_log_group" "gotrue_migration" {
 
 locals {
   alloy_config = <<-ALLOY
-    prometheus.scrape "app" {
+    prometheus.scrape "api" {
       targets         = [{"__address__" = "localhost:${var.app_port}"}]
       forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
       scrape_interval = "15s"
@@ -48,8 +48,8 @@ locals {
   ALLOY
 }
 
-resource "aws_ecs_task_definition" "app" {
-  family                   = "rabi-food-app"
+resource "aws_ecs_task_definition" "api" {
+  family                   = "rabi-food-api"
   network_mode             = "awsvpc"
   requires_compatibilities = ["EC2"]
   cpu                      = var.ecs_cpu
@@ -58,17 +58,17 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([
     {
-      name  = "app"
-      image = "${aws_ecr_repository.app.repository_url}:latest"
+      name  = "api"
+      image = "${aws_ecr_repository.api.repository_url}:latest"
 
       portMappings = [{
-        containerPort = var.app_port
+        containerPort = var.api_port
         protocol      = "tcp"
       }]
 
       environment = [
         { name = "ENV",           value = "production" },
-        { name = "APP_PORT",      value = tostring(var.app_port) },
+        { name = "API_PORT",      value = tostring(var.api_port) },
         { name = "DATABASE_HOST", value = aws_db_instance.postgres.address },
         { name = "DATABASE_NAME", value = var.db_name },
         { name = "DATABASE_USER", value = var.db_user },
@@ -86,7 +86,7 @@ resource "aws_ecs_task_definition" "app" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.app.name
+          "awslogs-group"         = aws_cloudwatch_log_group.api.name
           "awslogs-region"        = var.aws_region
           "awslogs-stream-prefix" = "ecs"
         }
@@ -191,10 +191,10 @@ resource "aws_ecs_task_definition" "app" {
   }
 }
 
-resource "aws_ecs_service" "app" {
-  name            = "rabi-food-app"
+resource "aws_ecs_service" "api" {
+  name            = "rabi-food-api"
   cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.app.arn
+  task_definition = aws_ecs_task_definition.api.arn
   desired_count = 1
 
   capacity_provider_strategy {
@@ -208,9 +208,9 @@ resource "aws_ecs_service" "app" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.app.arn
-    container_name   = "app"
-    container_port   = var.app_port
+    target_group_arn = aws_lb_target_group.api.arn
+    container_name   = "api"
+    container_port   = var.api_port
   }
 
   depends_on = [aws_lb_listener.http_redirect, aws_ecs_capacity_provider.ec2]

@@ -1,4 +1,4 @@
-resource "aws_ecr_repository" "app" {
+resource "aws_ecr_repository" "api" {
   name                 = "rabi-food-core"
   image_tag_mutability = "MUTABLE"
 
@@ -9,8 +9,8 @@ resource "aws_ecr_repository" "app" {
   tags = { Name = "rabi-food-core" }
 }
 
-resource "aws_ecr_lifecycle_policy" "app" {
-  repository = aws_ecr_repository.app.name
+resource "aws_ecr_lifecycle_policy" "api" {
+  repository = aws_ecr_repository.api.name
 
   policy = jsonencode({
     rules = [{

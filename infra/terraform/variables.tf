@@ -4,8 +4,8 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "app_port" {
-  description = "Port the app listens on"
+variable "api_port" {
+  description = "Port the API listens on"
   type        = number
   default     = 3000
 }

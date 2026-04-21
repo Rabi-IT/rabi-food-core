@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	appHost = "localhost:" + config.AppPort
+	appHost = "localhost:" + config.ApiPort
 	AppURL  = "http://" + appHost
 )
 

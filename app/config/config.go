@@ -3,7 +3,7 @@ package config
 import "os"
 
 var (
-	AppPort           = os.Getenv("APP_PORT")
+	ApiPort           = os.Getenv("API_PORT")
 	AppVersion        = os.Getenv("APP_VERSION")
 	AuthSecret        = os.Getenv("AUTH_SECRET")
 	Env               = environment(os.Getenv("ENV"))
