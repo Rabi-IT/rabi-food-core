@@ -5,6 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Web: Launch",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/web/node_modules/.bin/react-router",
+            "args": ["dev"],
+            "cwd": "${workspaceFolder}/web",
+            "envFile": "${workspaceFolder}/.env.test",
+            "sourceMaps": true,
+            "restart": true
+        },
+        {
             "name": "HTTP Server",
             "type": "go",
             "request": "launch",

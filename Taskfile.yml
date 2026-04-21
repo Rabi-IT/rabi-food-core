@@ -18,6 +18,14 @@ tasks:
       - go run main.go
     silent: false
 
+  web:
+    desc: "Start the web development server"
+    dir: web
+    dotenv: ["../.env.test"]
+    cmds:
+      - npm run dev
+    silent: false
+
   lint:
     desc: "Run linters using golangci-lint with auto-fix"
     dir: app
