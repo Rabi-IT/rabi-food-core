@@ -13,6 +13,7 @@ func Auth(app *fiber.App, c *controller.AuthController) {
 	route.Post("/signup", c.SignUp)
 	route.Post("/signin", c.SignIn)
 	route.Post("/refresh", c.Refresh)
+	route.Post("/refresh-scoped", c.RefreshScoped)
 }
 
 // AuthProtected registers auth routes that require a valid JWT.
