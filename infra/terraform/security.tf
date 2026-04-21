@@ -33,8 +33,8 @@ resource "aws_security_group" "ecs_tasks" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port       = var.app_port
-    to_port         = var.app_port
+    from_port       = var.api_port
+    to_port         = var.api_port
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }

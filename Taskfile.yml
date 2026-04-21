@@ -42,7 +42,7 @@ tasks:
     dotenv: ["../.env.test"]
     cmds:
       - swag init --output ./libs/docs --outputTypes json
-      - echo "Docs -> http://localhost:${APP_PORT}/docs"
+      - echo "Docs -> http://localhost:${API_PORT}/docs"
     silent: false
 
   # =============================

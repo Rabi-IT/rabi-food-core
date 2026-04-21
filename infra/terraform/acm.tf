@@ -1,4 +1,4 @@
-resource "aws_acm_certificate" "app" {
+resource "aws_acm_certificate" "api" {
   domain_name       = var.domain_name
   validation_method = "DNS"
 
@@ -9,6 +9,6 @@ resource "aws_acm_certificate" "app" {
   }
 }
 
-resource "aws_acm_certificate_validation" "app" {
-  certificate_arn = aws_acm_certificate.app.arn
+resource "aws_acm_certificate_validation" "api" {
+  certificate_arn = aws_acm_certificate.api.arn
 }

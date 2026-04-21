@@ -60,12 +60,12 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		orderController := do.MustInvoke[*order_controller.OrderController](i)
 		subscriptionController := do.MustInvoke[*subscription_controller.SubscriptionController](i)
 
-		if config.AppPort == "" {
+		if config.ApiPort == "" {
 			return nil, ErrHTTPPortNotConfigured
 		}
 
 		return http.New(
-			config.AppPort,
+			config.ApiPort,
 			authController,
 			tenantController,
 			productController,
