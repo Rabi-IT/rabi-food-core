@@ -1,0 +1,9 @@
+{
+  "storefront": {
+    "menu": "Menu",
+    "addToCart": "Add to cart",
+    "cart": "Cart",
+    "checkout": "Checkout",
+    "empty": "No products available"
+  }
+}

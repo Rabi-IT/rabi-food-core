@@ -1,0 +1,9 @@
+{
+  "storefront": {
+    "menu": "Cardápio",
+    "addToCart": "Adicionar",
+    "cart": "Carrinho",
+    "checkout": "Finalizar pedido",
+    "empty": "Nenhum produto disponível"
+  }
+}
