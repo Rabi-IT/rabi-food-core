@@ -23,10 +23,10 @@ services:
     container_name: loki
     ports:
       - "3200:3200"
-    command: 
+    command:
       - "--config.file=/etc/loki/local-config.yaml"
-      - "--server.http-listen-port=3200"
     volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml:ro
       - loki-data:/loki
     restart: unless-stopped
     networks:

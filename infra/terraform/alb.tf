@@ -53,3 +53,41 @@ resource "aws_lb_listener" "https" {
     target_group_arn = aws_lb_target_group.app.arn
   }
 }
+
+resource "aws_lb_listener_rule" "block_metrics_http" {
+  listener_arn = aws_lb_listener.http_redirect.arn
+  priority     = 1
+
+  condition {
+    path_pattern {
+      values = ["/metrics", "/docs", "/docs/*"]
+    }
+  }
+
+  action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      status_code  = "403"
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "block_metrics" {
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 1
+
+  condition {
+    path_pattern {
+      values = ["/metrics", "/docs", "/docs/*"]
+    }
+  }
+
+  action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      status_code  = "403"
+    }
+  }
+}

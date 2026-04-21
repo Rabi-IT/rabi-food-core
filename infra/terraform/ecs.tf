@@ -167,8 +167,8 @@ resource "aws_ecs_task_definition" "app" {
 
       environment = [
         { name = "ALLOY_CONFIG",                   value = local.alloy_config },
-        { name = "GRAFANA_PROMETHEUS_URL",          value = var.grafana_prometheus_url },
-        { name = "GRAFANA_PROMETHEUS_INSTANCE_ID",  value = var.grafana_prometheus_instance_id },
+        { name = "GRAFANA_PROMETHEUS_URL",          value = data.grafana_cloud_stack.main.prometheus_remote_write_url },
+        { name = "GRAFANA_PROMETHEUS_INSTANCE_ID",  value = tostring(data.grafana_cloud_stack.main.prometheus_user_id) },
       ]
 
       secrets = [
