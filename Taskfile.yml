@@ -51,7 +51,7 @@ tasks:
   test:
     desc: "Start Postgres and pgAdmin"
     dotenv: ["../.env.test"]
-    dir: infra
+    dir: infra/app
     deps: [db]
     cmds:
       - docker compose up
@@ -66,7 +66,7 @@ tasks:
 
   db:
     desc: "Run tests inside Docker"
-    dir: infra
+    dir: infra/app
     dotenv: ["../.env.test"]
     cmds:
       - docker compose -f docker-compose.db.yaml up -d --wait
@@ -83,7 +83,7 @@ tasks:
 
   db-down:
     desc: "Stop Postgres and pgAdmin"
-    dir: infra
+    dir: infra/app
     dotenv: ["../.env.test"]
     cmds:
       - docker compose -f docker-compose.db.yaml down -v --remove-orphans
@@ -156,13 +156,13 @@ tasks:
   # =============================
   validate_alloy:
     desc: "Validate the Alloy configuration"
-    dir: infra
+    dir: infra/monitoring
     cmds:
       - docker run --rm -v $(pwd)/alloy.config.alloy:/etc/alloy/alloy.config.alloy grafana/alloy:latest validate /etc/alloy/alloy.config.alloy
 
   logs:
     desc: "Watch application logs"
-    dir: infra
+    dir: infra/app
     cmds:
       - docker compose logs -f app
     interactive: true

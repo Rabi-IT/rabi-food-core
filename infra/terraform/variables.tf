@@ -58,14 +58,15 @@ variable "grafana_token" {
   sensitive   = true
 }
 
-variable "grafana_prometheus_url" {
-  description = "Grafana Cloud Prometheus remote_write URL"
+variable "grafana_stack_slug" {
+  description = "Grafana Cloud stack slug — subdomain of yourstack.grafana.net"
   type        = string
 }
 
-variable "grafana_prometheus_instance_id" {
-  description = "Grafana Cloud Prometheus numeric instance ID (used as basic_auth username)"
+variable "grafana_cloud_api_key" {
+  description = "Grafana Cloud organization API key (grafana.com → My Account → API Keys)"
   type        = string
+  sensitive   = true
 }
 
 variable "domain_name" {
@@ -77,5 +78,27 @@ variable "gotrue_service_key" {
   description = "Shared secret used by the app to authenticate against the GoTrue Admin API (GOTRUE_OPERATOR_TOKEN)"
   type        = string
   sensitive   = true
+}
+
+variable "grafana_url" {
+  description = "Grafana Cloud instance URL (ex: https://yourstack.grafana.net)"
+  type        = string
+}
+
+variable "grafana_admin_token" {
+  description = "Grafana Cloud Service Account token with Editor or Admin role (for alerting provisioning)"
+  type        = string
+  sensitive   = true
+}
+
+variable "grafana_loki_datasource_name" {
+  description = "Name of the Loki datasource in Grafana Cloud"
+  type        = string
+  default     = "grafana-loki"
+}
+
+variable "alert_email_to" {
+  description = "Email address to receive alerts"
+  type        = string
 }
 

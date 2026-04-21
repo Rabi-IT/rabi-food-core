@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    grafana = {
+      source  = "grafana/grafana"
+      version = "~> 3.0"
+    }
   }
 
   # Uncomment to store state remotely
@@ -18,4 +22,10 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
+}
+
+provider "grafana" {
+  url           = var.grafana_url
+  auth          = var.grafana_admin_token
+  cloud_api_key = var.grafana_cloud_api_key
 }
