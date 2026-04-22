@@ -14,11 +14,11 @@ import (
 type TestSuite struct {
 	suite.Suite
 
-	app *fixtures.App
+	app *fixtures.Api
 }
 
 func (t *TestSuite) SetupSuite() {
-	t.app = fixtures.NewApp()
+	t.app = fixtures.NewApi()
 	t.app.Start(t.T())
 }
 
@@ -47,7 +47,7 @@ func (t *TestSuite) Test_TenantIntegration_EnrollCustomer() {
 		})
 		token := fixtures.Auth.UserToken(t.T(), customerID)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/enroll-customers").
 			WithHeader("Authorization", "Bearer "+token).
 			Expect().Status(http.StatusNoContent)
@@ -66,7 +66,7 @@ func (t *TestSuite) Test_TenantIntegration_EnrollCustomer() {
 		token := fixtures.Auth.UserToken(t.T(), customerID)
 
 		for range 2 {
-			httpexpect.Default(t.T(), fixtures.AppURL).
+			httpexpect.Default(t.T(), fixtures.ApiURL).
 				Request(http.MethodPost, fixtures.Tenant.URI+tenant.ID+"/enroll-customers").
 				WithHeader("Authorization", "Bearer "+token).
 				Expect().Status(http.StatusNoContent)
@@ -87,7 +87,7 @@ func (t *TestSuite) Test_TenantIntegration_Create() {
 
 		token := fixtures.Auth.TenantOwnerToken(t.T(), tenant.UserID, tenant.ID)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Tenant.URI+"me").
 			WithHeader("Authorization", "Bearer "+token).
 			WithHeader("X-Tenant-ID", tenant.ID).
@@ -110,7 +110,7 @@ func (t *TestSuite) Test_TenantIntegration_Create() {
 		token := fixtures.Auth.UserToken(t.T(), userID)
 
 		response := new(middlewares.ValidationErrorResponse)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, "/tenant").
 			WithHeader("Authorization", "Bearer "+token).
 			WithJSON(map[string]string{"name": ""}).

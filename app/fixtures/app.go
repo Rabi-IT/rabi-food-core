@@ -15,25 +15,25 @@ import (
 )
 
 var (
-	appHost = "localhost:" + config.ApiPort
-	AppURL  = "http://" + appHost
+	apiHost = "localhost:" + config.ApiPort
+	ApiURL  = "http://" + apiHost
 )
 
-type App struct {
+type Api struct {
 	http     http.HTTPServer
 	database database.Database
 }
 
-func NewApp() *App {
+func NewApi() *Api {
 	time.Local = time.UTC
 
-	return &App{
+	return &Api{
 		http:     testHTTPServer,
 		database: testDB,
 	}
 }
 
-func (a *App) Start(t *testing.T) {
+func (a *Api) Start(t *testing.T) {
 	t.Helper()
 
 	ctx := context.Background()
@@ -53,7 +53,7 @@ func (a *App) Start(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func (a *App) Stop(t *testing.T) {
+func (a *Api) Stop(t *testing.T) {
 	t.Helper()
 	err := a.http.Stop()
 	require.NoError(t, err)
@@ -67,7 +67,7 @@ func waitForServer() error {
 	timeout := 15 * time.Second
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
-		conn, err := net.DialTimeout("tcp", appHost, 500*time.Millisecond)
+		conn, err := net.DialTimeout("tcp", apiHost, 500*time.Millisecond)
 		if err == nil {
 			_ = conn.Close()
 
@@ -77,5 +77,5 @@ func waitForServer() error {
 	}
 
 	//nolint:err113
-	return fmt.Errorf("server %s did not start within %s", appHost, timeout)
+	return fmt.Errorf("server %s did not start within %s", apiHost, timeout)
 }

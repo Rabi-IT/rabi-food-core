@@ -28,9 +28,9 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 		})
 	}
 
-	var appErr *errs.AppError
-	if errors.As(err, &appErr) {
-		return ctx.Status(appErr.Status).JSON(appErr)
+	var apiErr *errs.ApiError
+	if errors.As(err, &apiErr) {
+		return ctx.Status(apiErr.Status).JSON(apiErr)
 	}
 
 	var e *fiber.Error

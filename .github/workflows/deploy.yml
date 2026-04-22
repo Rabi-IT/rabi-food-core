@@ -14,7 +14,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: app
+        working-directory: api
 
     steps:
       - name: Fetch Repository
@@ -34,11 +34,11 @@ jobs:
       - name: Build and push image
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-          APP_VERSION: ${{ github.event.release.tag_name }}
+          API_VERSION: ${{ github.event.release.tag_name }}
         run: |
-          docker build -t $ECR_REGISTRY/rabi-food-core:$APP_VERSION .
-          docker tag $ECR_REGISTRY/rabi-food-core:$APP_VERSION $ECR_REGISTRY/rabi-food-core:latest
-          docker push $ECR_REGISTRY/rabi-food-core:$APP_VERSION
+          docker build -t $ECR_REGISTRY/rabi-food-core:$API_VERSION .
+          docker tag $ECR_REGISTRY/rabi-food-core:$API_VERSION $ECR_REGISTRY/rabi-food-core:latest
+          docker push $ECR_REGISTRY/rabi-food-core:$API_VERSION
           docker push $ECR_REGISTRY/rabi-food-core:latest
 
       - name: Set up Go
@@ -62,14 +62,14 @@ jobs:
       - name: Update ECS task definition
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-          APP_VERSION: ${{ github.event.release.tag_name }}
+          API_VERSION: ${{ github.event.release.tag_name }}
         run: |
           TASK_DEF=$(aws ecs describe-task-definition --task-definition rabi-food-app --query 'taskDefinition' --output json)
           NEW_TASK_DEF=$(echo $TASK_DEF | jq \
-            --arg IMAGE "$ECR_REGISTRY/rabi-food-core:$APP_VERSION" \
-            --arg VERSION "$APP_VERSION" \
+            --arg IMAGE "$ECR_REGISTRY/rabi-food-core:$API_VERSION" \
+            --arg VERSION "$API_VERSION" \
             '.containerDefinitions[0].image = $IMAGE |
-             .containerDefinitions[0].environment += [{"name":"APP_VERSION","value":$VERSION}] |
+             .containerDefinitions[0].environment += [{"name":"API_VERSION","value":$VERSION}] |
              del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.placementConstraints,.compatibilities,.registeredAt,.registeredBy)')
           NEW_ARN=$(aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEF" \
             --query 'taskDefinition.taskDefinitionArn' --output text)

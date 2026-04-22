@@ -34,7 +34,7 @@ func (productFixture) Create(t *testing.T, input *g.CreateInput, auth RequestCon
 	}
 
 	id := ""
-	httpexpect.Default(t, AppURL).
+	httpexpect.Default(t, ApiURL).
 		Request(http.MethodPost, Product.URI).
 		WithHeader("Authorization", "Bearer "+auth.Token).
 		WithHeader("X-Tenant-ID", auth.TenantID).
@@ -50,7 +50,7 @@ func (productFixture) GetByID(t *testing.T, id string) (g.GetByIDOutput, int) {
 	t.Helper()
 	found := g.GetByIDOutput{}
 
-	obj := httpexpect.Default(t, AppURL).
+	obj := httpexpect.Default(t, ApiURL).
 		Request(http.MethodGet, Product.URI+id).
 		Expect().Status(http.StatusOK)
 

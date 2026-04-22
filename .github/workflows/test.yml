@@ -17,10 +17,10 @@ jobs:
 
     defaults:
       run:
-        working-directory: app
+        working-directory: api
 
     env:
-      APP_PORT: 3000
+      API_PORT: 3000
       TEST_DATABASE_HOST: postgres
       TEST_DATABASE_USER: postgres
       TEST_DATABASE_NAME: rabi_food_test

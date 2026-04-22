@@ -11,7 +11,7 @@ var (
 	ErrTenantSubscriptionNotConfigured = newErr("TENANT_SUBSCRIPTION_NOT_CONFIGURED", http.StatusInternalServerError)
 )
 
-func DuplicateProduct(productID string) *AppError {
+func DuplicateProduct(productID string) *ApiError {
 	e := *ErrDuplicateProduct
 	e.Code = ErrDuplicateProduct.Code
 	e.FullCode = fmt.Sprintf("%s__%s", e.Code, productID)
@@ -22,7 +22,7 @@ func DuplicateProduct(productID string) *AppError {
 	return &e
 }
 
-func DuplicateDeliveryWeekday(weekday uint8) *AppError {
+func DuplicateDeliveryWeekday(weekday uint8) *ApiError {
 	e := *ErrDuplicateDeliveryWeekday
 	e.Code = ErrDuplicateDeliveryWeekday.Code
 	e.FullCode = fmt.Sprintf("%s__%d", e.Code, weekday)

@@ -17,11 +17,11 @@ import (
 type TestSuite struct {
 	suite.Suite
 
-	app *fixtures.App
+	app *fixtures.Api
 }
 
 func (t *TestSuite) SetupSuite() {
-	t.app = fixtures.NewApp()
+	t.app = fixtures.NewApi()
 	t.app.Start(t.T())
 }
 
@@ -47,7 +47,7 @@ func (t *TestSuite) Test_CategoryIntegration_Create() {
 			Description: "Description",
 		}
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Category.URI).
 			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			WithJSON(body).
@@ -66,7 +66,7 @@ func (t *TestSuite) Test_CategoryIntegration_Create() {
 		}
 
 		response := new(middlewares.ValidationErrorResponse)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Category.URI).
 			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			WithJSON(body).
@@ -88,7 +88,7 @@ func (t *TestSuite) Test_CategoryIntegration_Create() {
 			Description: "",
 		}
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Category.URI).
 			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			WithJSON(body).
@@ -121,7 +121,7 @@ func (t *TestSuite) Test_CategoryIntegration_Create() {
 
 		body := gateway.CreateInput{Name: "Name"}
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Category.URI).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -146,7 +146,7 @@ func (t *TestSuite) Test_CategoryIntegration_GetByID() {
 	})
 
 	t.Run("should return NotFound when get by id not found", func() {
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Category.URI+uuid.New().String()).
 			Expect().
 			Status(http.StatusNotFound).
@@ -164,7 +164,7 @@ func (t *TestSuite) Test_CategoryIntegration_Paginate() {
 		}
 
 		response := new(gateway.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Category.URI).
 			WithHeader("X-Tenant-ID", tenantAuth.TenantID).
 			WithQueryObject(database.PaginateInput{
@@ -196,7 +196,7 @@ func (t *TestSuite) Test_CategoryIntegration_Paginate() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 
 		response := new(gateway.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Category.URI).
 			WithHeader("X-Tenant-ID", tenant.ID).
 			WithQueryObject(database.PaginateInput{
@@ -223,7 +223,7 @@ func (t *TestSuite) Test_CategoryIntegration_Patch() {
 			Description: new("Updated Description"),
 		}
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPatch, fixtures.Category.URI+categoryID).
 			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			WithJSON(body).
@@ -252,7 +252,7 @@ func (t *TestSuite) Test_CategoryIntegration_Patch() {
 			Description: new("Updated Description"),
 		}
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPatch, fixtures.Category.URI+anotherCategoryID).
 			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			WithJSON(body).
@@ -269,7 +269,7 @@ func (t *TestSuite) Test_CategoryIntegration_Patch() {
 
 		body := gateway.PatchValues{Name: new("Updated Name")}
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPatch, fixtures.Category.URI+categoryID).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -296,7 +296,7 @@ func (t *TestSuite) Test_CategoryIntegration_BackofficePaginate() {
 		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
 
 		response := new(gateway.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Category.BackofficeURI).
 			WithHeader("Authorization", "Bearer "+backofficeToken).
 			WithQueryObject(database.PaginateInput{Page: 0, PageSize: 10}).
@@ -323,7 +323,7 @@ func (t *TestSuite) Test_CategoryIntegration_BackofficePaginate() {
 		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
 
 		response := new(gateway.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Category.BackofficeURI).
 			WithHeader("Authorization", "Bearer "+backofficeToken).
 			WithQueryObject(map[string]any{
@@ -346,13 +346,13 @@ func (t *TestSuite) Test_CategoryIntegration_Delete() {
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 		categoryID := fixtures.Category.Create(t.T(), nil, tenantAuth)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodDelete, fixtures.Category.URI+categoryID).
 			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			Expect().
 			Status(http.StatusNoContent)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Category.URI+categoryID).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			Expect().
@@ -367,7 +367,7 @@ func (t *TestSuite) Test_CategoryIntegration_Delete() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodDelete, fixtures.Category.URI+anotherCategoryID).
 			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			Expect().
@@ -381,7 +381,7 @@ func (t *TestSuite) Test_CategoryIntegration_Delete() {
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 		categoryID := fixtures.Category.Create(t.T(), nil, tenantAuth)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodDelete, fixtures.Category.URI+categoryID).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).

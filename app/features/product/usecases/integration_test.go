@@ -16,12 +16,12 @@ import (
 type TestSuite struct {
 	suite.Suite
 
-	app *fixtures.App
+	api *fixtures.Api
 }
 
 func (t *TestSuite) SetupSuite() {
-	t.app = fixtures.NewApp()
-	t.app.Start(t.T())
+	t.api = fixtures.NewApi()
+	t.api.Start(t.T())
 }
 
 func (t *TestSuite) SetupSubTest() {
@@ -29,7 +29,7 @@ func (t *TestSuite) SetupSubTest() {
 }
 
 func (t *TestSuite) TearDownSuite() {
-	t.app.Stop(t.T())
+	t.api.Stop(t.T())
 }
 
 func TestMySuite(t *testing.T) {
@@ -52,7 +52,7 @@ func (t *TestSuite) Test_ProductIntegration_Create() {
 			IsActive:    true,
 		}
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Product.URI).
 			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			WithJSON(body).
@@ -95,7 +95,7 @@ func (t *TestSuite) Test_ProductIntegration_Create() {
 			Price:       100,
 		}
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Product.URI).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -125,7 +125,7 @@ func (t *TestSuite) Test_ProductIntegration_GetByID() {
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 		_ = fixtures.Product.Create(t.T(), nil, tenantAuth)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Product.URI+uuid.New().String()).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			Expect().
@@ -144,7 +144,7 @@ func (t *TestSuite) Test_ProductIntegration_Paginate() {
 		}
 
 		response := new(product_gateway.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Product.URI).
 			WithHeader("X-Tenant-ID", tenantAuth.TenantID).
 			WithQueryObject(database.PaginateInput{
@@ -176,7 +176,7 @@ func (t *TestSuite) Test_ProductIntegration_Paginate() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 
 		response := new(product_gateway.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Product.URI).
 			WithHeader("X-Tenant-ID", tenant.ID).
 			WithQueryObject(database.PaginateInput{
@@ -203,7 +203,7 @@ func (t *TestSuite) Test_ProductIntegration_Patch() {
 			Description: new("Updated Description"),
 		}
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPatch, fixtures.Product.URI+productID).
 			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			WithJSON(body).
@@ -232,7 +232,7 @@ func (t *TestSuite) Test_ProductIntegration_Patch() {
 			Description: new("Updated Description"),
 		}
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPatch, fixtures.Product.URI+anotherProductID).
 			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			WithJSON(body).
@@ -251,7 +251,7 @@ func (t *TestSuite) Test_ProductIntegration_Patch() {
 			Name: new("Updated Name"),
 		}
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPatch, fixtures.Product.URI+productID).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -278,7 +278,7 @@ func (t *TestSuite) Test_ProductIntegration_BackofficePaginate() {
 		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
 
 		response := new(product_gateway.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Product.BackofficeURI).
 			WithHeader("Authorization", "Bearer "+backofficeToken).
 			WithQueryObject(database.PaginateInput{Page: 0, PageSize: 10}).
@@ -305,7 +305,7 @@ func (t *TestSuite) Test_ProductIntegration_BackofficePaginate() {
 		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
 
 		response := new(product_gateway.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Product.BackofficeURI).
 			WithHeader("Authorization", "Bearer "+backofficeToken).
 			WithQueryObject(map[string]any{
@@ -328,13 +328,13 @@ func (t *TestSuite) Test_ProductIntegration_Delete() {
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 		productID := fixtures.Product.Create(t.T(), nil, tenantAuth)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodDelete, fixtures.Product.URI+productID).
 			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			Expect().
 			Status(http.StatusNoContent)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Product.URI+productID).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -350,7 +350,7 @@ func (t *TestSuite) Test_ProductIntegration_Delete() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodDelete, fixtures.Product.URI+anotherProductID).
 			WithHeader("Authorization", "Bearer "+tenantAuth.Token).
 			Expect().
@@ -364,7 +364,7 @@ func (t *TestSuite) Test_ProductIntegration_Delete() {
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 		productID := fixtures.Product.Create(t.T(), nil, tenantAuth)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodDelete, fixtures.Product.URI+productID).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).

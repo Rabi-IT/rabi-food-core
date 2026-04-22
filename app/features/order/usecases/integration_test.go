@@ -23,12 +23,12 @@ import (
 type TestSuite struct {
 	suite.Suite
 
-	app *fixtures.App
+	api *fixtures.Api
 }
 
 func (t *TestSuite) SetupSuite() {
-	t.app = fixtures.NewApp()
-	t.app.Start(t.T())
+	t.api = fixtures.NewApi()
+	t.api.Start(t.T())
 }
 
 func (t *TestSuite) SetupSubTest() {
@@ -36,7 +36,7 @@ func (t *TestSuite) SetupSubTest() {
 }
 
 func (t *TestSuite) TearDownSuite() {
-	t.app.Stop(t.T())
+	t.api.Stop(t.T())
 }
 
 func TestMySuite(t *testing.T) {
@@ -66,7 +66,7 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 			},
 		}
 
-		orderID := httpexpect.Default(t.T(), fixtures.AppURL).
+		orderID := httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Order.URI).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -102,7 +102,7 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 			},
 		}
 
-		orderID := httpexpect.Default(t.T(), fixtures.AppURL).
+		orderID := httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Order.URI).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -142,7 +142,7 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 		}
 
 		expectedError := errs.ProductNotFound(nonExistingProductID)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Order.URI).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -170,7 +170,7 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 		}
 
 		expectedError := errs.ProductNotFound(nonExistingProductID)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Order.URI).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -196,7 +196,7 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 			},
 		}
 
-		orderID := httpexpect.Default(t.T(), fixtures.AppURL).
+		orderID := httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Order.URI).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -233,7 +233,7 @@ func (t *TestSuite) Test_OrderIntegration_Create() {
 		}
 
 		execpectedError := errs.ProductNotFound(productID)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodPost, fixtures.Order.URI).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -265,7 +265,7 @@ func (t *TestSuite) Test_OrderIntegration_GetByID() {
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 		_ = fixtures.Order.Create(t.T(), nil, tenantAuth)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Order.URI+uuid.New().String()).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -282,7 +282,7 @@ func (t *TestSuite) Test_OrderIntegration_GetByID() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Order.URI+anotherOrderID).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -303,7 +303,7 @@ func (t *TestSuite) Test_OrderIntegration_Paginate() {
 		}
 
 		response := new(gateway.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Order.URI).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -336,7 +336,7 @@ func (t *TestSuite) Test_OrderIntegration_Paginate() {
 		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 
 		response := new(gateway.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Order.URI).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -396,7 +396,7 @@ func (t *TestSuite) Test_OrderIntegration_ConfirmPayment() {
 
 		n := 5
 		var wg sync.WaitGroup
-		errCh := make(chan *errs.AppError, n)
+		errCh := make(chan *errs.ApiError, n)
 		start := make(chan struct{})
 		for range n {
 			wg.Go(func() {
@@ -548,7 +548,7 @@ func (t *TestSuite) Test_OrderIntegration_BackofficePaginate() {
 		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
 
 		response := new(gateway.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Order.BackofficeURI).
 			WithHeader("Authorization", "Bearer "+backofficeToken).
 			WithQueryObject(database.PaginateInput{Page: 0, PageSize: 10}).
@@ -575,7 +575,7 @@ func (t *TestSuite) Test_OrderIntegration_BackofficePaginate() {
 		backofficeToken := fixtures.Auth.BackofficeToken(t.T(), tenant1.UserID)
 
 		response := new(gateway.PaginateOutput)
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Order.BackofficeURI).
 			WithHeader("Authorization", "Bearer "+backofficeToken).
 			WithQueryObject(map[string]any{
@@ -598,14 +598,14 @@ func (t *TestSuite) Test_OrderIntegration_Delete() {
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 		orderID := fixtures.Order.Create(t.T(), nil, tenantAuth)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodDelete, fixtures.Order.URI+orderID).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
 			Expect().
 			Status(http.StatusNoContent)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, fixtures.Order.URI+orderID).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).
@@ -621,7 +621,7 @@ func (t *TestSuite) Test_OrderIntegration_Delete() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		userAuth := fixtures.Auth.UserAuth(t.T(), tenant.ID, tenant.UserID)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodDelete, fixtures.Order.URI+anotherOrderID).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
 			WithHeader("X-Tenant-ID", userAuth.TenantID).

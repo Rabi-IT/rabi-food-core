@@ -3,7 +3,7 @@
 version: '3'
 
 vars:
-  GOOSE_VERSION: v3.27.0 # keep in sync with app/go.mod
+  GOOSE_VERSION: v3.27.0 # keep in sync with api/go.mod
 
 tasks:
   # =============================
@@ -11,7 +11,7 @@ tasks:
   # =============================
   dev:
     desc: "Start the development environment"
-    dir: app
+    dir: api
     dotenv: ["../.env.test"]
     deps: [seed, docs]
     cmds:
@@ -28,7 +28,7 @@ tasks:
 
   lint:
     desc: "Run linters using golangci-lint with auto-fix"
-    dir: app
+    dir: api
     env:
       GOROOT: /home/kelvin/go
       GOPATH: /home/kelvin/workspace
@@ -38,7 +38,7 @@ tasks:
 
   docs:
     desc: "Generate API documentation using swaggo"
-    dir: app
+    dir: api
     dotenv: ["../.env.test"]
     cmds:
       - swag init --output ./libs/docs --outputTypes json
@@ -59,7 +59,7 @@ tasks:
   test-local:
     desc: "Run tests directly (executado dentro do container Docker via task test)"
     dotenv: ["../.env.test"]
-    dir: app
+    dir: api
     cmds:
       - gotestsum --format testname -- ./... -p 1 -v
     silent: false
@@ -78,7 +78,7 @@ tasks:
     dotenv: [".env.test"]
     deps: [db]
     cmds:
-      - docker exec -i $(docker ps -qf "name=postgres") psql -U ${TEST_DATABASE_USER} -d ${TEST_DATABASE_NAME} < app/libs/database/seeds/seed.sql
+      - docker exec -i $(docker ps -qf "name=postgres") psql -U ${TEST_DATABASE_USER} -d ${TEST_DATABASE_NAME} < api/libs/database/seeds/seed.sql
     silent: false
 
   db-down:
@@ -91,7 +91,7 @@ tasks:
 
   migrate:
     desc: "Run pending database migrations"
-    dir: app
+    dir: api
     dotenv: ["../.env.test"]
     deps: [db]
     cmds:
@@ -101,7 +101,7 @@ tasks:
 
   migrate-status:
     desc: "Show migration status"
-    dir: app
+    dir: api
     dotenv: ["../.env.test"]
     cmds:
       - echo "goose {{.GOOSE_VERSION}}"
@@ -110,7 +110,7 @@ tasks:
 
   migrate-down:
     desc: "Rollback the last migration"
-    dir: app
+    dir: api
     dotenv: ["../.env.test"]
     cmds:
       - echo "goose {{.GOOSE_VERSION}}"
@@ -119,7 +119,7 @@ tasks:
 
   mockgen:
     desc: "Generate mocks using mockery"
-    dir: app
+    dir: api
     cmds:
       - go run github.com/vektra/mockery/v2@v2.53.5 --all --output fixtures/mocks
     silent: false
@@ -164,7 +164,7 @@ tasks:
     desc: "Watch application logs"
     dir: infra/api
     cmds:
-      - docker compose logs -f app
+      - docker compose logs -f api
     interactive: true
 
   clean_docker:

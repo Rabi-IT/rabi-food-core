@@ -11,7 +11,7 @@ func DefaultHTTP(t *testing.T) *httpexpect.Expect {
 
 	c := httpexpect.WithConfig(httpexpect.Config{
 		TestName: t.Name(),
-		BaseURL:  AppURL,
+		BaseURL:  ApiURL,
 		Reporter: httpexpect.NewRequireReporter(t),
 		Printers: []httpexpect.Printer{
 			httpexpect.NewCompactPrinter(t),

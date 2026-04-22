@@ -11,7 +11,7 @@ import (
 )
 
 type categoryFixture struct {
-	URI          string
+	URI           string
 	BackofficeURI string
 }
 
@@ -28,7 +28,7 @@ func (categoryFixture) Create(t *testing.T, input *g.CreateInput, auth RequestCo
 	}
 
 	id := ""
-	httpexpect.Default(t, AppURL).
+	httpexpect.Default(t, ApiURL).
 		Request(http.MethodPost, Category.URI).
 		WithHeader("Authorization", "Bearer "+auth.Token).
 		WithHeader("X-Tenant-ID", auth.TenantID).
@@ -44,7 +44,7 @@ func (categoryFixture) GetByID(t *testing.T, id string) (g.GetByIDOutput, int) {
 	t.Helper()
 	found := g.GetByIDOutput{}
 
-	obj := httpexpect.Default(t, AppURL).
+	obj := httpexpect.Default(t, ApiURL).
 		Request(http.MethodGet, Category.URI+id).
 		Expect().Status(http.StatusOK)
 

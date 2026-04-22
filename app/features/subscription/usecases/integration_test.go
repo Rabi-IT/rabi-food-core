@@ -17,12 +17,12 @@ import (
 type TestSuite struct {
 	suite.Suite
 
-	app *fixtures.App
+	api *fixtures.Api
 }
 
 func (t *TestSuite) SetupSuite() {
-	t.app = fixtures.NewApp()
-	t.app.Start(t.T())
+	t.api = fixtures.NewApi()
+	t.api.Start(t.T())
 }
 
 func (t *TestSuite) SetupSubTest() {
@@ -30,7 +30,7 @@ func (t *TestSuite) SetupSubTest() {
 }
 
 func (t *TestSuite) TearDownSuite() {
-	t.app.Stop(t.T())
+	t.api.Stop(t.T())
 }
 
 func TestMySuite(t *testing.T) {
