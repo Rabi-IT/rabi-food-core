@@ -14,7 +14,7 @@ import (
 )
 
 type orderFixture struct {
-	URI          string
+	URI           string
 	BackofficeURI string
 }
 
@@ -36,7 +36,7 @@ func (orderFixture) Create(t *testing.T, input *c.CreateInput, auth RequestConte
 	}
 
 	id := ""
-	httpexpect.Default(t, AppURL).
+	httpexpect.Default(t, ApiURL).
 		Request(http.MethodPost, Order.URI).
 		WithHeader("Authorization", "Bearer "+auth.Token).
 		WithHeader("X-Tenant-ID", auth.TenantID).
@@ -54,7 +54,7 @@ func (orderFixture) GetByID(t *testing.T, id string, auth RequestContext) (g.Get
 
 	found := g.GetByIDOutput{}
 
-	obj := httpexpect.Default(t, AppURL).
+	obj := httpexpect.Default(t, ApiURL).
 		Request(http.MethodGet, Order.URI+id).
 		WithHeader("Authorization", "Bearer "+auth.Token).
 		WithHeader("X-Tenant-ID", auth.TenantID).
@@ -82,11 +82,11 @@ func (orderFixture) ExpectFulfillmentStatus(
 	require.Equal(t, expectedStatus, found.FulfillmentStatus)
 }
 
-func (orderFixture) Patch(t *testing.T, id string, input *g.PatchValues, auth RequestContext) *errs.AppError {
+func (orderFixture) Patch(t *testing.T, id string, input *g.PatchValues, auth RequestContext) *errs.ApiError {
 	t.Helper()
 	require.NotEmpty(t, id)
 
-	obj := httpexpect.Default(t, AppURL).
+	obj := httpexpect.Default(t, ApiURL).
 		Request(http.MethodPatch, Order.URI+id).
 		WithHeader("Authorization", "Bearer "+auth.Token).
 		WithHeader("X-Tenant-ID", auth.TenantID).
@@ -96,7 +96,7 @@ func (orderFixture) Patch(t *testing.T, id string, input *g.PatchValues, auth Re
 	raw := obj.Raw()
 
 	if raw.StatusCode != http.StatusOK && raw.StatusCode != http.StatusNotFound {
-		appErr := errs.AppError{}
+		appErr := errs.ApiError{}
 		obj.JSON().Object().Decode(&appErr)
 		err := raw.Body.Close()
 		require.NoError(t, err)
@@ -112,10 +112,10 @@ func (orderFixture) ConfirmPayment(
 	orderID string,
 	input *c.ConfirmPaymentInput,
 	token string,
-) *errs.AppError {
+) *errs.ApiError {
 	t.Helper()
 
-	obj := httpexpect.Default(t, AppURL).
+	obj := httpexpect.Default(t, ApiURL).
 		Request(http.MethodPost, Order.URI+orderID+"/payments/confirm").
 		WithHeader("Authorization", "Bearer "+token).
 		WithJSON(input).
@@ -124,11 +124,11 @@ func (orderFixture) ConfirmPayment(
 	raw := obj.Raw()
 
 	if raw.StatusCode == http.StatusNotFound {
-		return &errs.AppError{Status: raw.StatusCode}
+		return &errs.ApiError{Status: raw.StatusCode}
 	}
 
 	if raw.StatusCode != http.StatusOK {
-		appErr := errs.AppError{}
+		appErr := errs.ApiError{}
 		obj.JSON().Object().Decode(&appErr)
 		err := raw.Body.Close()
 		require.NoError(t, err)

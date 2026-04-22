@@ -14,7 +14,7 @@ output "acm_cname_value" {
 }
 
 output "ecr_registry_url" {
-  description = "ECR registry URL for the app image"
+  description = "ECR registry URL for the api image"
   value       = aws_ecr_repository.api.repository_url
 }
 

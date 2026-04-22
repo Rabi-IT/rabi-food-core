@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: app
+        working-directory: api
 
     steps:
       - name: Checkout repository
@@ -22,19 +22,19 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: 'app/go.mod'
+          go-version-file: 'api/go.mod'
           cache: true
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v9.2.0
         with:
-          working-directory: app
+          working-directory: api
           version: latest
 
       - name: Run Reviewdog
         uses: reviewdog/action-golangci-lint@v2.8.0
         with:
-          workdir: app
+          workdir: api
           github_token: ${{ secrets.GITHUB_TOKEN }}
           golangci_lint_flags: --timeout=5m
           level: warning
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: app
+        working-directory: api
 
     steps:
       - name: Checkout repository
@@ -55,7 +55,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: 'app/go.mod'
+          go-version-file: 'api/go.mod'
           cache: true
 
       - name: Run Gosec
@@ -66,4 +66,4 @@ jobs:
       - name: Upload Gosec SARIF report
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: app/results.sarif
+          sarif_file: api/results.sarif

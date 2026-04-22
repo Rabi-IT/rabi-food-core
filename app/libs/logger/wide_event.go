@@ -133,9 +133,9 @@ func (w *WideEvent) FinishRequest(statusCode int, err error, latencyMs int64) {
 	w.LatencyMs = latencyMs
 	if err != nil {
 		w.err = err.Error()
-		var appError *errs.AppError
-		if errors.As(err, &appError) {
-			w.errorCode = appError.Code
+		var apiError *errs.ApiError
+		if errors.As(err, &apiError) {
+			w.errorCode = apiError.Code
 		}
 	}
 }
@@ -147,9 +147,9 @@ func (w *WideEvent) FinishCronJob(err error, latencyMs int64) {
 	w.LatencyMs = latencyMs
 	if err != nil {
 		w.err = err.Error()
-		var appError *errs.AppError
-		if errors.As(err, &appError) {
-			w.errorCode = appError.Code
+		var apiError *errs.ApiError
+		if errors.As(err, &apiError) {
+			w.errorCode = apiError.Code
 		}
 	}
 }

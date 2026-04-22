@@ -27,7 +27,7 @@ import (
 
 type fiberAdapter struct {
 	port string
-	app  *fiber.App
+	api  *fiber.App
 }
 
 func New(
@@ -39,7 +39,7 @@ func New(
 	orderController *order_controller.OrderController,
 	subscriptionController *subscription_controller.SubscriptionController,
 ) HTTPServer {
-	app := fiber.New(fiber.Config{
+	api := fiber.New(fiber.Config{
 		Immutable:    true,
 		ErrorHandler: middlewares.ErrorHandler,
 	})
@@ -49,9 +49,9 @@ func New(
 	})
 
 	prom := fiberprometheus.New("rabi-food-core")
-	prom.RegisterAt(app, "/metrics")
+	prom.RegisterAt(api, "/metrics")
 
-	app.
+	api.
 		Use(cors.New()).
 		Use(requestid.New()).
 		Use(prom.Middleware).
@@ -61,37 +61,37 @@ func New(
 		})
 
 	if !config.Env.IsProduction() {
-		app.Static("/docs", "./libs/docs")
+		api.Static("/docs", "./libs/docs")
 	}
 
 	// Public routes — no JWT required
-	auth_routes.Auth(app, authController)
-	tenant_routes.Tenant(app, tenantController)
-	product_routes.Product(app, productController)
-	category_routes.Category(app, categoryController)
+	auth_routes.Auth(api, authController)
+	tenant_routes.Tenant(api, tenantController)
+	product_routes.Product(api, productController)
+	category_routes.Category(api, categoryController)
 
 	// Protected routes — JWT required
-	app.
+	api.
 		Use(jwtMiddleware).
 		Use(middlewares.Session)
 
-	auth_routes.AuthProtected(app, authController)
-	tenant_routes.TenantProtected(app, tenantController)
-	product_routes.ProductProtected(app, productController)
-	category_routes.CategoryProtected(app, categoryController)
-	order_routes.OrderProtected(app, orderController)
-	subscription_routes.SubscriptionProtected(app, subscriptionController)
+	auth_routes.AuthProtected(api, authController)
+	tenant_routes.TenantProtected(api, tenantController)
+	product_routes.ProductProtected(api, productController)
+	category_routes.CategoryProtected(api, categoryController)
+	order_routes.OrderProtected(api, orderController)
+	subscription_routes.SubscriptionProtected(api, subscriptionController)
 
 	return &fiberAdapter{
-		app:  app,
+		api:  api,
 		port: port,
 	}
 }
 
 func (f *fiberAdapter) Start() error {
-	return f.app.Listen(":" + f.port)
+	return f.api.Listen(":" + f.port)
 }
 
 func (f *fiberAdapter) Stop() error {
-	return f.app.Shutdown()
+	return f.api.Shutdown()
 }

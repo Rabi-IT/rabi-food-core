@@ -30,7 +30,7 @@ func main() {
 	}
 
 	fmt.Println("📁 Installing Go modules...")
-	runDir("app", "go", "mod", "download")
+	runDir("api", "go", "mod", "download")
 
 	fmt.Println()
 	fmt.Println("✅ All dependencies installed successfully!")

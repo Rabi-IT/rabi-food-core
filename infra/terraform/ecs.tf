@@ -31,7 +31,7 @@ resource "aws_cloudwatch_log_group" "gotrue_migration" {
 locals {
   alloy_config = <<-ALLOY
     prometheus.scrape "api" {
-      targets         = [{"__address__" = "localhost:${var.app_port}"}]
+      targets         = [{"__address__" = "localhost:${var.api_port}"}]
       forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
       scrape_interval = "15s"
     }

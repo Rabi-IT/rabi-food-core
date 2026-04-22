@@ -129,7 +129,7 @@ func (a *authFixture) SignUp(t *testing.T, input SignUpInput) string {
 	t.Helper()
 
 	out := &auth_usecases.SignUpOutput{}
-	httpexpect.Default(t, AppURL).
+	httpexpect.Default(t, ApiURL).
 		Request(http.MethodPost, "/auth/signup").
 		WithJSON(auth_usecases.SignUpInput{
 			Email:    input.Email,
@@ -145,4 +145,3 @@ func (a *authFixture) SignUp(t *testing.T, input SignUpInput) string {
 
 	return out.ID
 }
-

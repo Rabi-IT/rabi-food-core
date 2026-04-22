@@ -21,7 +21,7 @@
             "request": "launch",
             "envFile": "${workspaceFolder}/.env.test",
             "mode": "auto",
-            "program": "${workspaceFolder}/app/main.go"
+            "program": "${workspaceFolder}/api/main.go"
         }
     ]
 }

@@ -11,18 +11,18 @@ var (
 	ErrConflict         = newErr("CONFLICT", http.StatusConflict)
 )
 
-type AppError struct {
+type ApiError struct {
 	Code     string `json:"code"`
 	FullCode string `json:"fullCode,omitempty"`
 	Status   int    `json:"status"`
 	err      error  `json:"-"`
 }
 
-func newErr(code string, status int) *AppError {
-	return &AppError{Code: code, Status: status}
+func newErr(code string, status int) *ApiError {
+	return &ApiError{Code: code, Status: status}
 }
 
-func (e *AppError) fullCode() string {
+func (e *ApiError) fullCode() string {
 	if e.FullCode != "" {
 		return e.FullCode
 	}
@@ -30,7 +30,7 @@ func (e *AppError) fullCode() string {
 	return e.Code
 }
 
-func (e *AppError) Error() string {
+func (e *ApiError) Error() string {
 	code := e.fullCode()
 
 	if e.err != nil {
@@ -40,10 +40,10 @@ func (e *AppError) Error() string {
 	return code
 }
 
-func (e *AppError) Unwrap() error {
+func (e *ApiError) Unwrap() error {
 	return e.err
 }
 
-func (e *AppError) MarshalJSON() ([]byte, error) {
+func (e *ApiError) MarshalJSON() ([]byte, error) {
 	return fmt.Appendf(nil, `{"code":"%s","status":%d}`, e.fullCode(), e.Status), nil
 }

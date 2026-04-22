@@ -57,7 +57,7 @@ func (tenantFixture) Create(t *testing.T, input *TenantCreateInput) *TenantCreat
 
 	token := Auth.UserToken(t, userID)
 
-	tenantID := httpexpect.Default(t, AppURL).
+	tenantID := httpexpect.Default(t, ApiURL).
 		Request(http.MethodPost, "/tenant").
 		WithHeader("Authorization", "Bearer "+token).
 		WithJSON(map[string]string{"name": body.Name}).
@@ -72,7 +72,7 @@ func (tenantFixture) Create(t *testing.T, input *TenantCreateInput) *TenantCreat
 func (tenantFixture) EnrollCustomer(t *testing.T, tenantID, token string) {
 	t.Helper()
 
-	httpexpect.Default(t, AppURL).
+	httpexpect.Default(t, ApiURL).
 		Request(http.MethodPost, Tenant.URI+tenantID+"/enroll-customers").
 		WithHeader("Authorization", "Bearer "+token).
 		Expect().Status(http.StatusNoContent)
@@ -83,7 +83,7 @@ func (tenantFixture) GetMe(t *testing.T, token string) g.GetByIDOutput {
 
 	found := g.GetByIDOutput{}
 
-	obj := httpexpect.Default(t, AppURL).
+	obj := httpexpect.Default(t, ApiURL).
 		Request(http.MethodGet, Tenant.URI+"me").
 		WithHeader("Authorization", "Bearer "+token).
 		Expect().Status(http.StatusOK)

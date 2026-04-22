@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/Rabi-IT/rabi-food-core/config"
-	appCron "github.com/Rabi-IT/rabi-food-core/libs/cron"
+	apiCron "github.com/Rabi-IT/rabi-food-core/libs/cron"
 	"github.com/Rabi-IT/rabi-food-core/libs/database"
 	"github.com/Rabi-IT/rabi-food-core/libs/di"
 	"github.com/Rabi-IT/rabi-food-core/libs/http"
@@ -34,7 +34,7 @@ func main() {
 	}
 
 	// Cron scheduler
-	appCron.Start(ctx, injector)
+	apiCron.Start(ctx, injector)
 
 	httpServer := do.MustInvoke[http.HTTPServer](injector)
 

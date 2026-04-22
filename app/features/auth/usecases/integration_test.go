@@ -13,11 +13,11 @@ import (
 type TestSuite struct {
 	suite.Suite
 
-	app *fixtures.App
+	app *fixtures.Api
 }
 
 func (t *TestSuite) SetupSuite() {
-	t.app = fixtures.NewApp()
+	t.app = fixtures.NewApi()
 	t.app.Start(t.T())
 }
 
@@ -44,7 +44,7 @@ func (t *TestSuite) Test_AuthIntegration_UserPaginate() {
 		})
 		token := fixtures.Auth.UserToken(t.T(), userID)
 
-		httpexpect.Default(t.T(), fixtures.AppURL).
+		httpexpect.Default(t.T(), fixtures.ApiURL).
 			Request(http.MethodGet, "/user").
 			WithHeader("Authorization", "Bearer "+token).
 			Expect().Status(http.StatusNotFound)

@@ -82,9 +82,9 @@ func classifyStatus(err error) int {
 		return fiber.StatusBadRequest
 	}
 
-	var appErr *errs.AppError
-	if errors.As(err, &appErr) {
-		return appErr.Status
+	var apiErr *errs.ApiError
+	if errors.As(err, &apiErr) {
+		return apiErr.Status
 	}
 
 	var fiberErr *fiber.Error

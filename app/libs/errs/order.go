@@ -14,7 +14,7 @@ var (
 	ErrOrderStateVerificationFailed = newErr("ORDER_STATE_VERIFICATION_FAILED", http.StatusInternalServerError)
 )
 
-func ProductNotFound(productIDs ...string) *AppError {
+func ProductNotFound(productIDs ...string) *ApiError {
 	if len(productIDs) == 0 {
 		return ErrProductNotFound
 	}
@@ -28,7 +28,7 @@ func ProductNotFound(productIDs ...string) *AppError {
 	return &e
 }
 
-func StatusNotModifiable(status fmt.Stringer) *AppError {
+func StatusNotModifiable(status fmt.Stringer) *ApiError {
 	e := *ErrStatusNotModifiable
 	e.Code = ErrStatusNotModifiable.Code
 	e.FullCode = fmt.Sprintf("%s__%s", e.Code, status)
@@ -39,7 +39,7 @@ func StatusNotModifiable(status fmt.Stringer) *AppError {
 	return &e
 }
 
-func InvalidTranstion(from, to fmt.Stringer) *AppError {
+func InvalidTranstion(from, to fmt.Stringer) *ApiError {
 	e := *ErrInvalidStatusTransition
 	e.Code = ErrInvalidStatusTransition.Code
 	e.FullCode = fmt.Sprintf("%s__FROM_%s_TO_%s", e.Code, from, to)
