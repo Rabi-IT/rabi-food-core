@@ -67,7 +67,7 @@ tasks:
   db:
     desc: "Run tests inside Docker"
     dir: infra/api
-    dotenv: ["../.env.test"]
+    dotenv: ["../../.env.test"]
     cmds:
       - docker compose -f docker-compose.db.yaml up -d --wait
     silent: false
@@ -84,7 +84,7 @@ tasks:
   db-down:
     desc: "Stop Postgres and pgAdmin"
     dir: infra/api
-    dotenv: ["../.env.test"]
+    dotenv: ["../../.env.test"]
     cmds:
       - docker compose -f docker-compose.db.yaml down -v --remove-orphans
     silent: true
