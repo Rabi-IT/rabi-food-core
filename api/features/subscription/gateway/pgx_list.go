@@ -43,7 +43,7 @@ func (g *PgxSubscriptionGatewayAdapter) List(ctx context.Context, filter ListFil
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan subscription: %w", err)
 		}
-		err := json.Unmarshal(deliveryJSON, &s.DeliveryDays)
+		err = json.Unmarshal(deliveryJSON, &s.DeliveryDays)
 		if err != nil {
 			return nil, fmt.Errorf("failed to unmarshal delivery_days for subscription %s: %w", s.ID, err)
 		}
