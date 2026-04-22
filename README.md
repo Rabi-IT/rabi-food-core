@@ -62,10 +62,10 @@ rabi-food-core/
 ### Running locally
 
 ```bash
-# Start Postgres
+# Start Postgres + GoTrue + pgAdmin
 task db
 
-# Run pending migrations
+# Run pending migrations and seed
 task migrate
 
 # Start the API (loads .env.test)
@@ -78,18 +78,28 @@ task dev
 task test
 ```
 
+## Local services
+
+| Service | URL |
+|---------|-----|
+| API | http://localhost:3000 |
+| API Docs (Swagger) | http://localhost:3000/docs |
+| GoTrue (auth) | http://localhost:9999 |
+| pgAdmin | http://localhost:5050 |
+| Web | http://app.localhost:5173 |
+
 ## Commands
 
 | Command | Description |
 |---------|-------------|
 | `task dev` | Start development environment |
-| `task db` | Start Postgres (Docker) |
-| `task db-down` | Stop Postgres |
+| `task web` | Start web development server |
+| `task db` | Start Postgres + GoTrue + pgAdmin (Docker) |
+| `task db-down` | Stop and remove containers |
 | `task test` | Run integration tests in Docker |
 | `task migrate` | Run pending migrations |
 | `task migrate-status` | Show migration status |
 | `task migrate-down` | Rollback last migration |
-| `task build` | Build the binary |
 | `task lint` | Run golangci-lint |
 | `task docs` | Generate Swagger docs |
 | `task mockgen` | Generate mocks |
