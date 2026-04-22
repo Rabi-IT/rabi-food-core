@@ -29,6 +29,7 @@ func GetSession(ctx context.Context) UserSession {
 	if !ok {
 		return UserSession{}
 	}
+
 	return *session
 }
 

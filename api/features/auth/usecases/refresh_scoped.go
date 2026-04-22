@@ -84,7 +84,7 @@ func parseGoTrueToken(tokenStr string) (app_context.UserSession, error) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return app_context.UserSession{}, fmt.Errorf("invalid claims")
+		return app_context.UserSession{}, errors.New("invalid claims")
 	}
 
 	appMeta, _ := claims["app_metadata"].(map[string]any)
@@ -106,5 +106,6 @@ func claimString(m map[string]any, key string) string {
 	if !ok {
 		return ""
 	}
+
 	return fmt.Sprint(v)
 }

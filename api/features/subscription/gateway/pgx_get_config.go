@@ -45,7 +45,8 @@ func (g *PgxSubscriptionGatewayAdapter) GetConfig(ctx context.Context, tenantID 
 
 	discountRules := make([]DiscountRule, 0)
 	if len(row.DiscountRulesRaw) > 0 {
-		if err := json.Unmarshal(row.DiscountRulesRaw, &discountRules); err != nil {
+		err := json.Unmarshal(row.DiscountRulesRaw, &discountRules)
+		if err != nil {
 			return nil, fmt.Errorf("failed to unmarshal discount rules: %w", err)
 		}
 	}

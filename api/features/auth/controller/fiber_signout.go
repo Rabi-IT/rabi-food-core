@@ -16,7 +16,8 @@ func (c *AuthController) SignOut(ctx *fiber.Ctx) error {
 	authHeader := ctx.Get("Authorization")
 	accessToken := strings.TrimPrefix(authHeader, "Bearer ")
 
-	if err := c.usecase.SignOut(uctx, accessToken); err != nil {
+	err := c.usecase.SignOut(uctx, accessToken)
+	if err != nil {
 		return err
 	}
 

@@ -11,14 +11,14 @@ import (
 func (g *GoTrueGatewayAdapter) Delete(ctx context.Context, id string) (bool, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, g.baseURL+"/admin/users/"+id, nil)
 	if err != nil {
-		return false, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
+		return false, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", g.serviceKey))
+	req.Header.Set("Authorization", "Bearer "+g.serviceKey)
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
-		return false, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
+		return false, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 	defer resp.Body.Close()
 

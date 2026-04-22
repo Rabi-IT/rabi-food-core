@@ -58,7 +58,8 @@ func (g *PgxProductGatewayAdapter) List(ctx context.Context, filter ListFilter) 
 
 	for i, row := range scanned {
 		var discountRules []DiscountRule
-		if err := json.Unmarshal(row.DiscountRules, &discountRules); err != nil {
+		err := json.Unmarshal(row.DiscountRules, &discountRules)
+		if err != nil {
 			return nil, fmt.Errorf("failed to unmarshal discount rules for product %s: %w", row.ID, err)
 		}
 

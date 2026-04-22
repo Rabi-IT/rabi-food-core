@@ -21,5 +21,6 @@ func (c *TenantCase) Create(ctx context.Context, name, ownerUserID string) (stri
 
 	id, err := c.gateway.Create(ctx, input)
 	logger.GetWideEvent(ctx).SetTenantID(id)
+
 	return id, err
 }

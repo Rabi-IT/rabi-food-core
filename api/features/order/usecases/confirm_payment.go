@@ -69,10 +69,12 @@ func (c *OrderCase) handleNotConfirmedPayment(ctx context.Context, in ConfirmPay
 	if orderFound.PaymentStatus == payment_status.StatusPaid {
 		if orderFound.ExternalPaymentID != nil && *orderFound.ExternalPaymentID == in.ExternalPaymentID {
 			wd.MarkPaymentIdempotent()
+
 			return true, nil
 		}
 
 		wd.TrackPaymentConflict(*orderFound.ExternalPaymentID)
+
 		return false, errs.ErrPaymentExternalIDConflict
 	}
 

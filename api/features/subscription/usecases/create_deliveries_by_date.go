@@ -35,6 +35,7 @@ func (s *SubscriptionCase) CreateDeliveriesByDate(ctx context.Context, input Cre
 		for _, d := range sub.DeliveryDays {
 			if d.Weekday == uint8(weekday) {
 				day = d
+
 				break
 			}
 		}

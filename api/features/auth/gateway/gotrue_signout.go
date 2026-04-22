@@ -11,14 +11,14 @@ import (
 func (g *GoTrueGatewayAdapter) SignOut(ctx context.Context, accessToken string) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, g.baseURL+"/logout", nil)
 	if err != nil {
-		return fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
+		return fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+	req.Header.Set("Authorization", "Bearer "+accessToken)
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
+		return fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 	defer resp.Body.Close()
 

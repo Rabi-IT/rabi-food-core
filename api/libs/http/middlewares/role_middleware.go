@@ -12,6 +12,7 @@ func RequireBackoffice(c *fiber.Ctx) error {
 	if !app_context.GetSession(c.UserContext()).Role.IsBackoffice() {
 		return errs.ErrForbidden
 	}
+
 	return c.Next()
 }
 
@@ -20,5 +21,6 @@ func RequireTenant(c *fiber.Ctx) error {
 	if !app_context.GetSession(c.UserContext()).IsTenant() {
 		return errs.ErrForbidden
 	}
+
 	return c.Next()
 }

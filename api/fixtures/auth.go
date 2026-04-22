@@ -55,6 +55,7 @@ func (*authFixture) BackofficeToken(t *testing.T, userID string) string {
 
 func (a *authFixture) UserToken(t *testing.T, id string) string {
 	t.Helper()
+
 	return a.signToken(t, id, auth.User)
 }
 
@@ -79,11 +80,13 @@ func (a *authFixture) TenantOwnerToken(t *testing.T, id, tenantID string) string
 
 func (a *authFixture) UserAuth(t *testing.T, tenantID, userID string) RequestContext {
 	t.Helper()
+
 	return RequestContext{Token: a.UserToken(t, userID), TenantID: tenantID}
 }
 
 func (a *authFixture) TenantOwnerAuth(t *testing.T, tenantID, userID string) RequestContext {
 	t.Helper()
+
 	return RequestContext{Token: a.TenantOwnerToken(t, userID, tenantID), TenantID: tenantID}
 }
 

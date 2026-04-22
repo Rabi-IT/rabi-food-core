@@ -47,8 +47,8 @@ type GetBySlugOutput struct {
 }
 
 type GetByIDOutput struct {
-	ID   string `json:"id" db:"id"`
-	Name string `json:"name" db:"name"`
+	ID   string `db:"id"   json:"id"`
+	Name string `db:"name" json:"name"`
 }
 
 type PaginateFilter struct {
@@ -56,8 +56,8 @@ type PaginateFilter struct {
 }
 
 type PaginateData struct {
-	ID   string `json:"id"   db:"id"`
-	Name string `json:"name" db:"name"`
+	ID   string `db:"id"   json:"id"`
+	Name string `db:"name" json:"name"`
 }
 
 type PaginateOutput struct {

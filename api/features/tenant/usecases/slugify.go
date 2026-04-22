@@ -18,5 +18,6 @@ func slugify(s string) string {
 			prev = '-'
 		}
 	}
+
 	return strings.Trim(b.String(), "-")
 }
