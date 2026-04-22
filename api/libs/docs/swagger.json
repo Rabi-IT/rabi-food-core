@@ -814,7 +814,7 @@
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/errs.AppError"
+                            "$ref": "#/definitions/errs.ApiError"
                         }
                     },
                     "500": {
@@ -1342,7 +1342,7 @@
         }
     },
     "definitions": {
-        "errs.AppError": {
+        "errs.ApiError": {
             "type": "object",
             "properties": {
                 "code": {
