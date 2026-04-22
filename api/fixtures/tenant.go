@@ -1,7 +1,6 @@
 package fixtures
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
 
