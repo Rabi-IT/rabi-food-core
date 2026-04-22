@@ -64,7 +64,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
           API_VERSION: ${{ github.event.release.tag_name }}
         run: |
-          TASK_DEF=$(aws ecs describe-task-definition --task-definition rabi-food-app --query 'taskDefinition' --output json)
+          TASK_DEF=$(aws ecs describe-task-definition --task-definition rabi-food-api --query 'taskDefinition' --output json)
           NEW_TASK_DEF=$(echo $TASK_DEF | jq \
             --arg IMAGE "$ECR_REGISTRY/rabi-food-core:$API_VERSION" \
             --arg VERSION "$API_VERSION" \
@@ -73,4 +73,4 @@ jobs:
              del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.placementConstraints,.compatibilities,.registeredAt,.registeredBy)')
           NEW_ARN=$(aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEF" \
             --query 'taskDefinition.taskDefinitionArn' --output text)
-          aws ecs update-service --cluster rabi-food --service rabi-food-app --task-definition $NEW_ARN
+          aws ecs update-service --cluster rabi-food --service rabi-food-api --task-definition $NEW_ARN
