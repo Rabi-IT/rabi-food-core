@@ -76,7 +76,7 @@ tasks:
     desc: "Apply seed data to the database"
     dir: "{{.ROOT_DIR}}"
     dotenv: [".env.test"]
-    deps: [db]
+    deps: [migrate]
     cmds:
       - docker exec -i $(docker ps -qf "name=postgres") psql -U ${TEST_DATABASE_USER} -d ${TEST_DATABASE_NAME} < api/libs/database/seeds/seed.sql
     silent: false
