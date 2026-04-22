@@ -1,9 +1,9 @@
 services:
-  app-test:
+  api-test:
     build:
       context: ../..
       dockerfile: infra/api/Dockerfile.test
-    container_name: app-test
+    container_name: api-test
     env_file:
       - ../../.env.test
     environment:
