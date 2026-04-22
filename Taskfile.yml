@@ -51,7 +51,7 @@ tasks:
   test:
     desc: "Start Postgres and pgAdmin"
     dotenv: ["../.env.test"]
-    dir: infra/app
+    dir: infra/api
     deps: [db]
     cmds:
       - docker compose up
@@ -66,7 +66,7 @@ tasks:
 
   db:
     desc: "Run tests inside Docker"
-    dir: infra/app
+    dir: infra/api
     dotenv: ["../.env.test"]
     cmds:
       - docker compose -f docker-compose.db.yaml up -d --wait
@@ -83,7 +83,7 @@ tasks:
 
   db-down:
     desc: "Stop Postgres and pgAdmin"
-    dir: infra/app
+    dir: infra/api
     dotenv: ["../.env.test"]
     cmds:
       - docker compose -f docker-compose.db.yaml down -v --remove-orphans
@@ -162,7 +162,7 @@ tasks:
 
   logs:
     desc: "Watch application logs"
-    dir: infra/app
+    dir: infra/api
     cmds:
       - docker compose logs -f app
     interactive: true
