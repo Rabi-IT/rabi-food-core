@@ -22,7 +22,7 @@ import (
 // @Success 200 {string} string "Payment confirmed"
 // @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
 // @Failure 404 {string} string "Not found"
-// @Failure 409 {object} errs.AppError "Conflict"
+// @Failure 409 {object} errs.ApiError "Conflict"
 // @Failure 500 {string} string "Internal server error"
 // @Router /order/{id}/payments/confirm [post].
 func (c *OrderController) ConfirmPayment(ctx *fiber.Ctx) error {
