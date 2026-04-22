@@ -38,7 +38,7 @@ func (g *PgxProductGatewayAdapter) Paginate(
 	}
 
 	dataSQL, dataArgs, err := base.
-		Columns("id", "name", "description", "photo", "category_id", "unit", "price", "is_active").
+		Columns("id", "name", "description", "photo", "category_id", "unit", "price", "is_active", "discount_rules").
 		Limit(uint64(paginate.PageSize)).
 		Offset(uint64(paginate.Offset())).
 		ToSql()

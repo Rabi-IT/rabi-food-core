@@ -69,6 +69,7 @@ func New(
 	tenant_routes.Tenant(api, tenantController)
 	product_routes.Product(api, productController)
 	category_routes.Category(api, categoryController)
+	subscription_routes.Subscription(api, subscriptionController)
 
 	// Protected routes — JWT required
 	api.
