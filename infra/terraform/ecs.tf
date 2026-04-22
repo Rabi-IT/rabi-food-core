@@ -97,7 +97,7 @@ resource "aws_ecs_task_definition" "api" {
       image     = "postgres:18.3"
       essential = false
 
-      command = ["sh", file("${path.module}/../gotrue/migration.sh")]
+      command = ["sh", file("${path.module}/../api/gotrue/migration.sh")]
 
       environment = [
         { name = "DATABASE_HOST", value = aws_db_instance.postgres.address },
