@@ -88,14 +88,15 @@ type PaginateFilter struct {
 }
 
 type PaginateData struct {
-	ID          string `db:"id"          json:"id"`
-	Name        string `db:"name"        json:"name"`
-	Description string `db:"description" json:"description"`
-	Photo       string `db:"photo"       json:"photo"`
-	CategoryID  string `db:"category_id" json:"categoryId"`
-	Unit        string `db:"unit"        json:"unit"`
-	Price       uint   `db:"price"       json:"price"`
-	IsActive    bool   `db:"is_active"   json:"isActive"`
+	ID            string         `db:"id"          json:"id"`
+	Name          string         `db:"name"        json:"name"`
+	Description   string         `db:"description" json:"description"`
+	Photo         string         `db:"photo"       json:"photo"`
+	CategoryID    string         `db:"category_id" json:"categoryId"`
+	Unit          string         `db:"unit"        json:"unit"`
+	Price         uint           `db:"price"       json:"price"`
+	IsActive      bool           `db:"is_active"   json:"isActive"`
+	DiscountRules []DiscountRule `json:"discountRules"`
 }
 
 type PaginateOutput struct {

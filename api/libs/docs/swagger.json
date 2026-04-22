@@ -1156,6 +1156,36 @@
             }
         },
         "/subscription/config": {
+            "get": {
+                "description": "Get subscription configuration for the current tenant",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Get subscription config",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/subscription_gateway.GetConfigOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "put": {
                 "description": "Create or update subscription config for the current tenant",
                 "consumes": [
@@ -1657,6 +1687,12 @@
                 "description": {
                     "type": "string"
                 },
+                "discountRules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gateway.DiscountRule"
+                    }
+                },
                 "id": {
                     "type": "string"
                 },
@@ -1944,6 +1980,26 @@
                 },
                 "userId": {
                     "type": "string"
+                }
+            }
+        },
+        "subscription_gateway.GetConfigOutput": {
+            "type": "object",
+            "properties": {
+                "cutoffOffsetMinutes": {
+                    "type": "integer"
+                },
+                "discountRules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/subscription_gateway.DiscountRule"
+                    }
+                },
+                "isOpen": {
+                    "type": "boolean"
+                },
+                "maxAttemptsPerOrder": {
+                    "type": "integer"
                 }
             }
         },
