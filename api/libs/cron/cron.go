@@ -39,7 +39,7 @@ func (s *Scheduler) register(ctx context.Context, job Job) error {
 
 		we.Event = job.Name
 
-		ctx = logger.WithWideEvent(ctx, we)
+		ctx := logger.WithWideEvent(ctx, we)
 
 		start := time.Now()
 		err := job.Run(ctx)
@@ -48,6 +48,7 @@ func (s *Scheduler) register(ctx context.Context, job Job) error {
 
 		if err != nil {
 			l.Error().EmbedObject(we).Msg("cron job failed")
+
 			return
 		}
 

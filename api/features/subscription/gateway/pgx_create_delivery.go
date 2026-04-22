@@ -24,7 +24,8 @@ func (g *PgxSubscriptionGatewayAdapter) CreateDeliveries(ctx context.Context, in
 
 	for start := 0; start < len(inputs); start += batchSize {
 		end := min(start+batchSize, len(inputs))
-		if err := g.createDeliveriesBatch(ctx, inputs[start:end]); err != nil {
+		err := g.createDeliveriesBatch(ctx, inputs[start:end])
+		if err != nil {
 			return err
 		}
 	}

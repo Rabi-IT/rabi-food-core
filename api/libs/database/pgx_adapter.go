@@ -39,7 +39,8 @@ func (g *PgxAdapter) Connect(ctx context.Context) error {
 
 // Start initializes the database connection.
 func (g *PgxAdapter) Start(ctx context.Context) error {
-	if err := g.Connect(ctx); err != nil {
+	err := g.Connect(ctx)
+	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
 

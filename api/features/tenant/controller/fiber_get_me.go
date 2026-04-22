@@ -31,6 +31,7 @@ func (c *TenantController) GetMe(ctx *fiber.Ctx) error {
 	if data == nil {
 		return ctx.SendStatus(http.StatusNotFound)
 	}
+
 	return ctx.JSON(data)
 }
 
@@ -42,5 +43,6 @@ func (c *TenantController) GetByID(ctx *fiber.Ctx) error {
 	if data == nil {
 		return ctx.SendStatus(http.StatusNotFound)
 	}
+
 	return ctx.JSON(data)
 }

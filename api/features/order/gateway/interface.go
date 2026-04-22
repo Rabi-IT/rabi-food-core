@@ -84,15 +84,15 @@ type PaginateFilter struct {
 }
 
 type PaginateData struct {
-	ID                string                  `json:"id"                db:"id"`
-	TenantID          string                  `json:"tenantId"          db:"tenant_id"`
-	Code              string                  `json:"code"              db:"code"`
-	PaymentStatus     payment_status.Status   `json:"paymentStatus"     db:"payment_status"`
-	FulfillmentStatus order.FulfillmentStatus `json:"fulfillmentStatus" db:"fulfillment_status"`
-	DeliveryStatus    order.DeliveryStatus    `json:"deliveryStatus"    db:"delivery_status"`
-	Notes             string                  `json:"notes"             db:"notes"`
-	TotalPrice        uint                    `json:"totalPrice"        db:"total_price"`
-	CreatedAt         time.Time               `json:"createdAt"         db:"created_at"`
+	ID                string                  `db:"id"                 json:"id"`
+	TenantID          string                  `db:"tenant_id"          json:"tenantId"`
+	Code              string                  `db:"code"               json:"code"`
+	PaymentStatus     payment_status.Status   `db:"payment_status"     json:"paymentStatus"`
+	FulfillmentStatus order.FulfillmentStatus `db:"fulfillment_status" json:"fulfillmentStatus"`
+	DeliveryStatus    order.DeliveryStatus    `db:"delivery_status"    json:"deliveryStatus"`
+	Notes             string                  `db:"notes"              json:"notes"`
+	TotalPrice        uint                    `db:"total_price"        json:"totalPrice"`
+	CreatedAt         time.Time               `db:"created_at"         json:"createdAt"`
 }
 
 type PaginateOutput struct {

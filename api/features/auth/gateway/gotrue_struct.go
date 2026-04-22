@@ -28,7 +28,7 @@ func NewGoTrue(baseURL, serviceKey string, db *database.PgxAdapter) AuthGateway 
 func wrapResponseError(base error, resp *http.Response) error {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("%w: status=%d body_read_error=%v", base, resp.StatusCode, err)
+		return fmt.Errorf("%w: status=%d body_read_error=%w", base, resp.StatusCode, err)
 	}
 
 	bodyText := strings.TrimSpace(string(body))

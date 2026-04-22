@@ -39,10 +39,12 @@ func (g *PgxSubscriptionGatewayAdapter) List(ctx context.Context, filter ListFil
 			s            ListOutput
 			deliveryJSON json.RawMessage
 		)
-		if err := rows.Scan(&s.ID, &deliveryJSON, &s.CutoffOffsetMinutes, &s.MaxAttemptsPerOrder); err != nil {
+		err := rows.Scan(&s.ID, &deliveryJSON, &s.CutoffOffsetMinutes, &s.MaxAttemptsPerOrder)
+		if err != nil {
 			return nil, fmt.Errorf("failed to scan subscription: %w", err)
 		}
-		if err := json.Unmarshal(deliveryJSON, &s.DeliveryDays); err != nil {
+		err := json.Unmarshal(deliveryJSON, &s.DeliveryDays)
+		if err != nil {
 			return nil, fmt.Errorf("failed to unmarshal delivery_days for subscription %s: %w", s.ID, err)
 		}
 		subs = append(subs, s)

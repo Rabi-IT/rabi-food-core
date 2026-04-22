@@ -65,20 +65,20 @@ func (g *GoTrueGatewayAdapter) Patch(ctx context.Context, id string, input Patch
 
 	raw, err := json.Marshal(body)
 	if err != nil {
-		return false, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
+		return false, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPut, g.baseURL+"/admin/users/"+id, bytes.NewReader(raw))
 	if err != nil {
-		return false, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
+		return false, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", g.serviceKey))
+	req.Header.Set("Authorization", "Bearer "+g.serviceKey)
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
-		return false, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
+		return false, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 	defer resp.Body.Close()
 

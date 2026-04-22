@@ -53,7 +53,7 @@ func (g *GoTrueGatewayAdapter) Paginate(ctx context.Context, input PaginateInput
 		dataSQL, []any{pageSize, paginate.Offset()},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
+		return nil, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 
 	users := make([]UserOutput, len(data))

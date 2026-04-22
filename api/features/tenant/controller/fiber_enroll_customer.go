@@ -7,7 +7,8 @@ import (
 )
 
 func (c *TenantController) EnrollCustomer(ctx *fiber.Ctx) error {
-	if err := c.usecase.EnrollCustomer(ctx.UserContext(), ctx.Params("id")); err != nil {
+	err := c.usecase.EnrollCustomer(ctx.UserContext(), ctx.Params("id"))
+	if err != nil {
 		return err
 	}
 

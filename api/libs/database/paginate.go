@@ -38,7 +38,8 @@ func Paginate[T any](
 		return err
 	})
 
-	if err := eg.Wait(); err != nil {
+	err := eg.Wait()
+	if err != nil {
 		return nil, 0, err
 	}
 

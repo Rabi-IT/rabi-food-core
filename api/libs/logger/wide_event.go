@@ -260,10 +260,11 @@ var wideEventPool = sync.Pool{
 // Acquire retrieves a WideEvent from the pool, resetting its fields before returning it for use.
 func Acquire() *WideEvent {
 	wideEvent := wideEventPool.Get().(*WideEvent)
+
 	return wideEvent
 }
 
-// Release returns a WideEvent to the pool for reuse
+// Release returns a WideEvent to the pool for reuse.
 func Release(w *WideEvent) {
 	w.reset()
 	wideEventPool.Put(w)

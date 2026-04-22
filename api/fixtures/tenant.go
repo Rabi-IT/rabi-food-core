@@ -41,7 +41,7 @@ func (tenantFixture) Create(t *testing.T, input *TenantCreateInput) *TenantCreat
 			Name:         "Name",
 			UserName:     "UserName",
 			UserPhone:    "11999999999",
-			UserEmail:    fmt.Sprintf("%s@email.com", uuid.NewString()),
+			UserEmail:    uuid.NewString() + "@email.com",
 			UserPassword: "password123",
 			UserTaxID:    "12345678901",
 		}

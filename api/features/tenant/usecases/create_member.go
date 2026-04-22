@@ -10,6 +10,7 @@ import (
 
 func (c *TenantCase) CreateMember(ctx context.Context, tenantID, userID string, role tenant.Role) error {
 	logger.GetWideEvent(ctx).Event = "create-member"
+
 	return c.gateway.CreateMember(ctx, g.CreateMemberInput{
 		TenantID: tenantID,
 		UserID:   userID,

@@ -20,6 +20,7 @@ func Start(ctx context.Context, injector *do.Injector) {
 		Name:     "create-deliveries",
 		Run: func(ctx context.Context) error {
 			tomorrow := time.Now().In(location).AddDate(0, 0, 1)
+
 			return subscriptionCase.CreateDeliveriesByDate(ctx, usecases.CreateDeliveriesByDateInput{
 				Date: tomorrow,
 			})

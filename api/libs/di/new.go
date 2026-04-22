@@ -78,6 +78,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	// Auth dependencies
 	do.Provide(injector, func(i *do.Injector) (auth_gateway.AuthGateway, error) {
 		db := do.MustInvoke[*database.PgxAdapter](i)
+
 		return auth_gateway.NewGoTrue(config.GoTrueURL, config.GoTrueServiceKey, db), nil
 	})
 

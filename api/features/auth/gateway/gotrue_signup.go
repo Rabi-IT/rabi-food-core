@@ -47,20 +47,20 @@ func (g *GoTrueGatewayAdapter) SignUp(ctx context.Context, input SignUpInput) (*
 
 	raw, err := json.Marshal(body)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
+		return nil, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, g.baseURL+"/admin/users", bytes.NewReader(raw))
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
+		return nil, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", g.serviceKey))
+	req.Header.Set("Authorization", "Bearer "+g.serviceKey)
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
+		return nil, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 	defer resp.Body.Close()
 
@@ -70,7 +70,7 @@ func (g *GoTrueGatewayAdapter) SignUp(ctx context.Context, input SignUpInput) (*
 
 	var result adminCreateUserResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("%w: %v", errs.ErrAuthServiceFailure, err)
+		return nil, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 
 	return &SignUpOutput{ID: result.ID, Email: result.Email}, nil

@@ -75,7 +75,8 @@ func (g *PgxSubscriptionGatewayAdapter) GetByID(ctx context.Context, filter GetB
 
 	var deliveryDays []DeliveryDay
 	if len(row.DeliveryDaysRaw) > 0 {
-		if err := json.Unmarshal(row.DeliveryDaysRaw, &deliveryDays); err != nil {
+		err := json.Unmarshal(row.DeliveryDaysRaw, &deliveryDays)
+		if err != nil {
 			return nil, fmt.Errorf("failed to unmarshal delivery days: %w", err)
 		}
 	}
