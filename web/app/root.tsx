@@ -21,14 +21,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const data = useLoaderData<typeof loader>()
-  const { i18n } = useTranslation()
-
-  useEffect(() => {
-    if (data?.locale) i18n.changeLanguage(data.locale)
-  }, [data?.locale, i18n])
 
   return (
-    <html lang={data?.locale ?? "pt-BR"} dir={i18n.dir()}>
+    <html lang={data?.locale} dir="ltr">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -45,6 +40,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const { locale } = useLoaderData<typeof loader>()
+  const { i18n } = useTranslation()
+
+  useEffect(() => {
+    if (locale) i18n.changeLanguage(locale)
+  }, [locale, i18n])
+
   return <Outlet />
 }
 

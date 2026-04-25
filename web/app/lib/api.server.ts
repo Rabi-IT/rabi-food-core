@@ -23,5 +23,16 @@ export function apiClient(tenantId?: string) {
       if (!r.ok) throw new Response(r.statusText, { status: r.status })
       return r.json()
     },
+    async post<T>(path: string, body: unknown, token?: string): Promise<T> {
+      const h: Record<string, string> = { ...headers }
+      if (token) h["Authorization"] = `Bearer ${token}`
+      const r = await fetch(buildUrl(path), {
+        method: "POST",
+        headers: h,
+        body: JSON.stringify(body),
+      })
+      if (!r.ok) throw new Response(r.statusText, { status: r.status })
+      return r.json()
+    },
   }
 }
