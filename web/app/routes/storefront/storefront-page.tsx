@@ -1,8 +1,10 @@
-import { useLoaderData, useRouteLoaderData, Link, useSearchParams } from "react-router"
+import { useLoaderData, useRouteLoaderData, useSearchParams, Link } from "react-router"
+import { useState } from "react"
 import type { Route } from "./+types/storefront-page"
 import { resolveTenant } from "~/lib/tenant.server"
 import { apiClient } from "~/lib/api.server"
 import { cn } from "~/lib/utils"
+import { ProductSheet } from "~/components/subscription/product-sheet"
 import InstitutionalPage from "./institutional-page"
 
 type Category = { id: string; name: string; description: string }
@@ -15,6 +17,7 @@ type Product = {
   unit: string
   price: number
   isActive: boolean
+  discountRules: { quantityThreshold: number; discount: number }[]
 }
 type PaginatedCategories = { data: Category[]; maxPages: number }
 type PaginatedProducts = { data: Product[]; maxPages: number }
@@ -31,11 +34,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const [categories, products] = await Promise.all([
     api.get<PaginatedCategories>("/category/"),
-    api.get<PaginatedProducts>("/product/", {
-      isActive: "1",
-      categoryId,
-      name,
-    }),
+    api.get<PaginatedProducts>("/product/", { isActive: "1", categoryId, name }),
   ])
 
   return { tenant, categories: categories.data, products: products.data, selectedCategoryId: categoryId ?? null }
@@ -48,8 +47,10 @@ function formatPrice(cents: number): string {
 export default function StorefrontHome() {
   const { tenant, categories, products, selectedCategoryId } = useLoaderData<typeof loader>()
   if (!tenant) return <InstitutionalPage />
+
   const layout = useRouteLoaderData("routes/storefront/layout") as { tenant: { name: string } }
   const [searchParams, setSearchParams] = useSearchParams()
+  const [detailProduct, setDetailProduct] = useState<Product | null>(null)
 
   function selectCategory(id: string | null) {
     const next = new URLSearchParams(searchParams)
@@ -63,6 +64,20 @@ export default function StorefrontHome() {
       <header className="border-b px-6 py-4">
         <h1 className="text-xl font-semibold">{layout?.tenant.name}</h1>
       </header>
+
+      {/* Subscription CTA */}
+      <div className="bg-primary/5 border-b border-primary/20 px-6 py-4 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold">Receba sempre, sem esquecer</p>
+          <p className="text-xs text-muted-foreground">Monte sua cesta e receba nos dias que escolher</p>
+        </div>
+        <Link
+          to="/subscribe"
+          className="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          Assinar
+        </Link>
+      </div>
 
       <main className="mx-auto max-w-6xl px-4 py-6 space-y-6">
         {/* Category filter */}
@@ -100,10 +115,11 @@ export default function StorefrontHome() {
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {products.map((product) => (
-              <Link
+              <button
                 key={product.id}
-                to={`/product/${product.id}`}
-                className="group rounded-xl border bg-card overflow-hidden hover:shadow-md transition-shadow"
+                type="button"
+                onClick={() => setDetailProduct(product)}
+                className="group rounded-xl border bg-card overflow-hidden hover:shadow-md transition-shadow text-left"
               >
                 {product.photo ? (
                   <img
@@ -123,11 +139,13 @@ export default function StorefrontHome() {
                     <p className="text-xs text-muted-foreground">por {product.unit}</p>
                   )}
                 </div>
-              </Link>
+              </button>
             ))}
           </div>
         )}
       </main>
+
+      <ProductSheet product={detailProduct} onClose={() => setDetailProduct(null)} />
     </div>
   )
 }
