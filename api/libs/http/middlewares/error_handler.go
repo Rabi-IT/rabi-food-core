@@ -11,11 +11,15 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// ValidationErrorResponse represents the structure of validation error responses.
-// It is used to return detailed information about validation errors to the client.
 type ValidationErrorResponse struct {
+	Code   string                `json:"code"`
 	Errors []lib.ValidationError `json:"errors"`
 }
+
+var (
+	errBodyInternalError = []byte(`{"code":"INTERNAL_ERROR"}`)
+	errBodyInvalidToken  = []byte(`{"code":"INVALID_TOKEN"}`)
+)
 
 // ErrorHandler is a middleware that handles errors occurring during request processing.
 // Logging is handled by the Canonical Log Line middleware — this function only formats the response.
@@ -24,21 +28,21 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 	validationErr, ok := err.(validator.ValidationErrors)
 	if ok {
 		return ctx.Status(fiber.StatusBadRequest).JSON(ValidationErrorResponse{
+			Code:   "VALIDATION_ERROR",
 			Errors: lib.ParseValidationError(validationErr),
 		})
 	}
 
-	var apiErr *errs.ApiError
-	if errors.As(err, &apiErr) {
+	if apiErr, ok := errors.AsType[*errs.ApiError](err); ok {
 		return ctx.Status(apiErr.Status).JSON(apiErr)
 	}
 
-	var e *fiber.Error
-	if errors.As(err, &e) {
-		ctx.Set(fiber.HeaderContentType, fiber.MIMETextPlainCharsetUTF8)
-
-		return ctx.Status(e.Code).SendString(err.Error())
+	if e, ok := errors.AsType[*fiber.Error](err); ok {
+		if e.Code == fiber.StatusUnauthorized {
+			return ctx.Status(fiber.StatusUnauthorized).Type("json").Send(errBodyInvalidToken)
+		}
+		return ctx.Status(e.Code).Type("json").Send(errBodyInternalError)
 	}
 
-	return ctx.Status(http.StatusInternalServerError).SendString("internal server error")
+	return ctx.Status(http.StatusInternalServerError).Type("json").Send(errBodyInternalError)
 }
