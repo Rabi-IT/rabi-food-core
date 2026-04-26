@@ -5,22 +5,21 @@ import { cn } from "~/lib/utils"
 import type { CycleDiscountRule, Product } from "./types"
 
 type Props = {
-  products: readonly Product[]
-  items: { productId: string; quantity: number }[]
-  totalCycles: number
-  minCycles: number
-  deliveryWeekdays: number[]
-  cycleDiscountRules: readonly CycleDiscountRule[]
-  autoRenew: boolean
-  onChange: (totalCycles: number, autoRenew: boolean) => void
-  onNext: () => void
+  readonly products: readonly Product[]
+  readonly items: readonly { productId: string; quantity: number }[]
+  readonly totalCycles: number
+  readonly minCycles: number
+  readonly deliveryWeekdays: readonly number[]
+  readonly cycleDiscountRules: readonly CycleDiscountRule[]
+  readonly onChange: (totalCycles: number) => void
+  readonly onNext: () => void
 }
 
-function getRenewalDate(weekdays: number[], totalCycles: number): Date {
+function getRenewalDate(weekdays: readonly number[], totalCycles: number): Date {
   const sorted = [...weekdays].sort((a, b) => a - b)
   const cursor = new Date()
   cursor.setHours(0, 0, 0, 0)
-  cursor.setDate(cursor.getDate() + 1) // start from tomorrow
+  cursor.setDate(cursor.getDate() + 1)
   let count = 0
   while (count < totalCycles) {
     if (sorted.includes(cursor.getDay())) count++
@@ -29,7 +28,7 @@ function getRenewalDate(weekdays: number[], totalCycles: number): Date {
   return cursor
 }
 
-export function StepPlan({ products, items, totalCycles, minCycles, deliveryWeekdays, cycleDiscountRules, autoRenew, onChange, onNext }: Props) {
+export function StepPlan({ products, items, totalCycles, minCycles, deliveryWeekdays, cycleDiscountRules, onChange, onNext }: Props) {
   const label = (n: number) => `${n} ${n === 1 ? "entrega" : "entregas"}`
 
   const options = [
@@ -48,8 +47,10 @@ export function StepPlan({ products, items, totalCycles, minCycles, deliveryWeek
   const basePricing = calculatePricing(items, products, minCycles, [])
 
   useEffect(() => {
-    if (options.length === 1) onChange(options[0].cycles, autoRenew)
+    if (options.length === 1) onChange(options[0].cycles)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const renewalDate = getRenewalDate(deliveryWeekdays, totalCycles)
 
   return (
     <div className="flex flex-col pb-32">
@@ -70,13 +71,12 @@ export function StepPlan({ products, items, totalCycles, minCycles, deliveryWeek
             <button
               key={opt.cycles}
               type="button"
-              onClick={() => onChange(opt.cycles, autoRenew)}
+              onClick={() => onChange(opt.cycles)}
               className={cn(
                 "w-full rounded-xl border p-4 text-left transition-colors",
                 isSelected ? "border-primary bg-primary/5" : "border-border bg-card hover:bg-muted"
               )}
             >
-              {/* Header: label + selected */}
               <div className="flex items-center justify-between mb-3">
                 <p className="font-semibold">{opt.label}</p>
                 {isSelected && (
@@ -86,7 +86,6 @@ export function StepPlan({ products, items, totalCycles, minCycles, deliveryWeek
                 )}
               </div>
 
-              {/* Price row */}
               <div className="flex items-end justify-between gap-2">
                 <div>
                   {opt.discount > 0 && (
@@ -117,43 +116,18 @@ export function StepPlan({ products, items, totalCycles, minCycles, deliveryWeek
         })}
       </div>
 
-      <div className="mt-6 rounded-lg border p-4 space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-medium">Renovação automática</p>
-            <p className="text-xs text-muted-foreground">
-              Ao usar todas as {totalCycles} entregas, um novo ciclo é gerado automaticamente.
-            </p>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={autoRenew}
-            onClick={() => onChange(totalCycles, !autoRenew)}
-            className={cn(
-              "relative w-11 h-6 rounded-full transition-colors shrink-0",
-              autoRenew ? "bg-primary" : "bg-muted border border-border"
-            )}
-          >
-            <span
-              className={cn(
-                "absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform",
-                autoRenew && "translate-x-5"
-              )}
-            />
-          </button>
-        </div>
-
-        {autoRenew && (
-          <p className="text-xs text-primary border-t pt-3">
-            Sua próxima cobrança será em{" "}
-            <span className="font-semibold">
-              {getRenewalDate(deliveryWeekdays, totalCycles).toLocaleDateString("pt-BR", {
-                weekday: "long", day: "numeric", month: "long",
-              })}
-            </span>.
-          </p>
-        )}
+      <div className="mt-6 rounded-lg border p-4 space-y-2">
+        <p className="text-sm font-medium">Renovação automática</p>
+        <p className="text-xs text-muted-foreground">
+          Ao usar todas as {totalCycles} entregas, um novo ciclo começa automaticamente.
+          Você pode cancelar a renovação a qualquer momento.
+        </p>
+        <p className="text-xs text-primary">
+          Próxima renovação estimada:{" "}
+          <span className="font-semibold">
+            {renewalDate.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
+          </span>
+        </p>
       </div>
 
       <div className="mt-4 rounded-lg bg-muted/50 p-4 space-y-2">

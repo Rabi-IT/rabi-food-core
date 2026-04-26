@@ -59,7 +59,6 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 				},
 			},
 			TotalCycles: 10,
-			AutoRenew:   true,
 			Notes:       "Notes",
 		}
 

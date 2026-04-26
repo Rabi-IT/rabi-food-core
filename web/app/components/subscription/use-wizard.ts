@@ -6,7 +6,6 @@ export type WizardData = {
   items: { productId: string; quantity: number }[]
   deliveryDays: { weekday: number; startHour: number; endHour: number }[]
   totalCycles: number
-  autoRenew: boolean
   user: { name: string; email: string; phone: string; token: string }
   address: {
     street: string
@@ -22,7 +21,6 @@ const defaultData: WizardData = {
   items: [],
   deliveryDays: [],
   totalCycles: 1,
-  autoRenew: false,
   user: { name: "", email: "", phone: "", token: "" },
   address: { street: "", complement: "", neighborhood: "", city: "", state: "", zip: "" },
 }
