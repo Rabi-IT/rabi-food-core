@@ -29,9 +29,6 @@ export function isDashboard(request: Request): boolean {
 export async function resolveTenant(request: Request): Promise<Tenant | null> {
   const slug = getTenantSlug(request)
   if (!slug) return null
-  try {
-    return await apiClient().get<Tenant>(`/tenant/slug/${slug}`)
-  } catch {
-    return null
-  }
+  const result = await apiClient().get<Tenant>(`/tenant/slug/${slug}`)
+  return result.ok ? result.data : null
 }
