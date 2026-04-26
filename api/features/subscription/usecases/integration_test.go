@@ -169,7 +169,7 @@ func (t *TestSuite) Test_SubscriptionIntegration_GetByID() {
 		t.Equal(fixtures.Subscription.DEFAULT_TOTAL_CYCLES, response.RemainingCycles)
 		t.EqualValues(0, response.CycleDiscount)
 		t.Equal(fixtures.Subscription.DEFAULT_CUTOFF_OFFSET_MINUTES, response.CutoffOffsetMinutes)
-		t.Equal(fixtures.Subscription.DEFAULT_AUTO_RENEW, response.AutoRenew)
+		t.True(response.AutoRenew)
 	})
 
 	t.Run("should return NotFound when get by id not found", func() {

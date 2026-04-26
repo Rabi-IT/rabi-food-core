@@ -15,5 +15,6 @@ export type Product = {
 export type SubscriptionConfig = {
   readonly discountRules: readonly CycleDiscountRule[]
   readonly cutoffOffsetMinutes: number
+  readonly orderLeadMinutes: number
   readonly isOpen: boolean
 }

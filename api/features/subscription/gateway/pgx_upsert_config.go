@@ -14,12 +14,13 @@ func (g *PgxSubscriptionGatewayAdapter) UpsertConfig(
 ) error {
 	sql, args, err := sq.
 		Insert("subscription.subscription_configs").
-		Columns("tenant_id", "max_attempts_per_order", "discount_rules", "cutoff_offset_minutes", "is_open", "updated_at").
-		Values(tenantID, input.MaxAttemptsPerOrder, input.DiscountRules, input.CutoffOffsetMinutes, input.IsOpen, time.Now().UTC()).
+		Columns("tenant_id", "max_attempts_per_order", "discount_rules", "cutoff_offset_minutes", "order_lead_minutes", "is_open", "updated_at").
+		Values(tenantID, input.MaxAttemptsPerOrder, input.DiscountRules, input.CutoffOffsetMinutes, input.OrderLeadMinutes, input.IsOpen, time.Now().UTC()).
 		Suffix(`ON CONFLICT (tenant_id) DO UPDATE SET
 			max_attempts_per_order  = EXCLUDED.max_attempts_per_order,
 			discount_rules          = EXCLUDED.discount_rules,
 			cutoff_offset_minutes   = EXCLUDED.cutoff_offset_minutes,
+			order_lead_minutes        = EXCLUDED.order_lead_minutes,
 			is_open                 = EXCLUDED.is_open,
 			updated_at              = EXCLUDED.updated_at`).
 		PlaceholderFormat(sq.Dollar).

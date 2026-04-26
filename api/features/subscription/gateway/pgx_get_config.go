@@ -10,7 +10,7 @@ import (
 
 func (g *PgxSubscriptionGatewayAdapter) GetConfig(ctx context.Context, tenantID string) (*GetConfigOutput, error) {
 	sql, args, err := sq.
-		Select("max_attempts_per_order", "discount_rules", "cutoff_offset_minutes", "is_open").
+		Select("max_attempts_per_order", "discount_rules", "cutoff_offset_minutes", "order_lead_minutes", "is_open").
 		From("subscription.subscription_configs").
 		Where(sq.Eq{"tenant_id": tenantID}).
 		Limit(1).

@@ -71,13 +71,14 @@ INSERT INTO catalog.products (id, tenant_id, category_id, name, description, pho
 ON CONFLICT (id) DO UPDATE SET discount_rules = EXCLUDED.discount_rules;
 
 -- Subscription config — Fruit Fresh
-INSERT INTO subscription.subscription_configs (tenant_id, is_open, max_attempts_per_order, discount_rules, cutoff_offset_minutes, updated_at) VALUES
+INSERT INTO subscription.subscription_configs (tenant_id, is_open, max_attempts_per_order, discount_rules, cutoff_offset_minutes, order_lead_minutes, updated_at) VALUES
   ('00000000-0000-0000-0000-000000000003', true, 3,
    '[{"cyclesThreshold": 3, "discount": 5}, {"cyclesThreshold": 6, "discount": 10}]',
-   120, now())
+   120, 120, now())
 ON CONFLICT (tenant_id) DO UPDATE SET
   is_open                = EXCLUDED.is_open,
   max_attempts_per_order = EXCLUDED.max_attempts_per_order,
   discount_rules         = EXCLUDED.discount_rules,
   cutoff_offset_minutes  = EXCLUDED.cutoff_offset_minutes,
+  order_lead_minutes     = EXCLUDED.order_lead_minutes,
   updated_at             = EXCLUDED.updated_at;
