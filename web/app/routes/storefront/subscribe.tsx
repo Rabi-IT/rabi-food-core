@@ -2,6 +2,7 @@ import { useLoaderData, useActionData, useNavigation, useSubmit, useFetcher, Lin
 import type { Route } from "./+types/subscribe"
 import { resolveTenant } from "~/lib/tenant.server"
 import { apiClient } from "~/lib/api.server"
+import { isTokenExpired, getStoredRefreshToken, storeRefreshToken, clearRefreshToken } from "~/lib/token"
 import { useWizard, type WizardData } from "~/components/subscription/use-wizard"
 import { StepProducts } from "~/components/subscription/step-products"
 import { StepBasket } from "~/components/subscription/step-basket"
@@ -21,7 +22,9 @@ type UserProfile = {
 
 type OtpActionResult =
   | { intent: "send-otp"; ok: true }
-  | { intent: "verify-otp"; ok: true; accessToken: string }
+  | { intent: "verify-otp"; ok: true; accessToken: string; refreshToken: string }
+  | { intent: "refresh"; ok: true; accessToken: string; refreshToken: string }
+  | { intent: "refresh"; ok: false }
   | { intent: "get-profile"; ok: true; profile: UserProfile }
   | { intent: "save-address"; ok: true }
   | { intent: string; error: string }
@@ -40,99 +43,92 @@ export async function loader({ request }: Route.LoaderArgs) {
   const api = apiClient(tenant.id)
   const token = parseAuthCookie(request)
 
-  const [productsRes, config, profile] = await Promise.all([
+  const [productsRes, configRes, profileRes] = await Promise.all([
     api.get<{ data: readonly Product[] }>("/product/", { isActive: "1" }),
-    api.get<SubscriptionConfig>("/subscription/config").catch(() => null),
-    token ? api.get<UserProfile>("/user/me", undefined, token).catch(() => null) : Promise.resolve(null),
+    api.get<SubscriptionConfig>("/subscription/config"),
+    token ? api.get<UserProfile>("/user/me", undefined, token) : Promise.resolve(null),
   ])
 
-  if (!config) throw new Response("Not found", { status: 404 })
+  if (!productsRes.ok) throw new Response("Not found", { status: 404 })
+  if (!configRes.ok) throw new Response("Not found", { status: 404 })
 
-  return { products: productsRes.data, config, token, profile }
+  return {
+    products: productsRes.data.data,
+    config: configRes.data,
+    token,
+    profile: profileRes?.ok ? profileRes.data : null,
+  }
 }
 
 export async function action({ request }: Route.ActionArgs): Promise<OtpActionResult | ConfirmActionResult | Response> {
   const tenant = await resolveTenant(request)
-  if (!tenant) return { intent: "unknown", error: "Tenant não encontrado" }
+  if (!tenant) return { intent: "unknown", error: "UNKNOWN" }
 
   const api = apiClient(tenant.id)
   const body = await request.json()
   const intent = body.intent as string | undefined
 
   if (intent === "send-otp") {
-    try {
-      await api.post("/auth/otp", { email: body.email, name: body.name, phone: body.phone })
-      return { intent: "send-otp", ok: true }
-    } catch {
-      return { intent: "send-otp", error: "Não foi possível enviar o código. Tente novamente." }
-    }
+    const result = await api.post("/auth/otp", { email: body.email, name: body.name, phone: body.phone })
+    if (!result.ok) return { intent: "send-otp", error: result.code }
+    return { intent: "send-otp", ok: true }
   }
 
   if (intent === "verify-otp") {
-    try {
-      const out = await api.post<{ accessToken: string }>("/auth/otp/verify", {
-        email: body.email,
-        code: body.code,
-      })
-      const payload: OtpActionResult = { intent: "verify-otp", ok: true, accessToken: out.accessToken }
-      return new Response(JSON.stringify(payload), {
-        headers: {
-          "Content-Type": "application/json",
-          "Set-Cookie": `auth_token=${out.accessToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600`,
-        },
-      })
-    } catch {
-      return { intent: "verify-otp", error: "Código inválido ou expirado." }
-    }
+    const result = await api.post<{ accessToken: string; refreshToken: string }>("/auth/otp/verify", {
+      email: body.email,
+      code: body.code,
+    })
+    if (!result.ok) return { intent: "verify-otp", error: result.code }
+    const payload: OtpActionResult = { intent: "verify-otp", ok: true, accessToken: result.data.accessToken, refreshToken: result.data.refreshToken }
+    return new Response(JSON.stringify(payload), {
+      headers: {
+        "Content-Type": "application/json",
+        "Set-Cookie": `auth_token=${result.data.accessToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600`,
+      },
+    })
+  }
+
+  if (intent === "refresh") {
+    const result = await api.post<{ accessToken: string; refreshToken: string }>("/auth/refresh", {
+      refreshToken: body.refreshToken,
+    })
+    if (!result.ok) return { intent: "refresh", ok: false }
+    return { intent: "refresh", ok: true, accessToken: result.data.accessToken, refreshToken: result.data.refreshToken }
   }
 
   if (intent === "get-profile") {
-    try {
-      const profile = await api.get<UserProfile>("/user/me", undefined, body.token)
-      return { intent: "get-profile", ok: true, profile }
-    } catch {
-      return { intent: "get-profile", ok: true, profile: { street: "", complement: "", neighborhood: "", city: "", state: "", zip: "", phone: "" } }
-    }
+    const result = await api.get<UserProfile>("/user/me", undefined, body.token)
+    const profile = result.ok
+      ? result.data
+      : { street: "", complement: "", neighborhood: "", city: "", state: "", zip: "", phone: "" }
+    return { intent: "get-profile", ok: true, profile }
   }
 
   if (intent === "save-address") {
-    try {
-      await api.patch(
-        "/user/me",
-        {
-          phone: body.phone,
-          street: body.street,
-          complement: body.complement,
-          neighborhood: body.neighborhood,
-          city: body.city,
-          state: body.state,
-          zip: body.zip,
-        },
-        body.token,
-      )
-      return { intent: "save-address", ok: true }
-    } catch {
-      return { intent: "save-address", error: "Não foi possível salvar o endereço. Tente novamente." }
-    }
+    const result = await api.patch("/user/me", {
+      phone: body.phone,
+      street: body.street,
+      complement: body.complement,
+      neighborhood: body.neighborhood,
+      city: body.city,
+      state: body.state,
+      zip: body.zip,
+    }, body.token)
+    if (!result.ok) return { intent: "save-address", error: result.code }
+    return { intent: "save-address", ok: true }
   }
 
   // intent === "confirm": create subscription
   const data = body as WizardData
-  try {
-    await api.post(
-      "/subscription/",
-      {
-        items: data.items,
-        deliveryDays: data.deliveryDays,
-        totalCycles: data.totalCycles,
-        autoRenew: data.autoRenew,
-      },
-      data.user.token,
-    )
-    return { ok: true }
-  } catch {
-    return { error: "Não foi possível criar sua assinatura. Tente novamente." }
-  }
+  const result = await api.post("/subscription/", {
+    items: data.items,
+    deliveryDays: data.deliveryDays,
+    totalCycles: data.totalCycles,
+    autoRenew: data.autoRenew,
+  }, data.user.token)
+  if (!result.ok) return { error: result.code }
+  return { ok: true }
 }
 
 const STEP_LABELS = {
@@ -160,6 +156,8 @@ export default function Subscribe() {
   const confirmResult = actionData as ConfirmActionResult | undefined
 
   const [otpSubStep, setOtpSubStep] = useState<"identity" | "code">("identity")
+  const [forcedUserMode, setForcedUserMode] = useState<"new" | "existing" | undefined>(undefined)
+  const refreshInProgressRef = useRef(false)
 
   // Pre-populate token and profile from loader (already authenticated)
   useEffect(() => {
@@ -177,6 +175,8 @@ export default function Subscribe() {
     }
 
     if (otpFetcher.data.intent === "verify-otp" && "accessToken" in otpFetcher.data) {
+      storeRefreshToken(otpFetcher.data.refreshToken)
+      setForcedUserMode(undefined)
       setData({ user: { ...data.user, token: otpFetcher.data.accessToken } })
       setStep(6)
     }
@@ -186,14 +186,18 @@ export default function Subscribe() {
   const profileFetcher = useFetcher<OtpActionResult>()
   const prevStep6 = useRef(false)
   useEffect(() => {
-    if (step === 6 && !prevStep6.current) {
-      prevStep6.current = true
+    if (step !== 6 || prevStep6.current) {
+      if (step !== 6) prevStep6.current = false
+      return
+    }
+    prevStep6.current = true
+    ensureToken().then((token) => {
+      if (!token) return
       profileFetcher.submit(
-        { intent: "get-profile", token: data.user.token },
+        { intent: "get-profile", token },
         { method: "post", encType: "application/json" },
       )
-    }
-    if (step !== 6) prevStep6.current = false
+    })
   }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const existingProfile =
@@ -216,6 +220,44 @@ export default function Subscribe() {
     if (confirmResult && "ok" in confirmResult) reset()
   }, [confirmResult]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  async function ensureToken(): Promise<string | null> {
+    const { token } = data.user
+    if (!token) return null
+    if (!isTokenExpired(token)) return token
+    if (refreshInProgressRef.current) return null
+
+    refreshInProgressRef.current = true
+    try {
+      const refreshToken = getStoredRefreshToken()
+      if (!refreshToken) {
+        setForcedUserMode("existing")
+        setOtpSubStep("identity")
+        setStep(5)
+        return null
+      }
+
+      const res = await fetch(window.location.pathname, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent: "refresh", refreshToken }),
+      })
+      const result = await res.json() as { intent: "refresh"; ok: boolean; accessToken?: string; refreshToken?: string }
+      if (result.ok && result.accessToken && result.refreshToken) {
+        storeRefreshToken(result.refreshToken)
+        setData({ user: { ...data.user, token: result.accessToken } })
+        return result.accessToken
+      }
+
+      clearRefreshToken()
+      setForcedUserMode("existing")
+      setOtpSubStep("identity")
+      setStep(5)
+      return null
+    } finally {
+      refreshInProgressRef.current = false
+    }
+  }
+
   function handleSendOtp(name: string, email: string, phone: string) {
     otpFetcher.submit(
       { intent: "send-otp", name, email, phone },
@@ -230,14 +272,11 @@ export default function Subscribe() {
     )
   }
 
-  function handleSaveAddress() {
+  async function handleSaveAddress() {
+    const token = await ensureToken()
+    if (!token) return
     addressFetcher.submit(
-      {
-        intent: "save-address",
-        token: data.user.token,
-        phone: data.user.phone,
-        ...data.address,
-      },
+      { intent: "save-address", token, phone: data.user.phone, ...data.address },
       { method: "post", encType: "application/json" },
     )
   }
@@ -372,6 +411,7 @@ export default function Subscribe() {
           <StepUser
             user={data.user}
             subStep={otpSubStep}
+            initialMode={forcedUserMode}
             onChange={(user) => setData({ user })}
             onBack={() => setStep(4)}
             onSendOtp={handleSendOtp}

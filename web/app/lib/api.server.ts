@@ -1,3 +1,6 @@
+import axios, { type AxiosRequestConfig } from "axios"
+import { ok, err, validationErr, type Result } from "~/lib/result"
+
 const API_URL = process.env.API_URL ?? "http://localhost:3000"
 
 type SearchParams = Record<string, string | undefined>
@@ -12,44 +15,49 @@ function buildUrl(path: string, params?: SearchParams): string {
   return url.toString()
 }
 
+function authHeader(token?: string): Record<string, string> {
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+function normalizeError(error: unknown): Result<never> {
+  if (!axios.isAxiosError(error) || !error.response) return err("UNKNOWN")
+
+  const data = error.response.data as Record<string, unknown> | undefined
+  const code = typeof data?.code === "string" ? data.code : null
+
+  if (code === "VALIDATION_ERROR" && Array.isArray(data?.errors)) {
+    return validationErr(data.errors as { field: string; tag: string }[])
+  }
+
+  return err(code ?? "UNKNOWN")
+}
+
+async function request<T>(config: AxiosRequestConfig): Promise<Result<T>> {
+  try {
+    const res = await axios<T>(config)
+    return ok(res.data)
+  } catch (e) {
+    return normalizeError(e)
+  }
+}
+
 export function apiClient(tenantId?: string) {
-  const headers: Record<string, string> = { "Content-Type": "application/json" }
-  if (tenantId) headers["X-Tenant-ID"] = tenantId
+  const baseHeaders = {
+    "Content-Type": "application/json",
+    ...(tenantId ? { "X-Tenant-ID": tenantId } : {}),
+  }
 
   return {
-    async get<T>(path: string, params?: SearchParams, token?: string): Promise<T> {
-      const h: Record<string, string> = { ...headers }
-      if (token) h["Authorization"] = `Bearer ${token}`
-      const r = await fetch(buildUrl(path, params), { headers: h })
-      if (!r.ok) throw new Response(r.statusText, { status: r.status })
-      return r.json()
+    get<T>(path: string, params?: SearchParams, token?: string): Promise<Result<T>> {
+      return request<T>({ method: "GET", url: buildUrl(path, params), headers: { ...baseHeaders, ...authHeader(token) } })
     },
-    async post<T>(path: string, body: unknown, token?: string): Promise<T> {
-      return this._send<T>("POST", path, body, token)
-    },
-    async patch<T>(path: string, body: unknown, token?: string): Promise<T> {
-      return this._send<T>("PATCH", path, body, token)
-    },
-    async _send<T>(method: string, path: string, body: unknown, token?: string): Promise<T> {
-      const h: Record<string, string> = { ...headers }
-      if (token) h["Authorization"] = `Bearer ${token}`
-      const r = await fetch(buildUrl(path), {
-        method,
-        headers: h,
-        body: JSON.stringify(body),
-      })
-      if (r.ok && r.headers.get("Content-Type")?.includes("application/json")) {
-        return r.json()
-      } else if (r.ok) {
-        return {} as T
-      }
 
-      if (r.status === 400) {
-        const error = await r.json()
-        throw new Response(error.message || r.statusText, { status: 400 })
-      }
+    post<T>(path: string, body: unknown, token?: string): Promise<Result<T>> {
+      return request<T>({ method: "POST", url: buildUrl(path), data: body, headers: { ...baseHeaders, ...authHeader(token) } })
+    },
 
-      throw new Response(r.statusText, { status: r.status })
+    patch<T>(path: string, body: unknown, token?: string): Promise<Result<T>> {
+      return request<T>({ method: "PATCH", url: buildUrl(path), data: body, headers: { ...baseHeaders, ...authHeader(token) } })
     },
   }
 }
