@@ -90,26 +90,26 @@ type GetByIDFilter struct {
 }
 
 type GetByIDOutput struct {
-	ID       string              `json:"id"`
-	TenantID string              `json:"tenantId"`
-	UserID   string              `json:"userId"`
-	Status   subscription.Status `json:"status"`
+	ID       string              `db:"id"        json:"id"`
+	TenantID string              `db:"tenant_id" json:"tenantId"`
+	UserID   string              `db:"user_id"   json:"userId"`
+	Status   subscription.Status `db:"status"    json:"status"`
 
-	DeliveryDays []DeliveryDay      `json:"deliveryDays"`
-	Items        []SubscriptionItem `json:"items"`
-	Notes        string             `json:"notes"`
+	DeliveryDays []DeliveryDay      `db:"delivery_days" json:"deliveryDays"`
+	Items        []SubscriptionItem `db:"items"         json:"items"`
+	Notes        string             `db:"notes"         json:"notes"`
 
-	TotalCycles         uint   `json:"totalCycles"`
-	RemainingCycles     uint   `json:"remainingCycles"`
-	CycleDiscount       uint   `json:"cycleDiscount"`
-	CutoffOffsetMinutes uint16 `json:"cutoffOffsetMinutes"`
-	AutoRenew           bool   `json:"autoRenew"`
+	TotalCycles         uint   `db:"total_cycles"          json:"totalCycles"`
+	RemainingCycles     uint   `db:"remaining_cycles"      json:"remainingCycles"`
+	CycleDiscount       uint   `db:"cycle_discount"        json:"cycleDiscount"`
+	CutoffOffsetMinutes uint16 `db:"cutoff_offset_minutes" json:"cutoffOffsetMinutes"`
+	AutoRenew           bool   `db:"auto_renew"            json:"autoRenew"`
 
-	ItemsTotal    uint `json:"itemsTotal"`
-	ItemsDiscount uint `json:"itemsDiscount"`
-	PaymentAmount uint `json:"paymentAmount"`
+	ItemsTotal    uint `db:"items_total"    json:"itemsTotal"`
+	ItemsDiscount uint `db:"items_discount" json:"itemsDiscount"`
+	PaymentAmount uint `db:"payment_amount" json:"paymentAmount"`
 
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt time.Time `db:"created_at" json:"createdAt"`
 }
 
 type PatchFilter struct {
@@ -163,10 +163,10 @@ type ListFilter struct {
 }
 
 type ListOutput struct {
-	ID                  string
-	DeliveryDays        []DeliveryDay
-	CutoffOffsetMinutes uint16
-	MaxAttemptsPerOrder uint8
+	ID                  string        `db:"id"`
+	DeliveryDays        []DeliveryDay `db:"delivery_days"`
+	CutoffOffsetMinutes uint16        `db:"cutoff_offset_minutes"`
+	MaxAttemptsPerOrder uint8         `db:"max_attempts_per_order"`
 }
 
 type DiscountRule struct {
@@ -183,8 +183,8 @@ type UpsertConfigInput struct {
 }
 
 type GetConfigOutput struct {
-	MaxAttemptsPerOrder uint8          `json:"maxAttemptsPerOrder"`
-	DiscountRules       []DiscountRule `json:"discountRules"`
-	CutoffOffsetMinutes uint16         `json:"cutoffOffsetMinutes"`
-	IsOpen              bool           `json:"isOpen"`
+	MaxAttemptsPerOrder uint8          `db:"max_attempts_per_order" json:"maxAttemptsPerOrder"`
+	DiscountRules       []DiscountRule `db:"discount_rules"         json:"discountRules"`
+	CutoffOffsetMinutes uint16         `db:"cutoff_offset_minutes"  json:"cutoffOffsetMinutes"`
+	IsOpen              bool           `db:"is_open"                json:"isOpen"`
 }

@@ -2,8 +2,6 @@ package gateway
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -12,12 +10,6 @@ import (
 
 func (g *PgxProductGatewayAdapter) Create(ctx context.Context, input CreateInput) (string, error) {
 	id := uuid.Must(uuid.NewV7()).String()
-
-	discountRules, err := json.Marshal(input.DiscountRules)
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal discount rules: %w", err)
-	}
-
 	now := time.Now().UTC()
 
 	sql, args, err := sq.
@@ -25,7 +17,7 @@ func (g *PgxProductGatewayAdapter) Create(ctx context.Context, input CreateInput
 		Columns("id", "tenant_id", "name", "description", "photo", "category_id",
 			"discount_rules", "unit", "price", "is_active", "created_at", "updated_at").
 		Values(id, input.TenantID, input.Name, input.Description, input.Photo, input.CategoryID,
-			discountRules, input.Unit, input.Price, input.IsActive, now, now).
+			input.DiscountRules, input.Unit, input.Price, input.IsActive, now, now).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
