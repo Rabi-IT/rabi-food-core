@@ -1,13 +1,13 @@
 import { useState, useCallback, useEffect } from "react"
 
-export type WizardStep = 1 | 2 | 3 | 4 | "summary"
+export type WizardStep = 1 | 2 | 3 | 4 | 5 | 6 | "summary"
 
 export type WizardData = {
   items: { productId: string; quantity: number }[]
   deliveryDays: { weekday: number; startHour: number; endHour: number }[]
   totalCycles: number
   autoRenew: boolean
-  user: { name: string; phone: string; email: string; password: string; taxId: string }
+  user: { name: string; email: string; phone: string; token: string }
   address: {
     street: string
     complement: string
@@ -23,7 +23,7 @@ const defaultData: WizardData = {
   deliveryDays: [],
   totalCycles: 1,
   autoRenew: false,
-  user: { name: "", phone: "", email: "", password: "", taxId: "" },
+  user: { name: "", email: "", phone: "", token: "" },
   address: { street: "", complement: "", neighborhood: "", city: "", state: "", zip: "" },
 }
 

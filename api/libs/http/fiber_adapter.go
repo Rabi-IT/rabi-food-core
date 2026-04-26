@@ -64,6 +64,8 @@ func New(
 		api.Static("/docs", "./libs/docs")
 	}
 
+	api.Static("/templates", "./libs/templates")
+
 	// Public routes — no JWT required
 	auth_routes.Auth(api, authController)
 	tenant_routes.Tenant(api, tenantController)

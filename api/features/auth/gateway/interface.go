@@ -7,8 +7,10 @@ import (
 )
 
 type AuthGateway interface {
-	SignUp(ctx context.Context, input SignUpInput) (*SignUpOutput, error)
+	CreateUser(ctx context.Context, input CreateUserInput) (*CreateUserOutput, error)
 	SignIn(ctx context.Context, input SignInInput) (*TokenOutput, error)
+	SendOTP(ctx context.Context, input SendOTPInput) error
+	VerifyOTP(ctx context.Context, input VerifyOTPInput) (*TokenOutput, error)
 	RefreshToken(ctx context.Context, refreshToken string) (*TokenOutput, error)
 	SignOut(ctx context.Context, accessToken string) error
 	GetByID(ctx context.Context, id string) (*UserOutput, error)
@@ -17,7 +19,7 @@ type AuthGateway interface {
 	Paginate(ctx context.Context, input PaginateInput) (*PaginateOutput, error)
 }
 
-type SignUpInput struct {
+type CreateUserInput struct {
 	Email        string
 	Password     string
 	Name         string
@@ -30,10 +32,10 @@ type SignUpInput struct {
 	Street       string
 	Complement   string
 	Neighborhood string
-	Role auth.Role
+	Role         auth.Role
 }
 
-type SignUpOutput struct {
+type CreateUserOutput struct {
 	ID    string
 	Email string
 }
@@ -41,6 +43,16 @@ type SignUpOutput struct {
 type SignInInput struct {
 	Email    string
 	Password string
+}
+
+type SendOTPInput struct {
+	Email string
+	Name  string
+}
+
+type VerifyOTPInput struct {
+	Email string
+	Code  string
 }
 
 type TokenOutput struct {
