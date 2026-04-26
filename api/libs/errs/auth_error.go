@@ -3,6 +3,7 @@ package errs
 import "net/http"
 
 var (
+	ErrForbidden           = newErr("FORBIDDEN", http.StatusForbidden)
 	ErrInvalidCredentials  = newErr("INVALID_CREDENTIALS", http.StatusUnauthorized)
 	ErrInvalidRefreshToken = newErr("INVALID_REFRESH_TOKEN", http.StatusUnauthorized)
 	ErrInvalidOTP          = newErr("INVALID_OTP", http.StatusUnauthorized)
