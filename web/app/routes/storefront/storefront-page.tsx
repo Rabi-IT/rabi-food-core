@@ -20,6 +20,11 @@ type Product = {
 
 type Category = { readonly id: string; readonly name: string }
 
+// Fraction of a category's own height that is considered "dead zone" —
+// when only this much of the current category remains visible above the next one,
+// we already consider the next category active.
+const DEAD_ZONE_RATIO = 0.3
+
 type CatalogResponse = {
   readonly products: readonly Product[]
   readonly categories: readonly Category[]
@@ -43,10 +48,6 @@ function formatPrice(cents: number): string {
   return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
 }
 
-function scrollToCategory(id: string) {
-  document.getElementById(`category-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" })
-}
-
 export default function StorefrontHome() {
   const { tenant, categories, products } = useLoaderData<typeof loader>()
   if (!tenant) return <InstitutionalPage />
@@ -54,7 +55,13 @@ export default function StorefrontHome() {
   const layout = useRouteLoaderData("routes/storefront/layout") as { tenant: { name: string } }
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(categories[0]?.id ?? null)
   const [detailProduct, setDetailProduct] = useState<Product | null>(null)
+  const [stickyHeight, setStickyHeight] = useState(0)
+  const [titleGap, setTitleGap] = useState(0)
+  const [bottomPadding, setBottomPadding] = useState(0)
+
   const categoryBarRef = useRef<HTMLDivElement>(null)
+  const mainRef = useRef<HTMLDivElement>(null)
+  const firstTitleRef = useRef<HTMLHeadingElement>(null)
 
   const productsByCategory = categories.map((cat) => ({
     category: cat,
@@ -62,32 +69,79 @@ export default function StorefrontHome() {
   }))
 
   useEffect(() => {
+    function calculate() {
+      const bar = categoryBarRef.current
+      const main = mainRef.current
+      if (!bar || !main) return
+
+      const barHeight = bar.getBoundingClientRect().height
+      setStickyHeight(barHeight)
+
+      if (firstTitleRef.current) {
+        const mb = parseFloat(getComputedStyle(firstTitleRef.current).marginBottom)
+        setTitleGap(mb)
+      }
+
+      const sections = main.querySelectorAll("section")
+      const lastSection = sections[sections.length - 1]
+      if (!lastSection) return
+
+      const mb = firstTitleRef.current
+        ? parseFloat(getComputedStyle(firstTitleRef.current).marginBottom)
+        : 0
+      const available = window.innerHeight - barHeight - mb
+      const lastHeight = lastSection.getBoundingClientRect().height
+      setBottomPadding(Math.max(0, available - lastHeight))
+    }
+
+    calculate()
+    window.addEventListener("resize", calculate)
+    return () => window.removeEventListener("resize", calculate)
+  }, [productsByCategory])
+
+  useEffect(() => {
     if (categories.length === 0) return
 
-    const observers: IntersectionObserver[] = []
+    const offset = stickyHeight + titleGap
 
-    categories.forEach((cat) => {
-      const el = document.getElementById(`category-${cat.id}`)
-      if (!el) return
+    function handleScroll() {
+      let active = categories[0]?.id ?? null
 
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActiveCategoryId(cat.id)
-        },
-        { rootMargin: "-30% 0px -60% 0px", threshold: 0 },
-      )
-      observer.observe(el)
-      observers.push(observer)
-    })
+      for (let i = 0; i < categories.length; i++) {
+        const el = document.getElementById(`category-${categories[i].id}`)
+        if (!el) continue
+        if (el.getBoundingClientRect().top > offset) continue
 
-    return () => observers.forEach((o) => o.disconnect())
-  }, [categories])
+        active = categories[i].id
+
+        const next = categories[i + 1]
+        if (!next) continue
+        const nextEl = document.getElementById(`category-${next.id}`)
+        if (!nextEl) continue
+
+        const visibleHeight = nextEl.getBoundingClientRect().top - offset
+        const sectionHeight = el.getBoundingClientRect().height
+        if (visibleHeight < sectionHeight * DEAD_ZONE_RATIO) {
+          active = next.id
+        }
+      }
+
+      setActiveCategoryId(active)
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [categories, stickyHeight, titleGap])
 
   useEffect(() => {
     if (!activeCategoryId || !categoryBarRef.current) return
     const btn = categoryBarRef.current.querySelector(`[data-category="${activeCategoryId}"]`)
     btn?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" })
   }, [activeCategoryId])
+
+  function scrollToCategory(id: string) {
+    document.getElementById(`category-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -127,12 +181,25 @@ export default function StorefrontHome() {
         ))}
       </div>
 
-      <main className="mx-auto max-w-6xl px-4 py-6 space-y-10">
-        {productsByCategory.map(({ category, products: catProducts }) => {
+      <main
+        ref={mainRef}
+        className="mx-auto max-w-6xl px-4 py-6 space-y-10"
+        style={{ paddingBottom: bottomPadding > 0 ? `${bottomPadding}px` : undefined }}
+      >
+        {productsByCategory.map(({ category, products: catProducts }, index) => {
           if (catProducts.length === 0) return null
           return (
-            <section key={category.id} id={`category-${category.id}`}>
-              <h2 className="text-base font-semibold mb-4">{category.name}</h2>
+            <section
+              key={category.id}
+              id={`category-${category.id}`}
+              style={{ scrollMarginTop: `${stickyHeight + titleGap}px` }}
+            >
+              <h2
+                ref={index === 0 ? firstTitleRef : undefined}
+                className="text-base font-semibold mb-4"
+              >
+                {category.name}
+              </h2>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                 {catProducts.map((product) => (
                   <button
