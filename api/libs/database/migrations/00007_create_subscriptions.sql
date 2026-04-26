@@ -81,6 +81,7 @@ CREATE TABLE
         max_attempts_per_order SMALLINT,
         discount_rules JSONB,
         cutoff_offset_minutes INTEGER,
+        order_lead_minutes SMALLINT,
         updated_at TIMESTAMPTZ
     );
 
@@ -91,6 +92,8 @@ COMMENT ON COLUMN SUBSCRIPTION.subscription_configs.max_attempts_per_order IS 'T
 COMMENT ON COLUMN SUBSCRIPTION.subscription_configs.discount_rules IS 'JSON array of progressive discount rules based on contracted cycle volume.';
 
 COMMENT ON COLUMN SUBSCRIPTION.subscription_configs.cutoff_offset_minutes IS 'Tenant-level override for the cutoff offset in minutes. Takes precedence over the individual subscription value when set.';
+
+COMMENT ON COLUMN SUBSCRIPTION.subscription_configs.order_lead_minutes IS 'Minimum hours required between order placement and delivery start time. Orders placed with less than this lead time are scheduled for the following week.';
 
 CREATE TABLE
     SUBSCRIPTION.subscription_deliveries (

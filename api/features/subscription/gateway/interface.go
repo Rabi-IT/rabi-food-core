@@ -179,6 +179,7 @@ type UpsertConfigInput struct {
 	MaxAttemptsPerOrder uint8
 	DiscountRules       []DiscountRule
 	CutoffOffsetMinutes uint16
+	OrderLeadMinutes      uint16
 	IsOpen              bool
 }
 
@@ -186,5 +187,6 @@ type GetConfigOutput struct {
 	MaxAttemptsPerOrder uint8          `db:"max_attempts_per_order" json:"maxAttemptsPerOrder"`
 	DiscountRules       []DiscountRule `db:"discount_rules"         json:"discountRules"`
 	CutoffOffsetMinutes uint16         `db:"cutoff_offset_minutes"  json:"cutoffOffsetMinutes"`
+	OrderLeadMinutes      uint16          `db:"order_lead_minutes"       json:"orderLeadMinutes"`
 	IsOpen              bool           `db:"is_open"                json:"isOpen"`
 }

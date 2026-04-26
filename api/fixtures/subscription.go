@@ -11,14 +11,14 @@ import (
 )
 
 type subscriptionFixture struct {
-	URI          string
+	URI           string
 	BackofficeURI string
 	DEFAULT_DISCOUNT_RULE          g.DiscountRule
 	DEFAULT_CUTOFF_OFFSET_MINUTES  uint16
+	DEFAULT_ORDER_LEAD_MINUTES     uint16
 	DEFAULT_MAX_ATTEMPTS_PER_ORDER uint8
 
 	DEFAULT_TOTAL_CYCLES        uint
-	DEFAULT_AUTO_RENEW          bool
 	DEFAULT_NOTES               string
 	DEFAULT_DELIVERY_WEEKDAY    uint8
 	DEFAULT_DELIVERY_START_HOUR uint8
@@ -27,17 +27,17 @@ type subscriptionFixture struct {
 
 var (
 	Subscription = subscriptionFixture{
-		URI:          "/subscription/",
+		URI:           "/subscription/",
 		BackofficeURI: "/backoffice/subscription/",
 		DEFAULT_DISCOUNT_RULE: g.DiscountRule{
 			CyclesThreshold: 5,  //nolint:mnd
 			Discount:        10, //nolint:mnd
 		},
 		DEFAULT_CUTOFF_OFFSET_MINUTES:  uint16(0),
+		DEFAULT_ORDER_LEAD_MINUTES:       uint16(120), //nolint:mnd
 		DEFAULT_MAX_ATTEMPTS_PER_ORDER: uint8(1),
 
 		DEFAULT_TOTAL_CYCLES:        uint(1),
-		DEFAULT_AUTO_RENEW:          true,
 		DEFAULT_NOTES:               "Notes",
 		DEFAULT_DELIVERY_WEEKDAY:    uint8(0),
 		DEFAULT_DELIVERY_START_HOUR: uint8(10), //nolint:mnd
@@ -55,6 +55,7 @@ func (subscriptionFixture) UpsertConfig(t *testing.T, input *g.UpsertConfigInput
 				Subscription.DEFAULT_DISCOUNT_RULE,
 			},
 			CutoffOffsetMinutes: Subscription.DEFAULT_CUTOFF_OFFSET_MINUTES,
+			OrderLeadMinutes:      Subscription.DEFAULT_ORDER_LEAD_MINUTES,
 		}
 	}
 

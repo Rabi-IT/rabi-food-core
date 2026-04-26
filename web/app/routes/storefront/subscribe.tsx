@@ -387,6 +387,7 @@ export default function Subscribe() {
         {step === 3 && (
           <StepDelivery
             deliveryDays={data.deliveryDays}
+            orderLeadMinutes={config.orderLeadMinutes ?? 0}
             onChange={(deliveryDays) => setData({ deliveryDays })}
             onNext={() => setStep(4)}
           />
