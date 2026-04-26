@@ -1,15 +1,6 @@
 package errs
 
-import (
-	"fmt"
-	"net/http"
-)
-
-var (
-	ErrForbidden        = newErr("forbidden", http.StatusForbidden)
-	ErrNoValuesToUpdate = newErr("NO_VALUES_TO_UPDATE", http.StatusBadRequest)
-	ErrConflict         = newErr("CONFLICT", http.StatusConflict)
-)
+import "fmt"
 
 type ApiError struct {
 	Code     string `json:"code"`
