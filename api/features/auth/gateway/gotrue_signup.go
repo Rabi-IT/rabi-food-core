@@ -5,7 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 )
@@ -23,7 +25,7 @@ type adminCreateUserResponse struct {
 	Email string `json:"email"`
 }
 
-func (g *GoTrueGatewayAdapter) SignUp(ctx context.Context, input SignUpInput) (*SignUpOutput, error) {
+func (g *GoTrueGatewayAdapter) CreateUser(ctx context.Context, input CreateUserInput) (*CreateUserOutput, error) {
 	body := adminCreateUserRequest{
 		Email:        input.Email,
 		Password:     input.Password,
@@ -64,6 +66,14 @@ func (g *GoTrueGatewayAdapter) SignUp(ctx context.Context, input SignUpInput) (*
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusUnprocessableEntity {
+		body, _ := io.ReadAll(resp.Body)
+		if strings.Contains(string(body), "email_exists") {
+			return nil, errs.ErrUserAlreadyExists
+		}
+		return nil, fmt.Errorf("%w: status=422 body=%s", errs.ErrAuthServiceFailure, body)
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, wrapResponseError(errs.ErrAuthServiceFailure, resp)
 	}
@@ -73,5 +83,5 @@ func (g *GoTrueGatewayAdapter) SignUp(ctx context.Context, input SignUpInput) (*
 		return nil, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 
-	return &SignUpOutput{ID: result.ID, Email: result.Email}, nil
+	return &CreateUserOutput{ID: result.ID, Email: result.Email}, nil
 }

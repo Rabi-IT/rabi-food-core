@@ -59,33 +59,49 @@ export function StepSummary({
       <div className="my-4 border-t" />
 
       {/* Pricing breakdown */}
-      <section className="space-y-2">
-        <div className="flex justify-between text-sm">
+      <section className="space-y-2 text-sm">
+        <div className="flex justify-between">
           <span className="text-muted-foreground">Subtotal</span>
           <span>{formatPrice(pricing.itemsTotal)}</span>
         </div>
+
         {pricing.itemsDiscount > 0 && (
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between">
             <span className="text-muted-foreground">Desconto por quantidade</span>
             <span className="text-primary">− {formatPrice(pricing.itemsDiscount)}</span>
           </div>
         )}
+
         {pricing.cycleDiscount > 0 && (
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">
-              Desconto plano ({pricing.cycleDiscountPercent}%)
-            </span>
-            <span className="text-primary">− {formatPrice(pricing.cycleDiscount)}</span>
-          </div>
+          <>
+            <div className="flex justify-between border-t pt-2">
+              <span className="text-muted-foreground">
+                Desconto do plano ({pricing.cycleDiscountPercent}%)
+              </span>
+              <span className="text-primary">− {formatPrice(pricing.cycleDiscount)}</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Aplicado sobre {formatPrice(pricing.itemsTotal - pricing.itemsDiscount)} (valor após desconto por quantidade)
+            </p>
+          </>
         )}
-        <div className="flex justify-between font-semibold border-t pt-2">
+
+        <div className="flex justify-between font-semibold border-t pt-2 mt-1">
           <span>Total por entrega</span>
           <span className="text-primary text-lg">{formatPrice(pricing.paymentAmount)}</span>
         </div>
+
         {data.totalCycles > 1 && (
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Total do plano ({data.totalCycles} entregas)</span>
-            <span className="font-medium">{formatPrice(pricing.paymentAmount * data.totalCycles)}</span>
+          <div className="flex justify-between text-muted-foreground">
+            <span>{data.totalCycles} entregas × {formatPrice(pricing.paymentAmount)}</span>
+            <span className="font-medium text-foreground">{formatPrice(pricing.paymentAmount * data.totalCycles)}</span>
+          </div>
+        )}
+
+        {pricing.totalDiscount > 0 && (
+          <div className="flex justify-between font-medium text-primary">
+            <span>Você economiza no plano</span>
+            <span>− {formatPrice(pricing.totalDiscount * data.totalCycles)}</span>
           </div>
         )}
       </section>
@@ -107,12 +123,14 @@ export function StepSummary({
       <section className="space-y-3 rounded-xl bg-primary/5 border border-primary/20 p-4">
         <p className="text-sm font-medium text-primary">Benefícios da assinatura</p>
         <ul className="space-y-1.5 text-sm text-foreground/80">
-          <li>✓ Altere sua cesta quando quiser</li>
-          <li>✓ Cancele qualquer entrega individualmente</li>
-          {data.autoRenew && <li>✓ Renovação automática ao terminar os ciclos</li>}
+          <li>✓ Altere os produtos da cesta quando quiser</li>
+          <li>✓ Adie uma entrega se não puder receber</li>
+          <li>✓ Altere os dias e horários de entrega a qualquer momento</li>
+          <li>✓ Pule entregas para receber com menos frequência</li>
+          {data.autoRenew && <li>✓ Renovação automática ao consumir todas as entregas</li>}
           {cutoffHours > 0 && (
             <li className="text-muted-foreground">
-              Cancelamentos até {cutoffHours}h antes da entrega sem custo
+              Alterações até {cutoffHours}h antes da entrega sem custo
             </li>
           )}
         </ul>

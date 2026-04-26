@@ -12,6 +12,8 @@ func Auth(app *fiber.App, c *controller.AuthController) {
 	route := app.Group("/auth")
 	route.Post("/signup", c.SignUp)
 	route.Post("/signin", c.SignIn)
+	route.Post("/otp", c.SendOTP)
+	route.Post("/otp/verify", c.VerifyOTP)
 	route.Post("/refresh", c.Refresh)
 	route.Post("/refresh-scoped", c.RefreshScoped)
 }

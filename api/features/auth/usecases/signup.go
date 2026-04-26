@@ -23,12 +23,13 @@ type SignUpInput struct {
 }
 
 type SignUpOutput struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
+	ID          string `json:"id"`
+	Email       string `json:"email"`
+	AccessToken string `json:"accessToken"`
 }
 
 func (c *AuthCase) SignUp(ctx context.Context, input *SignUpInput) (SignUpOutput, error) {
-	out, err := c.gateway.SignUp(ctx, g.SignUpInput{
+	out, err := c.gateway.CreateUser(ctx, g.CreateUserInput{
 		Email:        input.Email,
 		Password:     input.Password,
 		Name:         input.Name,
@@ -47,5 +48,13 @@ func (c *AuthCase) SignUp(ctx context.Context, input *SignUpInput) (SignUpOutput
 		return SignUpOutput{}, err
 	}
 
-	return SignUpOutput{ID: out.ID, Email: out.Email}, nil
+	tokenOut, err := c.gateway.SignIn(ctx, g.SignInInput{
+		Email:    input.Email,
+		Password: input.Password,
+	})
+	if err != nil {
+		return SignUpOutput{}, err
+	}
+
+	return SignUpOutput{ID: out.ID, Email: out.Email, AccessToken: tokenOut.AccessToken}, nil
 }

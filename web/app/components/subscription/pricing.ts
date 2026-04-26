@@ -1,4 +1,4 @@
-import type { CycleDiscountRule, Product, ProductDiscountRule } from "./types"
+import type { CycleDiscountRule, Product } from "./types"
 
 export type ItemBreakdown = {
   productId: string
@@ -17,9 +17,11 @@ export type PricingResult = {
   itemsDiscount: number
   cycleDiscountPercent: number
   cycleDiscount: number
+  totalDiscount: number
   paymentAmount: number
 }
 
+// Mirrors buildSubscriptionPricing in api/features/subscription/usecases/build_subscription_pricing.go
 export function calculatePricing(
   selectedItems: { productId: string; quantity: number }[],
   products: readonly Product[],
@@ -37,10 +39,15 @@ export function calculatePricing(
     if (!product) continue
 
     const subtotal = product.price * quantity
-    const discountPercent = (product.discountRules ?? []).reduce((best, rule) => {
-      return quantity >= rule.quantityThreshold && rule.discount > best ? rule.discount : best
-    }, 0)
-    const discountAmount = Math.floor((subtotal * discountPercent) / 100)
+
+    let discountPercent = 0
+    for (const rule of product.discountRules ?? []) {
+      if (quantity >= rule.quantityThreshold && rule.discount > discountPercent) {
+        discountPercent = rule.discount
+      }
+    }
+
+    const discountAmount = Math.trunc((subtotal * discountPercent) / 100)
 
     items.push({
       productId,
@@ -52,15 +59,20 @@ export function calculatePricing(
       discountAmount,
       total: subtotal - discountAmount,
     })
+
     itemsTotal += subtotal
     itemsDiscount += discountAmount
   }
 
+  let cycleDiscountPercent = 0
+  for (const rule of cycleDiscountRules) {
+    if (totalCycles >= rule.cyclesThreshold && rule.discount > cycleDiscountPercent) {
+      cycleDiscountPercent = rule.discount
+    }
+  }
+
   const net = itemsTotal - itemsDiscount
-  const cycleDiscountPercent = cycleDiscountRules.reduce((best, rule) => {
-    return totalCycles >= rule.cyclesThreshold && rule.discount > best ? rule.discount : best
-  }, 0)
-  const cycleDiscount = Math.floor((net * cycleDiscountPercent) / 100)
+  const cycleDiscount = Math.trunc((net * cycleDiscountPercent) / 100)
 
   return {
     items,
@@ -68,6 +80,7 @@ export function calculatePricing(
     itemsDiscount,
     cycleDiscountPercent,
     cycleDiscount,
+    totalDiscount: itemsDiscount + cycleDiscount,
     paymentAmount: net - cycleDiscount,
   }
 }

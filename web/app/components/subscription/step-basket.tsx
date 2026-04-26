@@ -1,159 +1,172 @@
 import { useState } from "react"
 import { Button } from "~/components/ui/button"
-import { ProductSheet } from "./product-sheet"
-import { calculatePricing, formatPrice } from "./pricing"
+import { formatPrice } from "./pricing"
 import { cn } from "~/lib/utils"
-import type { CycleDiscountRule, Product, ProductDiscountRule } from "./types"
+import type { Product } from "./types"
 
 type Props = {
   products: readonly Product[]
   items: { productId: string; quantity: number }[]
-  totalCycles: number
-  cycleDiscountRules: readonly CycleDiscountRule[]
   onChange: (items: { productId: string; quantity: number }[]) => void
   onNext: () => void
 }
 
-export function StepBasket({ products, items, totalCycles, cycleDiscountRules, onChange, onNext }: Props) {
-  console.log("[StepBasket]")
-  const [detailProduct, setDetailProduct] = useState<Product | null>(null)
+export function StepBasket({ products, items, onChange, onNext }: Props) {
+  const [productIndex, setProductIndex] = useState(0)
 
-  function getQuantity(productId: string) {
-    return items.find((i) => i.productId === productId)?.quantity ?? 0
+  const selectedProducts = items
+    .map((item) => ({
+      item,
+      product: products.find((p) => p.id === item.productId),
+    }))
+    .filter((x): x is { item: typeof items[0]; product: Product } => x.product !== undefined)
+
+  const current = selectedProducts[productIndex]
+  if (!current) return null
+
+  const { item, product } = current
+  const qty = item.quantity
+  const rules = (product.discountRules ?? []).slice().sort((a, b) => a.quantityThreshold - b.quantityThreshold)
+
+  function setQuantity(qty: number) {
+    if (qty < 1) return
+    onChange(items.map((i) => (i.productId === product.id ? { ...i, quantity: qty } : i)))
   }
 
-  function setQuantity(productId: string, qty: number) {
-    console.log("[StepBasket] setQuantity", productId, qty)
-    if (qty <= 0) {
-      onChange(items.filter((i) => i.productId !== productId))
+  function handleNext() {
+    if (productIndex < selectedProducts.length - 1) {
+      setProductIndex(productIndex + 1)
     } else {
-      const exists = items.find((i) => i.productId === productId)
-      if (exists) {
-        onChange(items.map((i) => (i.productId === productId ? { ...i, quantity: qty } : i)))
-      } else {
-        onChange([...items, { productId, quantity: qty }])
-      }
+      onNext()
     }
   }
 
-  const pricing = calculatePricing(items, products, totalCycles, cycleDiscountRules)
-  const hasItems = items.length > 0
+  const isLast = productIndex === selectedProducts.length - 1
+  const activeRule = rules.filter((r) => qty >= r.quantityThreshold).at(-1) ?? null
+  const subtotal = product.price * qty
+  const discountAmount = activeRule ? Math.floor((subtotal * activeRule.discount) / 100) : 0
 
   return (
-    <>
-      <div className="flex flex-col min-h-0">
-        <div className="space-y-3 pb-36">
-          {products.map((product) => {
-            const qty = getQuantity(product.id)
-            const rules = product.discountRules ?? []
-            const activeRule = rules
-              .filter((r) => qty >= r.quantityThreshold)
-              .reduce<ProductDiscountRule | null>((best, r) => (!best || r.discount > best.discount ? r : best), null)
-            const nextRule = rules
-              .filter((r) => qty < r.quantityThreshold)
-              .reduce<ProductDiscountRule | null>((closest, r) => (!closest || r.quantityThreshold < closest.quantityThreshold ? r : closest), null)
+    <div className="flex flex-col pb-32">
+      {/* Progress within this step */}
+      <div className="flex gap-1 mb-6">
+        {selectedProducts.map((_, i) => (
+          <div
+            key={i}
+            className={cn(
+              "h-1 flex-1 rounded-full transition-colors",
+              i <= productIndex ? "bg-primary" : "bg-muted"
+            )}
+          />
+        ))}
+      </div>
 
-            return (
-              <div key={product.id} className="flex items-center gap-3 rounded-xl border bg-card p-3">
-                <button
-                  type="button"
-                  onClick={() => setDetailProduct(product)}
-                  className="shrink-0"
-                >
-                  {product.photo ? (
-                    <img
-                      src={product.photo}
-                      alt={product.name}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
-                      <span className="text-xs text-muted-foreground">Foto</span>
-                    </div>
-                  )}
-                </button>
+      <p className="text-xs text-muted-foreground mb-1">
+        Produto {productIndex + 1} de {selectedProducts.length}
+      </p>
 
-                <div className="flex-1 min-w-0">
-                  <button
-                    type="button"
-                    onClick={() => setDetailProduct(product)}
-                    className="text-left"
-                  >
-                    <p className="text-sm font-medium leading-snug line-clamp-1">{product.name}</p>
-                    <p className="text-sm font-semibold text-primary">{formatPrice(product.price)}</p>
-                    {product.unit && (
-                      <p className="text-xs text-muted-foreground">por {product.unit}</p>
-                    )}
-                  </button>
+      {/* Product card */}
+      <div className="rounded-xl border bg-card p-4 mb-6">
+        <div className="flex gap-4">
+          {product.photo ? (
+            <img src={product.photo} alt={product.name} className="w-20 h-20 rounded-lg object-cover shrink-0" />
+          ) : (
+            <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center shrink-0">
+              <span className="text-xs text-muted-foreground">Foto</span>
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold leading-snug">{product.name}</p>
+            {product.description && (
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.description}</p>
+            )}
+            <p className="text-sm font-semibold text-primary mt-1">{formatPrice(product.price)}</p>
+            {product.unit && <p className="text-xs text-muted-foreground">por {product.unit}</p>}
+          </div>
+        </div>
 
-                  {activeRule && (
-                    <span className="inline-block mt-1 text-xs font-medium text-primary bg-primary/10 rounded-full px-2 py-0.5">
-                      {activeRule.discount}% off aplicado
-                    </span>
-                  )}
-                  {!activeRule && nextRule && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Leve {nextRule.quantityThreshold - qty} mais → {nextRule.discount}% off
-                    </p>
-                  )}
-                </div>
+        {/* Quantity selector */}
+        <div className="mt-4 flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">Quantidade</p>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setQuantity(qty - 1)}
+              disabled={qty <= 1}
+              className="w-10 h-10 rounded-full border flex items-center justify-center text-xl font-medium hover:bg-muted transition-colors disabled:opacity-30"
+            >
+              −
+            </button>
+            <span className="w-6 text-center text-lg font-bold">{qty}</span>
+            <button
+              type="button"
+              onClick={() => setQuantity(qty + 1)}
+              className="w-10 h-10 rounded-full border flex items-center justify-center text-xl font-medium hover:bg-muted transition-colors"
+            >
+              +
+            </button>
+          </div>
+        </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(product.id, qty - 1)}
-                    className="w-8 h-8 rounded-full border flex items-center justify-center text-lg font-medium hover:bg-muted transition-colors"
-                  >
-                    −
-                  </button>
-                  <span className="w-5 text-center text-sm font-semibold">{qty}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(product.id, qty + 1)}
-                    className="w-8 h-8 rounded-full border flex items-center justify-center text-lg font-medium hover:bg-muted transition-colors"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            )
-          })}
+        {/* Subtotal */}
+        <div className="mt-3 flex items-baseline justify-between">
+          <p className="text-sm text-muted-foreground">Subtotal</p>
+          <div className="text-right">
+            {discountAmount > 0 && (
+              <p className="text-xs text-muted-foreground line-through">{formatPrice(subtotal)}</p>
+            )}
+            <p className="font-bold text-primary">{formatPrice(subtotal - discountAmount)}</p>
+          </div>
         </div>
       </div>
 
-      {/* Sticky footer */}
-      {/* <div className="fixed inset-x-0 bottom-0 border-t bg-background p-4 space-y-3">
-        {hasItems && (
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-muted-foreground">
-              {items.reduce((s, i) => s + i.quantity, 0)} itens
-            </span>
-            <div className="text-right">
-              {pricing.itemsDiscount > 0 && (
-                <p className="text-xs text-muted-foreground line-through">
-                  {formatPrice(pricing.itemsTotal)}
-                </p>
-              )}
-              <p className="font-semibold text-primary">
-                {formatPrice(pricing.itemsTotal - pricing.itemsDiscount)}
-                <span className="text-xs font-normal text-muted-foreground"> /entrega</span>
-              </p>
-            </div>
-          </div>
-        )}
-        <Button
-          className="w-full"
-          disabled={!hasItems}
-          onClick={onNext}
-        >
-          {hasItems ? "Continuar" : "Adicione ao menos um produto"}
-        </Button>
-        <p className="text-center text-xs text-muted-foreground">
-          Você pode alterar os produtos a qualquer momento
-        </p>
-      </div> */}
+      {/* Discount tiers */}
+      {rules.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Descontos por quantidade</p>
+          {rules.map((rule) => {
+            const isActive = activeRule?.quantityThreshold === rule.quantityThreshold
+            const nextUnlocked = rules.find((r) => r.quantityThreshold > qty)
 
-      {/* <ProductSheet product={detailProduct} onClose={() => setDetailProduct(null)} /> */}
-    </>
+            return (
+              <button
+                key={rule.quantityThreshold}
+                type="button"
+                onClick={() => setQuantity(rule.quantityThreshold)}
+                className={cn(
+                  "w-full flex items-center justify-between rounded-lg border px-4 py-3 text-sm transition-colors text-left",
+                  isActive ? "border-primary bg-primary/5" : "border-border bg-card hover:bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  {isActive ? (
+                    <span className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-white text-xs shrink-0">✓</span>
+                  ) : (
+                    <span className="w-5 h-5 rounded-full border-2 border-muted-foreground/30 shrink-0" />
+                  )}
+                  <span className={cn("font-medium", isActive ? "text-primary" : "text-foreground")}>
+                    {rule.quantityThreshold}+ {product.unit ?? "unidades"}
+                  </span>
+                  {nextUnlocked?.quantityThreshold === rule.quantityThreshold && (
+                    <span className="text-xs text-muted-foreground">
+                      (mais {rule.quantityThreshold - qty} para desbloquear)
+                    </span>
+                  )}
+                </div>
+                <span className={cn("font-semibold shrink-0", isActive ? "text-primary" : "text-muted-foreground")}>
+                  {rule.discount}% off
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      <div className="fixed inset-x-0 bottom-0 border-t bg-background p-4">
+        <Button className="w-full" onClick={handleNext}>
+          {isLast ? "Continuar" : "Próximo produto"}
+        </Button>
+      </div>
+    </div>
   )
 }
