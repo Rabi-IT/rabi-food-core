@@ -34,7 +34,6 @@ type CreateInput struct {
 	Items        []SubscriptionItemInput `json:"items"        validate:"required,min=1"`
 	DeliveryDays []g.DeliveryDay         `json:"deliveryDays" validate:"required,min=1"`
 	TotalCycles  uint                    `json:"totalCycles"  validate:"required,min=1"`
-	AutoRenew    bool                    `json:"autoRenew"`
 	Notes        string                  `json:"notes"`
 }
 
@@ -114,7 +113,7 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 		RemainingCycles:     input.TotalCycles,
 		CycleDiscount:       price.CycleDiscount,
 		CutoffOffsetMinutes: config.CutoffOffsetMinutes,
-		AutoRenew:           input.AutoRenew,
+		AutoRenew:           true,
 		MaxAttemptsPerOrder: config.MaxAttemptsPerOrder,
 		ItemsTotal:          price.ItemsTotal,
 		ItemsDiscount:       price.ItemsDiscount,

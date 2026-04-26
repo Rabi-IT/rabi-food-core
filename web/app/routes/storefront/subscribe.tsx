@@ -125,7 +125,6 @@ export async function action({ request }: Route.ActionArgs): Promise<OtpActionRe
     items: data.items,
     deliveryDays: data.deliveryDays,
     totalCycles: data.totalCycles,
-    autoRenew: data.autoRenew,
   }, data.user.token)
   if (!result.ok) return { error: result.code }
   return { ok: true }
@@ -401,8 +400,7 @@ export default function Subscribe() {
             minCycles={data.deliveryDays.length}
             deliveryWeekdays={data.deliveryDays.map((d) => d.weekday)}
             cycleDiscountRules={config?.discountRules ?? []}
-            autoRenew={data.autoRenew}
-            onChange={(totalCycles, autoRenew) => setData({ totalCycles, autoRenew })}
+            onChange={(totalCycles) => setData({ totalCycles })}
             onNext={() => setStep(data.user.token ? 6 : 5)}
           />
         )}

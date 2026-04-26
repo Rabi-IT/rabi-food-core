@@ -86,7 +86,6 @@ func (subscriptionFixture) Create(t *testing.T, input *c.CreateInput, auth Reque
 				},
 			},
 			TotalCycles: Subscription.DEFAULT_TOTAL_CYCLES,
-			AutoRenew:   Subscription.DEFAULT_AUTO_RENEW,
 			Notes:       Subscription.DEFAULT_NOTES,
 		}
 	}
