@@ -61,7 +61,7 @@ export async function action({ request }: Route.ActionArgs): Promise<OtpActionRe
 
   if (intent === "send-otp") {
     try {
-      await api.post("/auth/otp", { email: body.email, name: body.name })
+      await api.post("/auth/otp", { email: body.email, name: body.name, phone: body.phone })
       return { intent: "send-otp", ok: true }
     } catch {
       return { intent: "send-otp", error: "Não foi possível enviar o código. Tente novamente." }
@@ -216,9 +216,9 @@ export default function Subscribe() {
     if (confirmResult && "ok" in confirmResult) reset()
   }, [confirmResult]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  function handleSendOtp(name: string, email: string) {
+  function handleSendOtp(name: string, email: string, phone: string) {
     otpFetcher.submit(
-      { intent: "send-otp", name, email },
+      { intent: "send-otp", name, email, phone },
       { method: "post", encType: "application/json" },
     )
   }

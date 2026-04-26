@@ -15,13 +15,15 @@ import (
 
 type SendOTPInput struct {
 	Email string `json:"email" validate:"required,email"`
-	Name  string `json:"name"  validate:"required"`
+	Name  string `json:"name"`
+	Phone string `json:"phone" validate:"omitempty,e164"`
 }
 
 func (c *AuthCase) SendOTP(ctx context.Context, input *SendOTPInput) error {
 	_, err := c.gateway.CreateUser(ctx, g.CreateUserInput{
 		Email:    input.Email,
 		Name:     input.Name,
+		Phone:    input.Phone,
 		Password: randomPassword(),
 		Role:     auth.User,
 	})
