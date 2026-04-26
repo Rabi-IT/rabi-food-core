@@ -2,8 +2,6 @@ package gateway
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -12,12 +10,6 @@ import (
 
 func (g *PgxOrderGatewayAdapter) Create(ctx context.Context, input CreateInput) (string, error) {
 	id := uuid.Must(uuid.NewV7()).String()
-
-	items, err := json.Marshal(input.Items)
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal order items: %w", err)
-	}
-
 	now := time.Now().UTC()
 
 	sql, args, err := sq.
@@ -26,7 +18,7 @@ func (g *PgxOrderGatewayAdapter) Create(ctx context.Context, input CreateInput) 
 			"delivery_status", "payment_status", "notes", "total_price", "items",
 			"created_at", "updated_at").
 		Values(id, input.TenantID, input.UserID, input.Code, input.FulfillmentStatus,
-			input.DeliveryStatus, input.PaymentStatus, input.Notes, input.TotalPrice, items,
+			input.DeliveryStatus, input.PaymentStatus, input.Notes, input.TotalPrice, input.Items,
 			now, now).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()

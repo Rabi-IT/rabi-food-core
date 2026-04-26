@@ -2,10 +2,10 @@ package subscription_gateway
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v5"
 )
 
 func (g *PgxSubscriptionGatewayAdapter) List(ctx context.Context, filter ListFilter) ([]ListOutput, error) {
@@ -31,26 +31,10 @@ func (g *PgxSubscriptionGatewayAdapter) List(ctx context.Context, filter ListFil
 	if err != nil {
 		return nil, fmt.Errorf("failed to query schedulable subscriptions: %w", err)
 	}
-	defer rows.Close()
 
-	var subs []ListOutput
-	for rows.Next() {
-		var (
-			s            ListOutput
-			deliveryJSON json.RawMessage
-		)
-		err := rows.Scan(&s.ID, &deliveryJSON, &s.CutoffOffsetMinutes, &s.MaxAttemptsPerOrder)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan subscription: %w", err)
-		}
-		err = json.Unmarshal(deliveryJSON, &s.DeliveryDays)
-		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal delivery_days for subscription %s: %w", s.ID, err)
-		}
-		subs = append(subs, s)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating subscriptions: %w", err)
+	subs, err := pgx.CollectRows(rows, pgx.RowToStructByName[ListOutput])
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan subscriptions: %w", err)
 	}
 
 	return subs, nil

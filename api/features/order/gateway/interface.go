@@ -44,18 +44,18 @@ type GetByIDFilter struct {
 }
 
 type GetByIDOutput struct {
-	ID                string                  `json:"id"`
-	TenantID          string                  `json:"tenantId"`
-	Code              string                  `json:"code"`
-	PaymentStatus     payment_status.Status   `json:"paymentStatus"`
-	FulfillmentStatus order.FulfillmentStatus `json:"fulfillmentStatus"`
-	DeliveryStatus    order.DeliveryStatus    `json:"deliveryStatus"`
-	Notes             string                  `json:"notes"`
-	TotalPrice        uint                    `json:"totalPrice"`
-	Items             []OrderItem             `json:"items"`
-	PaidAt            *time.Time              `json:"paidAt"`
-	CreatedAt         time.Time               `json:"createdAt"`
-	ExternalPaymentID *string                 `json:"externalPaymentId"`
+	ID                string                  `db:"id"                  json:"id"`
+	TenantID          string                  `db:"tenant_id"           json:"tenantId"`
+	Code              string                  `db:"code"                json:"code"`
+	PaymentStatus     payment_status.Status   `db:"payment_status"      json:"paymentStatus"`
+	FulfillmentStatus order.FulfillmentStatus `db:"fulfillment_status"  json:"fulfillmentStatus"`
+	DeliveryStatus    order.DeliveryStatus    `db:"delivery_status"     json:"deliveryStatus"`
+	Notes             string                  `db:"notes"               json:"notes"`
+	TotalPrice        uint                    `db:"total_price"         json:"totalPrice"`
+	Items             []OrderItem             `db:"items"               json:"items"`
+	PaidAt            *time.Time              `db:"paid_at"             json:"paidAt"`
+	CreatedAt         time.Time               `db:"created_at"          json:"createdAt"`
+	ExternalPaymentID *string                 `db:"external_payment_id" json:"externalPaymentId"`
 }
 
 type PatchFilter struct {
