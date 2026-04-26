@@ -1,28 +1,51 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
+import { isValidPhoneNumber } from "react-phone-number-input"
 import { Button } from "~/components/ui/button"
+import { PhoneInput } from "~/components/ui/phone-input"
 import { cn } from "~/lib/utils"
 import type { WizardData } from "./use-wizard"
 
 type AddressData = WizardData["address"]
 
 type ExistingProfile = {
-  street: string; complement: string; neighborhood: string
-  city: string; state: string; zip: string; phone: string
+  readonly street: string
+  readonly complement: string
+  readonly neighborhood: string
+  readonly city: string
+  readonly state: string
+  readonly zip: string
+  readonly phone: string
 }
 
 type Props = {
-  phone: string
-  address: AddressData
-  existingProfile: ExistingProfile | null
-  isLoadingProfile: boolean
-  onChangePhone: (phone: string) => void
-  onChangeAddress: (address: AddressData) => void
-  onNext: () => void
-  isSaving: boolean
-  saveError?: string
+  readonly phone: string
+  readonly address: AddressData
+  readonly existingProfile: ExistingProfile | null
+  readonly isLoadingProfile: boolean
+  readonly onChangePhone: (phone: string) => void
+  readonly onChangeAddress: (address: AddressData) => void
+  readonly onNext: () => void
+  readonly isSaving: boolean
+  readonly saveError?: string
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+type AddressMode = "confirm" | "edit"
+
+const ZIP_LENGTH = 8
+
+const inputClass =
+  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
+
+function Field({
+  label,
+  error,
+  children,
+}: {
+  readonly label: string
+  readonly error?: string
+  readonly children: React.ReactNode
+}) {
   return (
     <div className="space-y-1">
       <label className="text-sm font-medium">{label}</label>
@@ -32,17 +55,18 @@ function Field({ label, error, children }: { label: string; error?: string; chil
   )
 }
 
-const inputClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
-
-function validate(phone: string, address: AddressData): Record<string, string> {
+function validate(
+  phone: string,
+  address: AddressData,
+  t: (key: string) => string,
+): Readonly<Record<string, string>> {
   const errors: Record<string, string> = {}
-  if (!phone.trim()) errors.phone = "Telefone obrigatório"
-  if (!address.zip.trim()) errors.zip = "CEP obrigatório"
-  if (!address.street.trim()) errors.street = "Rua obrigatória"
-  if (!address.neighborhood.trim()) errors.neighborhood = "Bairro obrigatório"
-  if (!address.city.trim()) errors.city = "Cidade obrigatória"
-  if (!address.state.trim()) errors.state = "Estado obrigatório"
+  if (!phone || !isValidPhoneNumber(phone)) errors.phone = t("subscription.address.phoneInvalid")
+  if (!address.zip.trim()) errors.zip = t("subscription.address.zipRequired")
+  if (!address.street.trim()) errors.street = t("subscription.address.streetRequired")
+  if (!address.neighborhood.trim()) errors.neighborhood = t("subscription.address.neighborhoodRequired")
+  if (!address.city.trim()) errors.city = t("subscription.address.cityRequired")
+  if (!address.state.trim()) errors.state = t("subscription.address.stateRequired")
   return errors
 }
 
@@ -57,12 +81,13 @@ export function StepAddress({
   isSaving,
   saveError,
 }: Props) {
+  const { t } = useTranslation()
   const [touched, setTouched] = useState(false)
-  const [mode, setMode] = useState<"confirm" | "edit">("confirm")
+  const [mode, setMode] = useState<AddressMode>("confirm")
   const [cepLoading, setCepLoading] = useState(false)
   const [cepError, setCepError] = useState<string | null>(null)
   const [addressReady, setAddressReady] = useState(
-    () => address.street.trim() !== "" || address.city.trim() !== ""
+    () => address.street.trim() !== "" || address.city.trim() !== "",
   )
 
   async function handleZipChange(raw: string) {
@@ -70,7 +95,7 @@ export function StepAddress({
     setCepError(null)
 
     const digits = raw.replace(/\D/g, "")
-    if (digits.length !== 8) {
+    if (digits.length !== ZIP_LENGTH) {
       setAddressReady(false)
       return
     }
@@ -80,7 +105,7 @@ export function StepAddress({
       const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`)
       const json = await res.json()
       if (json.erro) {
-        setCepError("CEP não encontrado")
+        setCepError(t("subscription.address.zipNotFound"))
         setAddressReady(false)
         return
       }
@@ -94,7 +119,7 @@ export function StepAddress({
       })
       setAddressReady(true)
     } catch {
-      setCepError("Erro ao buscar CEP. Preencha manualmente.")
+      setCepError(t("subscription.address.zipError"))
       setAddressReady(true)
     } finally {
       setCepLoading(false)
@@ -103,11 +128,24 @@ export function StepAddress({
 
   function handleNext() {
     setTouched(true)
-    if (Object.keys(validate(phone, address)).length === 0) onNext()
+    if (Object.keys(validate(phone, address, t)).length === 0) onNext()
   }
 
-  const errors = touched ? validate(phone, address) : {}
-  const hasExisting = existingProfile && existingProfile.street.trim() !== ""
+  function handleUseExisting(p: ExistingProfile) {
+    onChangePhone(p.phone)
+    onChangeAddress({
+      street: p.street,
+      complement: p.complement,
+      neighborhood: p.neighborhood,
+      city: p.city,
+      state: p.state,
+      zip: p.zip,
+    })
+    onNext()
+  }
+
+  const errors = touched ? validate(phone, address, t) : {}
+  const hasExisting = !!existingProfile && existingProfile.street.trim() !== ""
 
   if (isLoadingProfile) {
     return (
@@ -118,14 +156,17 @@ export function StepAddress({
   }
 
   if (hasExisting && mode === "confirm") {
-    const p = existingProfile
+    const p = existingProfile!
     return (
       <div className="flex flex-col pb-32 space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Encontramos um endereço cadastrado. Deseja usá-lo para esta entrega?
-        </p>
+        <p className="text-sm text-muted-foreground">{t("subscription.address.existingHint")}</p>
         <div className="rounded-xl border bg-card p-4 space-y-1 text-sm">
-          {p.phone && <p><span className="text-muted-foreground">Telefone:</span> {p.phone}</p>}
+          {p.phone && (
+            <p>
+              <span className="text-muted-foreground">{t("subscription.address.existingPhone")}:</span>{" "}
+              {p.phone}
+            </p>
+          )}
           <p>{p.street}</p>
           {p.complement && <p>{p.complement}</p>}
           <p>{p.neighborhood}</p>
@@ -135,21 +176,17 @@ export function StepAddress({
         <div className="fixed inset-x-0 bottom-0 border-t bg-background p-4 space-y-2">
           <Button
             className="w-full"
-            onClick={() => {
-              onChangePhone(p.phone)
-              onChangeAddress({ street: p.street, complement: p.complement, neighborhood: p.neighborhood, city: p.city, state: p.state, zip: p.zip })
-              onNext()
-            }}
+            onClick={() => handleUseExisting(p)}
             disabled={isSaving}
           >
-            {isSaving ? "Salvando…" : "Usar este endereço"}
+            {isSaving ? t("subscription.address.saving") : t("subscription.address.useExisting")}
           </Button>
           <button
             type="button"
             onClick={() => setMode("edit")}
             className="w-full text-sm text-primary hover:underline py-1"
           >
-            Atualizar endereço
+            {t("subscription.address.updateAddress")}
           </button>
         </div>
       </div>
@@ -158,31 +195,29 @@ export function StepAddress({
 
   return (
     <div className="flex flex-col pb-32 space-y-4">
-      <Field label="Telefone" error={errors.phone}>
-        <input
-          type="tel"
+      <Field label={t("subscription.address.phone")} error={errors.phone}>
+        <PhoneInput
           value={phone}
-          onChange={(e) => onChangePhone(e.target.value)}
+          onChange={onChangePhone}
           className={cn(inputClass, errors.phone && "border-destructive")}
-          placeholder="(11) 9 0000-0000"
           autoComplete="tel"
         />
       </Field>
 
-      <Field label="CEP" error={cepError ?? errors.zip}>
+      <Field label={t("subscription.address.zip")} error={cepError ?? errors.zip}>
         <div className="relative">
           <input
             type="text"
             value={address.zip}
             onChange={(e) => handleZipChange(e.target.value)}
-            className={cn(inputClass, (cepError || errors.zip) && "border-destructive")}
-            placeholder="00000-000"
+            className={cn(inputClass, (cepError ?? errors.zip) && "border-destructive")}
+            placeholder={t("subscription.address.zipPlaceholder")}
             autoComplete="postal-code"
             maxLength={9}
           />
           {cepLoading && (
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">
-              Buscando…
+              {t("subscription.address.zipSearching")}
             </span>
           )}
         </div>
@@ -190,56 +225,56 @@ export function StepAddress({
 
       {addressReady && (
         <>
-          <Field label="Rua e número" error={errors.street}>
+          <Field label={t("subscription.address.street")} error={errors.street}>
             <input
               type="text"
               value={address.street}
               onChange={(e) => onChangeAddress({ ...address, street: e.target.value })}
               className={cn(inputClass, errors.street && "border-destructive")}
-              placeholder="Rua Exemplo, 123"
+              placeholder={t("subscription.address.streetPlaceholder")}
               autoComplete="street-address"
             />
           </Field>
 
-          <Field label="Complemento">
+          <Field label={t("subscription.address.complement")}>
             <input
               type="text"
               value={address.complement}
               onChange={(e) => onChangeAddress({ ...address, complement: e.target.value })}
               className={inputClass}
-              placeholder="Apto, bloco… (opcional)"
+              placeholder={t("subscription.address.complementPlaceholder")}
             />
           </Field>
 
-          <Field label="Bairro" error={errors.neighborhood}>
+          <Field label={t("subscription.address.neighborhood")} error={errors.neighborhood}>
             <input
               type="text"
               value={address.neighborhood}
               onChange={(e) => onChangeAddress({ ...address, neighborhood: e.target.value })}
               className={cn(inputClass, errors.neighborhood && "border-destructive")}
-              placeholder="Seu bairro"
+              placeholder={t("subscription.address.neighborhoodPlaceholder")}
             />
           </Field>
 
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2">
-              <Field label="Cidade" error={errors.city}>
+              <Field label={t("subscription.address.city")} error={errors.city}>
                 <input
                   type="text"
                   value={address.city}
                   onChange={(e) => onChangeAddress({ ...address, city: e.target.value })}
                   className={cn(inputClass, errors.city && "border-destructive")}
-                  placeholder="Cidade"
+                  placeholder={t("subscription.address.cityPlaceholder")}
                 />
               </Field>
             </div>
-            <Field label="Estado" error={errors.state}>
+            <Field label={t("subscription.address.state")} error={errors.state}>
               <input
                 type="text"
                 value={address.state}
                 onChange={(e) => onChangeAddress({ ...address, state: e.target.value })}
                 className={cn(inputClass, errors.state && "border-destructive")}
-                placeholder="SP"
+                placeholder={t("subscription.address.statePlaceholder")}
                 maxLength={2}
               />
             </Field>
@@ -255,7 +290,7 @@ export function StepAddress({
 
       <div className="fixed inset-x-0 bottom-0 border-t bg-background p-4">
         <Button className="w-full" onClick={handleNext} disabled={isSaving || cepLoading}>
-          {isSaving ? "Salvando…" : "Continuar"}
+          {isSaving ? t("subscription.address.saving") : t("subscription.address.continue")}
         </Button>
       </div>
     </div>
