@@ -17,6 +17,7 @@ type AccountMode = "new" | "existing"
 type Props = {
   readonly user: UserData
   readonly subStep: "identity" | "code"
+  readonly initialMode?: AccountMode
   readonly onChange: (user: UserData) => void
   readonly onBack: () => void
   readonly onSendOtp: (name: string, email: string, phone: string) => void
@@ -48,6 +49,7 @@ function validateIdentity(
 export function StepUser({
   user,
   subStep,
+  initialMode,
   onChange,
   onBack,
   onSendOtp,
@@ -60,7 +62,7 @@ export function StepUser({
   const { t } = useTranslation()
   const [touched, setTouched] = useState(false)
   const [code, setCode] = useState("")
-  const [mode, setMode] = useState<AccountMode | undefined>(undefined)
+  const [mode, setMode] = useState<AccountMode | undefined>(initialMode)
   const codeInputRef = useRef<HTMLInputElement>(null)
 
   const errors = touched && mode ? validateIdentity(user, mode) : {}
