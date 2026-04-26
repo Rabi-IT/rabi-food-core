@@ -9,7 +9,7 @@ tasks:
   # =============================
   # 🛠️ Development environment
   # =============================
-  dev:
+  api:
     desc: "Start the development environment"
     dir: api
     dotenv: ["../.env.test"]
