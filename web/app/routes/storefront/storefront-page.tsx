@@ -7,37 +7,41 @@ import { cn } from "~/lib/utils"
 import { ProductSheet } from "~/components/subscription/product-sheet"
 import InstitutionalPage from "./institutional-page"
 
-type Category = { id: string; name: string; description: string }
 type Product = {
-  id: string
-  name: string
-  description: string
-  photo: string
-  categoryId: string
-  unit: string
-  price: number
-  isActive: boolean
-  discountRules: { quantityThreshold: number; discount: number }[]
+  readonly id: string
+  readonly name: string
+  readonly description: string
+  readonly photo: string
+  readonly categoryId: string
+  readonly categoryName: string
+  readonly unit: string
+  readonly price: number
+  readonly discountRules: readonly { quantityThreshold: number; discount: number }[]
 }
-type PaginatedCategories = { data: Category[]; maxPages: number }
-type PaginatedProducts = { data: Product[]; maxPages: number }
+
+type Category = { readonly id: string; readonly name: string }
+
+type CatalogResponse = {
+  readonly products: readonly Product[]
+  readonly categories: readonly Category[]
+}
 
 export async function loader({ request }: Route.LoaderArgs) {
   const tenant = await resolveTenant(request)
   if (!tenant) return { tenant: null, categories: [] as Category[], products: [] as Product[], selectedCategoryId: null }
 
   const url = new URL(request.url)
-  const categoryId = url.searchParams.get("categoryId") ?? undefined
-  const name = url.searchParams.get("name") ?? undefined
+  const selectedCategoryId = url.searchParams.get("categoryId")
 
   const api = apiClient(tenant.id)
+  const res = await api.get<CatalogResponse>("/product/catalog")
 
-  const [categories, products] = await Promise.all([
-    api.get<PaginatedCategories>("/category/"),
-    api.get<PaginatedProducts>("/product/", { isActive: "1", categoryId, name }),
-  ])
-
-  return { tenant, categories: categories.data, products: products.data, selectedCategoryId: categoryId ?? null }
+  return {
+    tenant,
+    products: res.ok ? res.data.products : [],
+    categories: res.ok ? res.data.categories : [],
+    selectedCategoryId,
+  }
 }
 
 function formatPrice(cents: number): string {
