@@ -17,6 +17,7 @@ type catalogProductResponse struct {
 	Name          string           `json:"name"`
 	Description   string           `json:"description"`
 	Photo         string           `json:"photo"`
+	CategoryID    string           `json:"categoryId"`
 	Unit          string           `json:"unit"`
 	Price         uint             `json:"price"`
 	DiscountRules []g.DiscountRule `json:"discountRules"`
@@ -47,6 +48,7 @@ func (c *ProductController) Catalog(ctx *fiber.Ctx) error {
 			Name:          p.Name,
 			Description:   p.Description,
 			Photo:         p.Photo,
+			CategoryID:    p.CategoryID,
 			Unit:          p.Unit,
 			Price:         p.Price,
 			DiscountRules: p.DiscountRules,
