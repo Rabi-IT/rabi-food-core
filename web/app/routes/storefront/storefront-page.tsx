@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react"
 import type { Route } from "./+types/storefront-page"
 import { resolveTenant } from "~/lib/tenant.server"
 import { apiClient } from "~/lib/api.server"
-import { cn } from "~/lib/utils"
+import { CategoryBar } from "~/components/storefront/category-bar"
+import { useScrollSpy } from "~/components/storefront/use-scroll-spy"
 import { ProductSheet } from "~/components/subscription/product-sheet"
 import InstitutionalPage from "./institutional-page"
 
@@ -19,11 +20,6 @@ type Product = {
 }
 
 type Category = { readonly id: string; readonly name: string }
-
-// Fraction of a category's own height that is considered "dead zone" —
-// when only this much of the current category remains visible above the next one,
-// we already consider the next category active.
-const DEAD_ZONE_RATIO = 0.3
 
 type CatalogResponse = {
   readonly products: readonly Product[]
@@ -53,15 +49,17 @@ export default function StorefrontHome() {
   if (!tenant) return <InstitutionalPage />
 
   const layout = useRouteLoaderData("routes/storefront/layout") as { tenant: { name: string } }
-  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(categories[0]?.id ?? null)
-  const [detailProduct, setDetailProduct] = useState<Product | null>(null)
-  const [stickyHeight, setStickyHeight] = useState(0)
-  const [titleGap, setTitleGap] = useState(0)
   const [bottomPadding, setBottomPadding] = useState(0)
+  const [detailProduct, setDetailProduct] = useState<Product | null>(null)
 
-  const categoryBarRef = useRef<HTMLDivElement>(null)
   const mainRef = useRef<HTMLDivElement>(null)
   const firstTitleRef = useRef<HTMLHeadingElement>(null)
+
+  const titleGap = firstTitleRef.current
+    ? parseFloat(getComputedStyle(firstTitleRef.current).marginBottom)
+    : 0
+
+  const { activeCategoryId, offset, barRef, scrollToCategory } = useScrollSpy(categories, titleGap)
 
   const productsByCategory = categories.map((cat) => ({
     category: cat,
@@ -70,26 +68,16 @@ export default function StorefrontHome() {
 
   useEffect(() => {
     function calculate() {
-      const bar = categoryBarRef.current
       const main = mainRef.current
-      if (!bar || !main) return
+      const firstTitle = firstTitleRef.current
+      if (!main || !firstTitle) return
 
-      const barHeight = bar.getBoundingClientRect().height
-      setStickyHeight(barHeight)
-
-      if (firstTitleRef.current) {
-        const mb = parseFloat(getComputedStyle(firstTitleRef.current).marginBottom)
-        setTitleGap(mb)
-      }
-
+      const gap = parseFloat(getComputedStyle(firstTitle).marginBottom)
       const sections = main.querySelectorAll("section")
       const lastSection = sections[sections.length - 1]
       if (!lastSection) return
 
-      const mb = firstTitleRef.current
-        ? parseFloat(getComputedStyle(firstTitleRef.current).marginBottom)
-        : 0
-      const available = window.innerHeight - barHeight - mb
+      const available = window.innerHeight - offset - gap
       const lastHeight = lastSection.getBoundingClientRect().height
       setBottomPadding(Math.max(0, available - lastHeight))
     }
@@ -97,51 +85,7 @@ export default function StorefrontHome() {
     calculate()
     window.addEventListener("resize", calculate)
     return () => window.removeEventListener("resize", calculate)
-  }, [productsByCategory])
-
-  useEffect(() => {
-    if (categories.length === 0) return
-
-    const offset = stickyHeight + titleGap
-
-    function handleScroll() {
-      let active = categories[0]?.id ?? null
-
-      for (let i = 0; i < categories.length; i++) {
-        const el = document.getElementById(`category-${categories[i].id}`)
-        if (!el) continue
-        if (el.getBoundingClientRect().top > offset) continue
-
-        active = categories[i].id
-
-        const next = categories[i + 1]
-        if (!next) continue
-        const nextEl = document.getElementById(`category-${next.id}`)
-        if (!nextEl) continue
-
-        const visibleHeight = nextEl.getBoundingClientRect().top - offset
-        const sectionHeight = el.getBoundingClientRect().height
-        if (visibleHeight < sectionHeight * DEAD_ZONE_RATIO) {
-          active = next.id
-        }
-      }
-
-      setActiveCategoryId(active)
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [categories, stickyHeight, titleGap])
-
-  useEffect(() => {
-    if (!activeCategoryId || !categoryBarRef.current) return
-    const btn = categoryBarRef.current.querySelector(`[data-category="${activeCategoryId}"]`)
-    btn?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" })
-  }, [activeCategoryId])
-
-  function scrollToCategory(id: string) {
-    document.getElementById(`category-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" })
-  }
+  }, [offset, productsByCategory])
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -162,24 +106,12 @@ export default function StorefrontHome() {
         </Link>
       </div>
 
-      <div ref={categoryBarRef} className="sticky top-0 z-10 bg-background border-b flex gap-2 overflow-x-auto px-4 py-2">
-        {categories.map((cat) => (
-          <button
-            key={cat.id}
-            type="button"
-            data-category={cat.id}
-            onClick={() => scrollToCategory(cat.id)}
-            className={cn(
-              "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors whitespace-nowrap",
-              activeCategoryId === cat.id
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-background hover:bg-muted border-border"
-            )}
-          >
-            {cat.name}
-          </button>
-        ))}
-      </div>
+      <CategoryBar
+        ref={barRef}
+        categories={categories}
+        activeCategoryId={activeCategoryId}
+        onCategoryClick={scrollToCategory}
+      />
 
       <main
         ref={mainRef}
@@ -192,7 +124,7 @@ export default function StorefrontHome() {
             <section
               key={category.id}
               id={`category-${category.id}`}
-              style={{ scrollMarginTop: `${stickyHeight + titleGap}px` }}
+              style={{ scrollMarginTop: `${offset}px` }}
             >
               <h2
                 ref={index === 0 ? firstTitleRef : undefined}
