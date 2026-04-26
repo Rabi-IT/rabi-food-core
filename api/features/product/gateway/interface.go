@@ -17,9 +17,17 @@ type ProductGateway interface {
 }
 
 type ListFilter struct {
-	IDs      []string    `json:"ids"`
-	IsActive filter.Bool `json:"isActive"`
-	TenantID string      `json:"tenantId"`
+	IDs        []string
+	TenantID   string
+	Name       string
+	CategoryID string
+	IsActive   filter.Bool
+	// WithCategoryName enables an INNER JOIN with catalog.categories to populate
+	// CategoryName in ListOutput. Use only when category names are required,
+	// as it adds a join cost to the query.
+	WithCategoryName bool
+	// Limit caps the number of rows returned. Zero means no limit.
+	Limit uint64
 }
 
 type DiscountRule struct {
@@ -28,10 +36,16 @@ type DiscountRule struct {
 }
 
 type ListOutput struct {
-	ID            string         `json:"id"`
-	Name          string         `json:"name"`
-	Price         uint           `json:"price"`
-	DiscountRules []DiscountRule `json:"discountRules"`
+	ID          string `db:"id"            json:"id"`
+	Name        string `db:"name"          json:"name"`
+	Description string `db:"description"   json:"description"`
+	Photo       string `db:"photo"         json:"photo"`
+	CategoryID  string `db:"category_id"   json:"categoryId"`
+	// CategoryName is only populated when ListFilter.WithCategoryName is true.
+	CategoryName  string         `db:"category_name"  json:"categoryName"`
+	Unit          string         `db:"unit"           json:"unit"`
+	Price         uint           `db:"price"          json:"price"`
+	DiscountRules []DiscountRule `db:"discount_rules" json:"discountRules"`
 }
 
 type CreateInput struct {

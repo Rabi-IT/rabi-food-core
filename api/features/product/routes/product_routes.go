@@ -10,7 +10,7 @@ import (
 // Product registers public product routes (before JWT middleware).
 func Product(app *fiber.App, c *controller.ProductController) {
 	route := app.Group("/product")
-	route.Get("/", middlewares.RequireTenantID, c.Paginate)
+	route.Get("/catalog", middlewares.RequireTenantID, c.Catalog)
 	route.Get("/:id", c.GetByID)
 }
 

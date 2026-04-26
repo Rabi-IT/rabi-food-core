@@ -2,41 +2,54 @@ package gateway
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 )
 
-var ErrIDsRequired = errors.New("ids is required")
-
-type productListRow struct {
-	ID            string `db:"id"`
-	Name          string `db:"name"`
-	Price         uint   `db:"price"`
-	DiscountRules []byte `db:"discount_rules"`
-}
-
 func (g *PgxProductGatewayAdapter) List(ctx context.Context, filter ListFilter) ([]ListOutput, error) {
-	if len(filter.IDs) == 0 {
-		return nil, ErrIDsRequired
+	columns := []string{
+		"p.id", "p.name", "p.description", "p.photo",
+		"p.category_id", "p.unit", "p.price", "p.discount_rules",
 	}
 
-	b := sq.
-		Select("id", "name", "price", "discount_rules").
-		From("catalog.products").
-		Where("deleted_at IS NULL").
-		Where(sq.Eq{"id": filter.IDs}).
-		PlaceholderFormat(sq.Dollar)
+	var b sq.SelectBuilder
+
+	if filter.WithCategoryName {
+		b = sq.Select(append(columns, "c.name as category_name")...).
+			From("catalog.products p").
+			Join("catalog.categories c ON c.id = p.category_id").
+			Where("p.deleted_at IS NULL").
+			PlaceholderFormat(sq.Dollar)
+	} else {
+		b = sq.Select(append(columns, "'' as category_name")...).
+			From("catalog.products p").
+			Where("p.deleted_at IS NULL").
+			PlaceholderFormat(sq.Dollar)
+	}
+
+	if len(filter.IDs) > 0 {
+		b = b.Where(sq.Eq{"p.id": filter.IDs})
+	}
 
 	if filter.TenantID != "" {
-		b = b.Where(sq.Eq{"tenant_id": filter.TenantID})
+		b = b.Where(sq.Eq{"p.tenant_id": filter.TenantID})
+	}
+
+	if filter.Name != "" {
+		b = b.Where(sq.ILike{"p.name": "%" + filter.Name + "%"})
+	}
+
+	if filter.CategoryID != "" {
+		b = b.Where(sq.Eq{"p.category_id": filter.CategoryID})
 	}
 
 	if !filter.IsActive.IsEmpty() {
-		b = b.Where(sq.Eq{"is_active": filter.IsActive.Value()})
+		b = b.Where(sq.Eq{"p.is_active": filter.IsActive.Value()})
+	}
+
+	if filter.Limit > 0 {
+		b = b.Limit(filter.Limit)
 	}
 
 	sql, args, err := b.ToSql()
@@ -49,27 +62,5 @@ func (g *PgxProductGatewayAdapter) List(ctx context.Context, filter ListFilter) 
 		return nil, err
 	}
 
-	scanned, err := pgx.CollectRows(rows, pgx.RowToStructByName[productListRow])
-	if err != nil {
-		return nil, err
-	}
-
-	output := make([]ListOutput, len(scanned))
-
-	for i, row := range scanned {
-		var discountRules []DiscountRule
-		err := json.Unmarshal(row.DiscountRules, &discountRules)
-		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal discount rules for product %s: %w", row.ID, err)
-		}
-
-		output[i] = ListOutput{
-			ID:            row.ID,
-			Name:          row.Name,
-			Price:         row.Price,
-			DiscountRules: discountRules,
-		}
-	}
-
-	return output, nil
+	return pgx.CollectRows(rows, pgx.RowToStructByName[ListOutput])
 }
