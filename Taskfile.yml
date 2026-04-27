@@ -52,7 +52,7 @@ tasks:
     desc: "Start Postgres and pgAdmin"
     dotenv: ["../.env.test"]
     dir: infra/api
-    deps: [db]
+    deps: [migrate]
     cmds:
       - docker compose up
 
