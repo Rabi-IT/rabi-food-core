@@ -86,6 +86,28 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (!open || data.user.token || loaderToken) return
+    const storedRefresh = getStoredRefreshToken()
+    if (!storedRefresh) return
+
+    fetch("/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ intent: "refresh", refreshToken: storedRefresh }),
+    })
+      .then((res) => res.json())
+      .then((result: { intent: "refresh"; ok: boolean; accessToken?: string; refreshToken?: string }) => {
+        if (result.ok && result.accessToken && result.refreshToken) {
+          storeRefreshToken(result.refreshToken)
+          setData({ user: { ...data.user, token: result.accessToken } })
+        } else {
+          clearRefreshToken()
+        }
+      })
+      .catch(() => clearRefreshToken())
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     if (!otpFetcher.data || !("ok" in otpFetcher.data)) return
     if (otpFetcher.data.intent === "send-otp") {
       setOtpSubStep("code")
@@ -202,13 +224,12 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
     if (step === 2) return setStep(1)
     if (step === 3) return setStep(2)
     if (step === 4) return setStep(3)
+    if (step === 5) return setStep(4)
     if (step === 6) return setStep(data.user.token && loaderToken ? 4 : 5)
   }
 
   function renderBackButton() {
     if (step === 1) return null
-    if (step === 5) return null
-    if (step === 6 && !loaderToken) return null
     return (
       <button
         type="button"
@@ -230,7 +251,7 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
   const stepLabel = STEP_LABELS[step as keyof typeof STEP_LABELS]
 
   return (
-    <Sheet open={open} onClose={onClose} variant="side">
+    <Sheet open={open} onClose={onClose} variant="full">
       {isSuccess && (
         <div className="flex flex-col items-center justify-center h-full px-6 text-center">
           <div className="text-5xl mb-4">🎉</div>
@@ -330,7 +351,10 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
                 deliveryWeekdays={data.deliveryDays.map((d) => d.weekday)}
                 cycleDiscountRules={config?.discountRules ?? []}
                 onChange={(totalCycles) => setData({ totalCycles })}
-                onNext={() => setStep(data.user.token ? 6 : 5)}
+                onNext={async () => {
+                  const token = await ensureToken()
+                  setStep(token ? 6 : 5)
+                }}
               />
             )}
 
