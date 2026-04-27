@@ -47,7 +47,7 @@ export function StepBasket({ products, items, onChange, onNext }: Props) {
   const discountAmount = activeRule ? Math.floor((subtotal * activeRule.discount) / 100) : 0
 
   return (
-    <div className="flex flex-col pb-32">
+    <div className="flex flex-col">
       {/* Progress within this step */}
       <div className="flex gap-1 mb-6">
         {selectedProducts.map((_, i) => (
@@ -162,7 +162,7 @@ export function StepBasket({ products, items, onChange, onNext }: Props) {
         </div>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 border-t bg-background p-4">
+      <div className="sticky bottom-0 border-t bg-background p-4">
         <Button className="w-full" onClick={handleNext}>
           {isLast ? "Continuar" : "Próximo produto"}
         </Button>

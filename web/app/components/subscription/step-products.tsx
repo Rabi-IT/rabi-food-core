@@ -24,7 +24,7 @@ export function StepProducts({ products, items, onChange, onNext }: Props) {
   const hasItems = items.length > 0
 
   return (
-    <div className="flex flex-col pb-32">
+    <div className="flex flex-col">
       <p className="text-sm text-muted-foreground mb-6">
         Escolha os produtos que farão parte da sua cesta recorrente.
       </p>
@@ -80,7 +80,7 @@ export function StepProducts({ products, items, onChange, onNext }: Props) {
         })}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 border-t bg-background p-4 space-y-2">
+      <div className="sticky bottom-0 border-t bg-background p-4 space-y-2">
         {hasItems && (
           <p className="text-center text-sm text-muted-foreground">
             {items.length} {items.length === 1 ? "produto selecionado" : "produtos selecionados"}

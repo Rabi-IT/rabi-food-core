@@ -50,7 +50,7 @@ export function StepSummary({
   })
 
   return (
-    <div className="flex flex-col pb-48">
+    <div className="flex flex-col">
       <section className="space-y-3">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Sua cesta</h3>
         {pricing.items.map((item) => (
@@ -181,7 +181,7 @@ export function StepSummary({
         </p>
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 border-t bg-background p-4 space-y-2">
+      <div className="sticky bottom-0 border-t bg-background p-4 space-y-2">
         {error && (
           <p className="text-sm text-destructive text-center">{error}</p>
         )}

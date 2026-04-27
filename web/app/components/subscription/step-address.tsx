@@ -158,7 +158,7 @@ export function StepAddress({
   if (hasExisting && mode === "confirm") {
     const p = existingProfile!
     return (
-      <div className="flex flex-col pb-32 space-y-4">
+      <div className="flex flex-col space-y-4">
         <p className="text-sm text-muted-foreground">{t("subscription.address.existingHint")}</p>
         <div className="rounded-xl border bg-card p-4 space-y-1 text-sm">
           {p.phone && (
@@ -173,7 +173,7 @@ export function StepAddress({
           <p>{p.city} — {p.state}</p>
           <p>{p.zip}</p>
         </div>
-        <div className="fixed inset-x-0 bottom-0 border-t bg-background p-4 space-y-2">
+        <div className="sticky bottom-0 border-t bg-background p-4 space-y-2">
           <Button
             className="w-full"
             onClick={() => handleUseExisting(p)}
@@ -194,7 +194,7 @@ export function StepAddress({
   }
 
   return (
-    <div className="flex flex-col pb-32 space-y-4">
+    <div className="flex flex-col space-y-4">
       <Field label={t("subscription.address.phone")} error={errors.phone}>
         <PhoneInput
           value={phone}
@@ -288,7 +288,7 @@ export function StepAddress({
         </p>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 border-t bg-background p-4">
+      <div className="sticky bottom-0 border-t bg-background p-4">
         <Button className="w-full" onClick={handleNext} disabled={isSaving || cepLoading}>
           {isSaving ? t("subscription.address.saving") : t("subscription.address.continue")}
         </Button>

@@ -23,7 +23,7 @@ export type PricingResult = {
 
 // Mirrors buildSubscriptionPricing in api/features/subscription/usecases/build_subscription_pricing.go
 export function calculatePricing(
-  selectedItems: { productId: string; quantity: number }[],
+  selectedItems: readonly { productId: string; quantity: number }[],
   products: readonly Product[],
   totalCycles: number,
   cycleDiscountRules: readonly CycleDiscountRule[],

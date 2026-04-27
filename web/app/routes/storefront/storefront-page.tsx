@@ -3,9 +3,11 @@ import { useEffect, useRef, useState } from "react"
 import type { Route } from "./+types/storefront-page"
 import { resolveTenant } from "~/lib/tenant.server"
 import { apiClient } from "~/lib/api.server"
+import type { SubscriptionConfig } from "~/components/subscription/types"
 import { CategoryBar } from "~/components/storefront/category-bar"
 import { useScrollSpy } from "~/components/storefront/use-scroll-spy"
 import { ProductSheet } from "~/components/subscription/product-sheet"
+import SubscriptionDrawer from "~/components/subscription/subscription-drawer"
 import InstitutionalPage from "./institutional-page"
 
 type Product = {
@@ -26,17 +28,29 @@ type CatalogResponse = {
   readonly categories: readonly Category[]
 }
 
+function parseAuthCookie(request: Request): string | null {
+  const cookie = request.headers.get("Cookie") ?? ""
+  return cookie.match(/auth_token=([^;]+)/)?.[1] ?? null
+}
+
 export async function loader({ request }: Route.LoaderArgs) {
   const tenant = await resolveTenant(request)
-  if (!tenant) return { tenant: null, categories: [] as Category[], products: [] as Product[] }
+  if (!tenant) return { tenant: null, categories: [] as Category[], products: [] as Product[], config: null, serverToken: null }
 
   const api = apiClient(tenant.id)
-  const res = await api.get<CatalogResponse>("/product/catalog")
+  const token = parseAuthCookie(request)
+
+  const [catalogRes, configRes] = await Promise.all([
+    api.get<CatalogResponse>("/product/catalog"),
+    api.get<SubscriptionConfig>("/subscription/config"),
+  ])
 
   return {
     tenant,
-    products: res.ok ? res.data.products : [],
-    categories: res.ok ? res.data.categories : [],
+    products: catalogRes.ok ? catalogRes.data.products : [],
+    categories: catalogRes.ok ? catalogRes.data.categories : [],
+    config: configRes.ok ? configRes.data : null,
+    serverToken: token,
   }
 }
 
@@ -45,12 +59,14 @@ function formatPrice(cents: number): string {
 }
 
 export default function StorefrontHome() {
-  const { tenant, categories, products } = useLoaderData<typeof loader>()
+  const { tenant, categories, products, config, serverToken } = useLoaderData<typeof loader>()
   if (!tenant) return <InstitutionalPage />
 
   const layout = useRouteLoaderData("routes/storefront/layout") as { tenant: { name: string } }
   const [bottomPadding, setBottomPadding] = useState(0)
   const [detailProduct, setDetailProduct] = useState<Product | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerInitialProductId, setDrawerInitialProductId] = useState<string | null>(null)
 
   const mainRef = useRef<HTMLDivElement>(null)
   const firstTitleRef = useRef<HTMLHeadingElement>(null)
@@ -87,6 +103,16 @@ export default function StorefrontHome() {
     return () => window.removeEventListener("resize", calculate)
   }, [offset, productsByCategory])
 
+  function subscribeProduct(productId: string) {
+    setDrawerInitialProductId(productId)
+    setDrawerOpen(true)
+  }
+
+  function closeDrawer() {
+    setDrawerOpen(false)
+    setDrawerInitialProductId(null)
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b px-6 py-4">
@@ -96,13 +122,13 @@ export default function StorefrontHome() {
       <div className="bg-primary/5 border-b border-primary/20 px-6 py-4 flex items-center justify-between gap-4">
         <div>
           <p className="text-sm font-semibold">Receba sempre, sem esquecer</p>
-          <p className="text-xs text-muted-foreground">Monte sua cesta e receba nos dias que escolher</p>
+          <p className="text-xs text-muted-foreground">Toque em um produto para montar sua cesta</p>
         </div>
         <Link
-          to="/subscribe"
-          className="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          to="/sobre-assinatura"
+          className="shrink-0 rounded-lg border border-primary/30 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/5 transition-colors"
         >
-          Assinar
+          Entenda a assinatura
         </Link>
       </div>
 
@@ -167,7 +193,20 @@ export default function StorefrontHome() {
         })}
       </main>
 
-      <ProductSheet product={detailProduct} onClose={() => setDetailProduct(null)} />
+      <ProductSheet
+        product={detailProduct}
+        onClose={() => setDetailProduct(null)}
+        onSubscribe={subscribeProduct}
+      />
+
+      <SubscriptionDrawer
+        open={drawerOpen}
+        onClose={closeDrawer}
+        initialProductId={drawerInitialProductId}
+        products={products}
+        config={config}
+        serverToken={serverToken}
+      />
     </div>
   )
 }

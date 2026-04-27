@@ -1761,9 +1761,6 @@
                 "totalCycles"
             ],
             "properties": {
-                "autoRenew": {
-                    "type": "boolean"
-                },
                 "deliveryDays": {
                     "type": "array",
                     "minItems": 1,
@@ -1826,6 +1823,9 @@
         "middlewares.ValidationErrorResponse": {
             "type": "object",
             "properties": {
+                "code": {
+                    "type": "string"
+                },
                 "errors": {
                     "type": "array",
                     "items": {
@@ -2000,6 +2000,9 @@
                 },
                 "maxAttemptsPerOrder": {
                     "type": "integer"
+                },
+                "orderLeadMinutes": {
+                    "type": "integer"
                 }
             }
         },
@@ -2092,6 +2095,10 @@
                     "type": "boolean"
                 },
                 "maxAttemptsPerOrder": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "orderLeadMinutes": {
                     "type": "integer",
                     "format": "int32"
                 }
