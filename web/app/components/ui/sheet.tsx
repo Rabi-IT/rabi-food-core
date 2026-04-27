@@ -1,6 +1,6 @@
 import { Drawer } from "@base-ui/react"
 
-const SHEET_VARIANTS = ["bottom", "side"] as const
+const SHEET_VARIANTS = ["bottom", "side", "full"] as const
 type SheetVariant = typeof SHEET_VARIANTS[number]
 
 type SheetProps = {
@@ -11,6 +11,20 @@ type SheetProps = {
 }
 
 export function Sheet({ open, onClose, children, variant = "bottom" }: SheetProps) {
+  if (variant === "full") {
+    return (
+      <Drawer.Root open={open} onOpenChange={(o) => !o && onClose()} swipeDirection="right">
+        <Drawer.Portal>
+          <Drawer.Popup className="fixed inset-0 z-50 flex flex-col bg-background outline-none transition-transform data-[starting-style]:translate-x-full data-[ending-style]:translate-x-full">
+            <div className="flex-1 flex flex-col w-full max-w-lg mx-auto min-h-0">
+              {children}
+            </div>
+          </Drawer.Popup>
+        </Drawer.Portal>
+      </Drawer.Root>
+    )
+  }
+
   if (variant === "side") {
     return (
       <Drawer.Root open={open} onOpenChange={(o) => !o && onClose()} swipeDirection="right">
