@@ -8,37 +8,48 @@ import (
 	"github.com/google/uuid"
 )
 
-func (g *PgxSubscriptionGatewayAdapter) Create(ctx context.Context, input CreateInput) (string, error) {
-	id := uuid.Must(uuid.NewV7()).String()
-
-	weekdaysMask := uint8(0)
-	for _, day := range input.DeliveryDays {
-		weekdaysMask |= weekdayBit(day.Weekday)
-	}
-
+func (g *PgxSubscriptionGatewayAdapter) BulkCreate(ctx context.Context, inputs []CreateInput) ([]string, error) {
+	ids := make([]string, 0, len(inputs))
 	now := time.Now().UTC()
 
-	sql, args, err := sq.
+	qb := sq.
 		Insert("subscription.subscriptions").
-		Columns("id", "root_subscription_id", "tenant_id", "user_id", "status",
-			"items", "delivery_days", "delivery_weekdays_mask", "notes",
+		Columns(
+			"id", "root_subscription_id", "subscription_group_id",
+			"tenant_id", "user_id", "product_id", "quantity", "unit_price",
+			"status", "delivery_days", "delivery_weekdays_mask", "notes",
 			"total_cycles", "remaining_cycles", "cycle_discount", "cutoff_offset_minutes",
 			"auto_renew", "max_attempts_per_order",
 			"items_total", "items_discount", "payment_amount", "payment_status",
-			"external_payment_id", "created_at", "updated_at").
-		Values(id, input.RootID, input.TenantID, input.UserID, input.Status,
-			input.Items, input.DeliveryDays, weekdaysMask, input.Notes,
+			"external_payment_id", "created_at", "updated_at",
+		)
+
+	for _, input := range inputs {
+		id := uuid.Must(uuid.NewV7()).String()
+		ids = append(ids, id)
+
+		weekdaysMask := uint8(0)
+		for _, day := range input.DeliveryDays {
+			weekdaysMask |= weekdayBit(day.Weekday)
+		}
+
+		qb = qb.Values(
+			id, input.RootID, input.SubscriptionGroupID,
+			input.TenantID, input.UserID, input.ProductID, input.Quantity, input.UnitPrice,
+			input.Status, input.DeliveryDays, weekdaysMask, input.Notes,
 			input.TotalCycles, input.RemainingCycles, input.CycleDiscount, input.CutoffOffsetMinutes,
 			input.AutoRenew, input.MaxAttemptsPerOrder,
 			input.ItemsTotal, input.ItemsDiscount, input.PaymentAmount, input.PaymentStatus,
-			input.ExternalPaymentID, now, now).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
-	if err != nil {
-		return "", err
+			input.ExternalPaymentID, now, now,
+		)
 	}
 
-	_, err = g.DB.Pool.Exec(ctx, sql, args...)
+	sql, args, err := qb.PlaceholderFormat(sq.Dollar).ToSql()
+	if err != nil {
+		return nil, err
+	}
 
-	return id, err
+	_, err = g.DB.Pool.Exec(context.WithoutCancel(ctx), sql, args...)
+
+	return ids, err
 }

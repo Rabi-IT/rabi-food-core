@@ -62,7 +62,7 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 			Notes:       "Notes",
 		}
 
-		id := ""
+		var ids []string
 		fixtures.DefaultHTTP(t.T()).
 			Request(http.MethodPost, fixtures.Subscription.URI).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
@@ -70,7 +70,9 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 			WithJSON(Body).
 			Expect().
 			Status(http.StatusCreated).
-			Body().Decode(&id)
+			JSON().Decode(&ids)
+
+		t.Len(ids, 1)
 	})
 
 	t.Run("should fail if required fields are empty", func() {
@@ -163,7 +165,7 @@ func (t *TestSuite) Test_SubscriptionIntegration_GetByID() {
 		t.Equal(fixtures.Subscription.DEFAULT_DELIVERY_START_HOUR, deliveryDay.StartHour)
 		t.Equal(fixtures.Subscription.DEFAULT_DELIVERY_END_HOUR, deliveryDay.EndHour)
 
-		t.Len(response.Items, 1)
+		t.NotEmpty(response.ProductID)
 		t.Equal(fixtures.Subscription.DEFAULT_NOTES, response.Notes)
 		t.Equal(fixtures.Subscription.DEFAULT_TOTAL_CYCLES, response.TotalCycles)
 		t.Equal(fixtures.Subscription.DEFAULT_TOTAL_CYCLES, response.RemainingCycles)

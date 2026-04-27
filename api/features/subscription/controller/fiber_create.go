@@ -13,12 +13,12 @@ import (
 
 // Create godoc
 // @Summary Create subscription
-// @Description Create a new subscription
+// @Description Create a new subscription group, one subscription per selected product
 // @Tags subscriptions
 // @Accept json
-// @Produce text/plain
+// @Produce json
 // @Param subscription body usecases.CreateInput true "Subscription data"
-// @Success 201 {string} string "Created subscription ID"
+// @Success 201 {array} string "Created subscription IDs"
 // @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
 // @Failure 500 {string} string "Internal server error"
 // @Router /subscription/ [post].
@@ -40,10 +40,10 @@ func (c *SubscriptionController) Create(ctx *fiber.Ctx) error {
 	data.UserID = session.UserID
 
 	logger.GetWideEvent(uctx).Event = "create-subscription"
-	id, err := c.usecase.Create(uctx, data)
+	ids, err := c.usecase.Create(uctx, data)
 	if err != nil {
 		return err
 	}
 
-	return ctx.Status(http.StatusCreated).SendString(id)
+	return ctx.Status(http.StatusCreated).JSON(ids)
 }
