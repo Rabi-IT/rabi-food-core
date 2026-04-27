@@ -98,7 +98,7 @@ export function StepUser({
   }
 
   return (
-    <div className="flex flex-col pb-32">
+    <div className="flex flex-col">
       <div className="flex items-center gap-3 mb-6">
         <button
           type="button"
@@ -176,7 +176,7 @@ export function StepUser({
         </section>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 border-t bg-background p-4">
+      <div className="sticky bottom-0 border-t bg-background p-4">
         {subStep === "identity" && (
           <Button
             className="w-full"

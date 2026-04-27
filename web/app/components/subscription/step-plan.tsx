@@ -53,7 +53,7 @@ export function StepPlan({ products, items, totalCycles, minCycles, deliveryWeek
   const renewalDate = getRenewalDate(deliveryWeekdays, totalCycles)
 
   return (
-    <div className="flex flex-col pb-32">
+    <div className="flex flex-col">
       <p className="text-sm text-muted-foreground mb-1">
         Cada entrega corresponde a um dia da semana que você selecionou.
       </p>
@@ -140,7 +140,7 @@ export function StepPlan({ products, items, totalCycles, minCycles, deliveryWeek
         </ul>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 border-t bg-background p-4">
+      <div className="sticky bottom-0 border-t bg-background p-4">
         <Button className="w-full" onClick={onNext}>
           Continuar
         </Button>

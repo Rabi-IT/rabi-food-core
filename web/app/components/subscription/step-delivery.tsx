@@ -71,7 +71,7 @@ export function StepDelivery({ deliveryDays, orderLeadMinutes, onChange, onNext 
   const sorted = deliveryDays.slice().sort((a, b) => a.weekday - b.weekday)
 
   return (
-    <div className="flex flex-col pb-32 space-y-6">
+    <div className="flex flex-col space-y-6">
       <div>
         <p className="text-sm text-muted-foreground mb-4">
           Escolha os dias da semana em que deseja receber suas entregas.
@@ -145,7 +145,7 @@ export function StepDelivery({ deliveryDays, orderLeadMinutes, onChange, onNext 
         </div>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 border-t bg-background p-4">
+      <div className="sticky bottom-0 border-t bg-background p-4">
         <Button className="w-full" disabled={!hasSelection || !allConfigured} onClick={onNext}>
           {hasSelection ? "Continuar" : "Selecione ao menos um dia"}
         </Button>
