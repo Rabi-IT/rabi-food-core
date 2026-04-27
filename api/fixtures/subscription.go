@@ -91,7 +91,7 @@ func (subscriptionFixture) Create(t *testing.T, input *c.CreateInput, auth Reque
 		}
 	}
 
-	var ids []string
+	groupID := ""
 	DefaultHTTP(t).
 		Request(http.MethodPost, Subscription.URI).
 		WithHeader("Authorization", "Bearer "+auth.Token).
@@ -99,10 +99,10 @@ func (subscriptionFixture) Create(t *testing.T, input *c.CreateInput, auth Reque
 		WithJSON(Body).
 		Expect().
 		Status(http.StatusCreated).
-		JSON().Decode(&ids)
+		Body().Decode(&groupID)
 
-	require.NotEmpty(t, ids)
-	return ids[0]
+	require.NotEmpty(t, groupID)
+	return groupID
 }
 
 func (subscriptionFixture) GetByID(t *testing.T, id string, auth RequestContext) (g.GetByIDOutput, int) {

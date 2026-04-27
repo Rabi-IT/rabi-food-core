@@ -57,10 +57,10 @@ func (c *CreateInput) Validate() error {
 	return nil
 }
 
-func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) ([]string, error) {
+func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (string, error) {
 	err := input.Validate()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	productIds := make([]string, 0, len(input.Items))
@@ -74,7 +74,7 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) ([]str
 		TenantID: input.TenantID,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch products: %w", err)
+		return "", fmt.Errorf("failed to fetch products: %w", err)
 	}
 
 	if len(products) != len(input.Items) {
@@ -83,11 +83,11 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) ([]str
 
 	config, err := s.gateway.GetConfig(ctx, input.TenantID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch subscription config: %w", err)
+		return "", fmt.Errorf("failed to fetch subscription config: %w", err)
 	}
 
 	if config == nil {
-		return nil, errs.ErrTenantSubscriptionNotConfigured
+		return "", errs.ErrTenantSubscriptionNotConfigured
 	}
 
 	price, err := buildSubscriptionPricing(
@@ -97,7 +97,7 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) ([]str
 		config.DiscountRules,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to calculate price: %w", err)
+		return "", fmt.Errorf("failed to calculate price: %w", err)
 	}
 
 	groupID := uuid.Must(uuid.NewV7()).String()
@@ -128,21 +128,21 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) ([]str
 		})
 	}
 
-	ids, err := s.gateway.BulkCreate(ctx, gatewayInputs)
+	_, err = s.gateway.BulkCreate(ctx, gatewayInputs)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	logger.GetWideEvent(ctx).SetSubscriptionID(groupID)
 
-	return ids, nil
+	return groupID, nil
 }
 
 // handleMissingProducts returns a structured error after identifying which products are absent.
 func (s *SubscriptionCase) handleMissingProducts(
 	requestedItems []SubscriptionItemInput,
 	foundProducts []product_gateway.ListOutput,
-) ([]string, error) {
+) (string, error) {
 	foundProductIDs := make(map[string]struct{}, len(foundProducts))
 	for _, product := range foundProducts {
 		foundProductIDs[product.ID] = struct{}{}
@@ -155,5 +155,5 @@ func (s *SubscriptionCase) handleMissingProducts(
 		}
 	}
 
-	return nil, errs.ProductNotFound(missingProductIDs...)
+	return "", errs.ProductNotFound(missingProductIDs...)
 }

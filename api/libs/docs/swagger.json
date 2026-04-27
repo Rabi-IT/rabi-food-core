@@ -1111,12 +1111,12 @@
                 }
             },
             "post": {
-                "description": "Create a new subscription",
+                "description": "Create a new subscription group, one subscription per selected product",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
-                    "text/plain"
+                    "application/json"
                 ],
                 "tags": [
                     "subscriptions"
@@ -1135,9 +1135,12 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created subscription ID",
+                        "description": "Created subscription IDs",
                         "schema": {
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
@@ -1948,12 +1951,6 @@
                 "id": {
                     "type": "string"
                 },
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/subscription_gateway.SubscriptionItem"
-                    }
-                },
                 "itemsDiscount": {
                     "type": "integer"
                 },
@@ -1966,16 +1963,28 @@
                 "paymentAmount": {
                     "type": "integer"
                 },
+                "productId": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
                 "remainingCycles": {
                     "type": "integer"
                 },
                 "status": {
                     "$ref": "#/definitions/subscription.Status"
                 },
+                "subscriptionGroupId": {
+                    "type": "string"
+                },
                 "tenantId": {
                     "type": "string"
                 },
                 "totalCycles": {
+                    "type": "integer"
+                },
+                "unitPrice": {
                     "type": "integer"
                 },
                 "userId": {
@@ -2021,6 +2030,9 @@
                 "paymentAmount": {
                     "type": "integer"
                 },
+                "productId": {
+                    "type": "string"
+                },
                 "remainingCycles": {
                     "type": "integer"
                 },
@@ -2048,32 +2060,6 @@
                     }
                 },
                 "maxPages": {
-                    "type": "integer"
-                }
-            }
-        },
-        "subscription_gateway.SubscriptionItem": {
-            "type": "object",
-            "properties": {
-                "discount": {
-                    "type": "integer"
-                },
-                "itemId": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "subtotal": {
-                    "type": "integer"
-                },
-                "total": {
-                    "type": "integer"
-                },
-                "unitPrice": {
                     "type": "integer"
                 }
             }
