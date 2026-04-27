@@ -40,10 +40,10 @@ func (c *SubscriptionController) Create(ctx *fiber.Ctx) error {
 	data.UserID = session.UserID
 
 	logger.GetWideEvent(uctx).Event = "create-subscription"
-	ids, err := c.usecase.Create(uctx, data)
+	groupID, err := c.usecase.Create(uctx, data)
 	if err != nil {
 		return err
 	}
 
-	return ctx.Status(http.StatusCreated).JSON(ids)
+	return ctx.Status(http.StatusCreated).SendString(groupID)
 }
