@@ -134,61 +134,56 @@ func (t *TestSuite) Test_ProductIntegration_GetByID() {
 	})
 }
 
-func (t *TestSuite) Test_ProductIntegration_Paginate() {
-	t.Run("should be able to paginate", func() {
+type catalogResponse struct {
+	Products   []product_gateway.ListOutput `json:"products"`
+	Categories []struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	} `json:"categories"`
+}
+
+func (t *TestSuite) Test_ProductIntegration_Catalog() {
+	t.Run("should return active products with categories", func() {
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 		tenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), tenant.ID, tenant.UserID)
 
-		for range 15 {
+		for range 3 {
 			fixtures.Product.Create(t.T(), nil, tenantAuth)
 		}
 
-		response := new(product_gateway.PaginateOutput)
+		response := new(catalogResponse)
 		httpexpect.Default(t.T(), fixtures.ApiURL).
-			Request(http.MethodGet, fixtures.Product.URI).
+			Request(http.MethodGet, fixtures.Product.URI+"catalog").
 			WithHeader("X-Tenant-ID", tenantAuth.TenantID).
-			WithQueryObject(database.PaginateInput{
-				Page:     0,
-				PageSize: 10,
-			}).
 			Expect().
 			Status(http.StatusOK).
 			JSON().Decode(&response)
 
-		t.Len(response.Data, 10)
-		t.Equal(2, response.MaxPages)
-
-		for i := range 10 {
-			t.NotEmpty(response.Data[i].ID)
-			t.Equal("Name", response.Data[i].Name)
-			t.Equal("Description", response.Data[i].Description)
+		t.Len(response.Products, 3)
+		for i := range 3 {
+			t.NotEmpty(response.Products[i].ID)
 		}
 	})
 
-	t.Run("should not be able to paginate products from another tenant", func() {
+	t.Run("should not return products from another tenant", func() {
 		anotherTenant := fixtures.Tenant.Create(t.T(), nil)
 		anotherTenantAuth := fixtures.Auth.TenantOwnerAuth(t.T(), anotherTenant.ID, anotherTenant.UserID)
 
-		for range 5 {
+		for range 3 {
 			fixtures.Product.Create(t.T(), nil, anotherTenantAuth)
 		}
 
 		tenant := fixtures.Tenant.Create(t.T(), nil)
 
-		response := new(product_gateway.PaginateOutput)
+		response := new(catalogResponse)
 		httpexpect.Default(t.T(), fixtures.ApiURL).
-			Request(http.MethodGet, fixtures.Product.URI).
+			Request(http.MethodGet, fixtures.Product.URI+"catalog").
 			WithHeader("X-Tenant-ID", tenant.ID).
-			WithQueryObject(database.PaginateInput{
-				Page:     0,
-				PageSize: 10,
-			}).
 			Expect().
 			Status(http.StatusOK).
 			JSON().Decode(&response)
 
-		t.Empty(response.Data)
-		t.Equal(0, response.MaxPages)
+		t.Empty(response.Products)
 	})
 }
 

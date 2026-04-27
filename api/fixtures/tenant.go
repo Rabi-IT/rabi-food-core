@@ -37,7 +37,7 @@ func (tenantFixture) Create(t *testing.T, input *TenantCreateInput) *TenantCreat
 	body := input
 	if body == nil {
 		body = &TenantCreateInput{
-			Name:         "Name",
+			Name:         uuid.NewString(),
 			UserName:     "UserName",
 			UserPhone:    "11999999999",
 			UserEmail:    uuid.NewString() + "@email.com",

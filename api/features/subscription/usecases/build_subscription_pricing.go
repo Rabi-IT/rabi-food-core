@@ -1,16 +1,29 @@
 package usecases
 
 import (
-	product_gateway "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
+	product_gateway "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 )
 
+type productPricing struct {
+	ProductID     string
+	Quantity      uint
+	UnitPrice     uint
+	ItemsTotal    uint
+	ItemsDiscount uint
+	CycleDiscount uint
+}
+
+func (p productPricing) PaymentAmount() uint {
+	return p.ItemsTotal - p.ItemsDiscount - p.CycleDiscount
+}
+
 type buildSubscriptionPricingOutput struct {
-	SubscriptionItems []g.SubscriptionItem
-	ItemsTotal        uint
-	ItemsDiscount     uint
-	CycleDiscount     uint
+	Products      []productPricing
+	ItemsTotal    uint
+	ItemsDiscount uint
+	CycleDiscount uint
 }
 
 func (b buildSubscriptionPricingOutput) PaymentAmount() uint {
@@ -24,7 +37,7 @@ func buildSubscriptionPricing(
 	cycleDiscountRules []g.DiscountRule,
 ) (buildSubscriptionPricingOutput, error) {
 	output := buildSubscriptionPricingOutput{
-		SubscriptionItems: make([]g.SubscriptionItem, 0, len(items)),
+		Products: make([]productPricing, 0, len(items)),
 	}
 
 	productMap := make(map[string]product_gateway.ListOutput, len(products))
@@ -45,19 +58,18 @@ func buildSubscriptionPricing(
 				discountPercent = rule.Discount
 			}
 		}
+		itemDiscount := subtotal * discountPercent / 100 //nolint:mnd
 
-		output.SubscriptionItems = append(output.SubscriptionItems, g.SubscriptionItem{
-			ItemID:    product.ID,
-			Name:      product.Name,
-			Quantity:  item.Quantity,
-			UnitPrice: product.Price,
-			Subtotal:  subtotal,
-			Discount:  discountPercent,
-			Total:     subtotal - subtotal*discountPercent/100,
+		output.Products = append(output.Products, productPricing{
+			ProductID:     product.ID,
+			Quantity:      item.Quantity,
+			UnitPrice:     product.Price,
+			ItemsTotal:    subtotal,
+			ItemsDiscount: itemDiscount,
 		})
 
 		output.ItemsTotal += subtotal
-		output.ItemsDiscount += subtotal * discountPercent / 100 //nolint:mnd
+		output.ItemsDiscount += itemDiscount
 	}
 
 	cycleDiscountPercent := uint8(0)
@@ -68,6 +80,11 @@ func buildSubscriptionPricing(
 	}
 
 	output.CycleDiscount = (output.ItemsTotal - output.ItemsDiscount) * uint(cycleDiscountPercent) / 100 //nolint:mnd
+
+	for i := range output.Products {
+		net := output.Products[i].ItemsTotal - output.Products[i].ItemsDiscount
+		output.Products[i].CycleDiscount = net * uint(cycleDiscountPercent) / 100 //nolint:mnd
+	}
 
 	return output, nil
 }

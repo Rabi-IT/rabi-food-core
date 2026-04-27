@@ -12,6 +12,10 @@ func (g *PgxProductGatewayAdapter) Create(ctx context.Context, input CreateInput
 	id := uuid.Must(uuid.NewV7()).String()
 	now := time.Now().UTC()
 
+	if input.DiscountRules == nil {
+		input.DiscountRules = []DiscountRule{}
+	}
+
 	sql, args, err := sq.
 		Insert("catalog.products").
 		Columns("id", "tenant_id", "name", "description", "photo", "category_id",

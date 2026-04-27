@@ -10,9 +10,13 @@ import (
 
 func (g *PgxSubscriptionGatewayAdapter) GetByID(ctx context.Context, filter GetByIDFilter) (*GetByIDOutput, error) {
 	b := sq.
-		Select("id", "tenant_id", "user_id", "status", "delivery_days", "items", "notes",
+		Select(
+			"id", "tenant_id", "user_id", "status", "subscription_group_id",
+			"product_id", "quantity", "unit_price",
+			"delivery_days", "notes",
 			"total_cycles", "remaining_cycles", "cycle_discount", "cutoff_offset_minutes",
-			"auto_renew", "items_total", "items_discount", "payment_amount", "created_at").
+			"auto_renew", "items_total", "items_discount", "payment_amount", "created_at",
+		).
 		From("subscription.subscriptions").
 		Where(sq.Eq{"id": filter.ID}).
 		Limit(1).

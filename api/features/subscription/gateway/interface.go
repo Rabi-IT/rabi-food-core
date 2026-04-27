@@ -10,24 +10,13 @@ import (
 )
 
 type SubscriptionGateway interface {
-	Create(ctx context.Context, input CreateInput) (string, error)
+	BulkCreate(ctx context.Context, inputs []CreateInput) ([]string, error)
 	GetByID(ctx context.Context, filter GetByIDFilter) (*GetByIDOutput, error)
 	Paginate(ctx context.Context, filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
 	UpsertConfig(ctx context.Context, tenantID string, input UpsertConfigInput) error
 	GetConfig(ctx context.Context, tenantID string) (*GetConfigOutput, error)
 	List(ctx context.Context, filter ListFilter) ([]ListOutput, error)
 	CreateDeliveries(ctx context.Context, inputs []CreateDeliveryInput) error
-}
-
-// SubscriptionItem holds a snapshot of a product at subscription creation time.
-type SubscriptionItem struct {
-	ItemID    string `json:"itemId"`
-	Name      string `json:"name"`
-	Quantity  uint   `json:"quantity"`
-	UnitPrice uint   `json:"unitPrice"`
-	Subtotal  uint   `json:"subtotal"`
-	Discount  uint   `json:"discount"`
-	Total     uint   `json:"total"`
 }
 
 type DeliveryDay struct {
@@ -37,40 +26,25 @@ type DeliveryDay struct {
 }
 
 type CreateInput struct {
-	UserID   string
-	TenantID string
-	Status   subscription.Status
+	UserID              string
+	TenantID            string
+	Status              subscription.Status
+	RootID              *string
+	SubscriptionGroupID *string
 
-	// RootID links subscription revisions. When a subscription is replaced
-	// by a new configuration, the new subscription keeps the same RootID
-	// to preserve history.
-	RootID *string
+	// Product (1:1 per subscription row)
+	ProductID string
+	Quantity  uint16
+	UnitPrice uint
 
 	// Configuration
-
-	// DeliveryDays stores the delivery schedule configuration,
-	// including weekdays and time windows, used to calculate future deliveries.
-	DeliveryDays []DeliveryDay
-	Items        []SubscriptionItem
-	Notes        string
-
-	// Cycles represent prepaid delivery units.
-	// Each cycle corresponds to one delivery.
-	// When a delivery is completed, one cycle is consumed.
-
-	// TotalCycles is the number of delivery cycles purchased
-	// when the subscription was created or last modified.
-	TotalCycles uint
-	// RemainingCycles is how many delivery cycles are still available.
-	RemainingCycles uint
-	// CycleDiscount is the percentage (0–100) applied to the cycle price.
-	CycleDiscount uint
-	// CutoffOffsetMinutes defines how many minutes before the scheduled
-	// delivery time modifications are no longer allowed.
+	DeliveryDays        []DeliveryDay
+	Notes               string
+	TotalCycles         uint
+	RemainingCycles     uint
+	CycleDiscount       uint
 	CutoffOffsetMinutes uint16
 	AutoRenew           bool
-	// MaxAttemptsPerOrder defines how many delivery attempts are allowed
-	// before the delivery is considered failed.
 	MaxAttemptsPerOrder uint8
 
 	// Payment snapshot
@@ -90,14 +64,18 @@ type GetByIDFilter struct {
 }
 
 type GetByIDOutput struct {
-	ID       string              `db:"id"        json:"id"`
-	TenantID string              `db:"tenant_id" json:"tenantId"`
-	UserID   string              `db:"user_id"   json:"userId"`
-	Status   subscription.Status `db:"status"    json:"status"`
+	ID                  string              `db:"id"                   json:"id"`
+	TenantID            string              `db:"tenant_id"            json:"tenantId"`
+	UserID              string              `db:"user_id"              json:"userId"`
+	Status              subscription.Status `db:"status"               json:"status"`
+	SubscriptionGroupID *string             `db:"subscription_group_id" json:"subscriptionGroupId,omitempty"`
 
-	DeliveryDays []DeliveryDay      `db:"delivery_days" json:"deliveryDays"`
-	Items        []SubscriptionItem `db:"items"         json:"items"`
-	Notes        string             `db:"notes"         json:"notes"`
+	ProductID string `db:"product_id" json:"productId"`
+	Quantity  uint16 `db:"quantity"   json:"quantity"`
+	UnitPrice uint   `db:"unit_price" json:"unitPrice"`
+
+	DeliveryDays []DeliveryDay `db:"delivery_days" json:"deliveryDays"`
+	Notes        string        `db:"notes"         json:"notes"`
 
 	TotalCycles         uint   `db:"total_cycles"          json:"totalCycles"`
 	RemainingCycles     uint   `db:"remaining_cycles"      json:"remainingCycles"`
@@ -132,6 +110,7 @@ type PaginateData struct {
 	ID              string              `json:"id"`
 	TenantID        string              `json:"tenantId"`
 	UserID          string              `json:"userId"`
+	ProductID       string              `json:"productId"`
 	Status          subscription.Status `json:"status"`
 	TotalCycles     int                 `json:"totalCycles"`
 	RemainingCycles int                 `json:"remainingCycles"`
@@ -179,7 +158,7 @@ type UpsertConfigInput struct {
 	MaxAttemptsPerOrder uint8
 	DiscountRules       []DiscountRule
 	CutoffOffsetMinutes uint16
-	OrderLeadMinutes      uint16
+	OrderLeadMinutes    uint16
 	IsOpen              bool
 }
 
@@ -187,6 +166,6 @@ type GetConfigOutput struct {
 	MaxAttemptsPerOrder uint8          `db:"max_attempts_per_order" json:"maxAttemptsPerOrder"`
 	DiscountRules       []DiscountRule `db:"discount_rules"         json:"discountRules"`
 	CutoffOffsetMinutes uint16         `db:"cutoff_offset_minutes"  json:"cutoffOffsetMinutes"`
-	OrderLeadMinutes      uint16          `db:"order_lead_minutes"       json:"orderLeadMinutes"`
+	OrderLeadMinutes    uint16         `db:"order_lead_minutes"     json:"orderLeadMinutes"`
 	IsOpen              bool           `db:"is_open"                json:"isOpen"`
 }

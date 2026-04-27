@@ -32,7 +32,7 @@ func (g *PgxSubscriptionGatewayAdapter) Paginate(
 	}
 
 	dataSQL, dataArgs, err := base.
-		Columns("id", "tenant_id", "user_id", "status", "total_cycles", "remaining_cycles",
+		Columns("id", "tenant_id", "user_id", "product_id", "status", "total_cycles", "remaining_cycles",
 			"payment_amount", "auto_renew", "created_at").
 		Limit(uint64(paginate.PageSize)).
 		Offset(uint64(paginate.Offset())).
