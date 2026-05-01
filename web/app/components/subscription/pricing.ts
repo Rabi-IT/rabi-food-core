@@ -1,29 +1,35 @@
 import type { CycleDiscountRule, Product } from "./types"
 
 export type ItemBreakdown = {
-  productId: string
-  name: string
-  quantity: number
-  unitPrice: number
-  subtotal: number
-  discountPercent: number
-  discountAmount: number
-  total: number
+  readonly productId: string
+  readonly name: string
+  readonly quantity: number
+  readonly unitPrice: number
+  readonly subtotal: number
+  readonly discountPercent: number
+  readonly discountAmount: number
+  readonly total: number
 }
 
 export type PricingResult = {
-  items: ItemBreakdown[]
-  itemsTotal: number
-  itemsDiscount: number
-  cycleDiscountPercent: number
-  cycleDiscount: number
-  totalDiscount: number
-  paymentAmount: number
+  readonly items: readonly ItemBreakdown[]
+  readonly itemsTotal: number
+  readonly itemsDiscount: number
+  readonly cycleDiscountPercent: number
+  readonly cycleDiscount: number
+  readonly totalDiscount: number
+  readonly paymentAmount: number
 }
+
+type SelectedItem = {
+  readonly productId: string
+  readonly quantity: number
+}
+
 
 // Mirrors buildSubscriptionPricing in api/features/subscription/usecases/build_subscription_pricing.go
 export function calculatePricing(
-  selectedItems: readonly { productId: string; quantity: number }[],
+  selectedItems: readonly SelectedItem[],
   products: readonly Product[],
   totalCycles: number,
   cycleDiscountRules: readonly CycleDiscountRule[],
