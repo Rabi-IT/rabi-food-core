@@ -18,6 +18,12 @@
 - **Sem números mágicos** — extraia como constante nomeada com intenção clara.
 - **Listas e valores reutilizáveis** declarados com `as const` e tipados explicitamente.
 
+### Estrutura de diretórios de componentes
+- **Componente usado só dentro de uma página** → reside no diretório da própria página (ex: `app/routes/subscription/_components/product-sheet.tsx`).
+- **Componente usado em mais de uma página** → sobe para `app/components/`.
+- **Componente de UI genérico (sem lógica de domínio)** → reside em `app/components/ui/` e deve ser construído reutilizando os primitivos base existentes (`Button`, `Sheet`, etc.).
+- **Nunca criar um componente de domínio direto em `app/components/ui/`** — UI é para primitivos reutilizáveis, não para componentes de feature.
+
 ### Internacionalização
 - **Todo texto visível ao usuário via i18n** — sem string literal no JSX.
 - **Placeholders de formato** (ex: `(11) 99999-9999`, `00000-000`) são constantes do componente, não chaves de tradução — o formato não muda entre idiomas.
