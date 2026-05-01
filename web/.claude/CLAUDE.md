@@ -28,6 +28,13 @@
 - **Todo texto visível ao usuário via i18n** — sem string literal no JSX.
 - **Placeholders de formato** (ex: `(11) 99999-9999`, `00000-000`) são constantes do componente, não chaves de tradução — o formato não muda entre idiomas.
 
+## Comandos úteis
+```bash
+npm run dev        # iniciar servidor de desenvolvimento
+npm run build      # build de produção
+npm run typecheck  # checar tipos
+```
+
 ## Exemplos
 
 ```tsx
