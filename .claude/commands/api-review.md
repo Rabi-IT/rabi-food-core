@@ -38,5 +38,8 @@ Se o código estiver correto, diga claramente "Aprovado" com observações se ho
 
 Se identificar problema arquitetural que vai além de uma revisão de código (modelagem errada, acoplamento estrutural, direção de dependência suspeita), indique explicitamente que o ponto deve ser discutido com `/arquiteto` antes de ser resolvido.
 
+### Desvios de padrão
+Se algum padrão foi intencionalmente ignorado sem justificativa visível no código ou no PR, aponte como **BLOQUEADOR**. Desvios aceitáveis precisam de comentário direto no código explicando o tradeoff.
+
 ## Código para revisar
 $ARGUMENTS
