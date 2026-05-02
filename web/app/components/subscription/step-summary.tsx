@@ -150,7 +150,7 @@ export function StepSummary({
       <div className="my-4 border-t" />
 
       <section className="space-y-3 rounded-xl border p-4">
-        <p className="text-sm font-semibold">Cancelamento e reembolso</p>
+        <h4 className="text-sm font-semibold">Cancelamento e reembolso</h4>
         <div className="space-y-3 text-sm text-muted-foreground">
           <div>
             <p className="font-medium text-foreground">Não quer renovar?</p>

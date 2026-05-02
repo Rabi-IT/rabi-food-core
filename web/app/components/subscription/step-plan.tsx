@@ -78,7 +78,7 @@ export function StepPlan({ products, items, totalCycles, minCycles, deliveryWeek
               )}
             >
               <div className="flex items-center justify-between mb-3">
-                <p className="font-semibold">{opt.label}</p>
+                <p className="font-semibold font-display">{opt.label}</p>
                 {isSelected && (
                   <span className="text-xs font-medium text-primary bg-primary/10 rounded-full px-2 py-0.5">
                     ✓ Selecionado

@@ -131,7 +131,7 @@ export default function Apresentacao() {
             >
               <div className="text-4xl shrink-0 w-12 text-center">{b.icon}</div>
               <div>
-                <p className="font-semibold text-lg mb-1">{b.title}</p>
+                <h3 className="font-semibold text-lg mb-1">{b.title}</h3>
                 <p className="text-muted-foreground leading-relaxed">{b.description}</p>
               </div>
             </div>
@@ -168,7 +168,7 @@ export default function Apresentacao() {
         </h2>
         <div className="space-y-8">
           <div className="reveal reveal-delay-1">
-            <p className="font-semibold mb-1">Posso cancelar a qualquer momento?</p>
+            <h3 className="font-semibold mb-1">Posso cancelar a qualquer momento?</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Sim. Se quiser cancelar dentro de 7 dias após a primeira entrega, reembolsamos
               as entregas não realizadas automaticamente. Depois desse prazo, a assinatura
@@ -176,14 +176,14 @@ export default function Apresentacao() {
             </p>
           </div>
           <div className="reveal reveal-delay-2">
-            <p className="font-semibold mb-1">E se eu não quiser renovar?</p>
+            <h3 className="font-semibold mb-1">E se eu não quiser renovar?</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Nenhum problema. Cancele a renovação quando quiser. As entregas pagas
               continuam chegando até o fim do ciclo.
             </p>
           </div>
           <div className="reveal reveal-delay-3">
-            <p className="font-semibold mb-1">Posso trocar um produto da cesta?</p>
+            <h3 className="font-semibold mb-1">Posso trocar um produto da cesta?</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Sim — substituição é diferente de cancelamento. Você pode trocar qualquer
               produto da cesta a qualquer momento.

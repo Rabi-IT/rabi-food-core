@@ -121,7 +121,7 @@ export default function StorefrontHome() {
 
       <div className="bg-primary/5 border-b border-primary/20 px-6 py-4 flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold">Receba sempre, sem esquecer</p>
+          <p className="text-sm font-semibold font-display">Receba sempre, sem esquecer</p>
           <p className="text-xs text-muted-foreground">Toque em um produto para montar sua cesta</p>
         </div>
         <Link
