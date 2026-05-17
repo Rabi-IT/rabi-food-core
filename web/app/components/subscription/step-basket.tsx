@@ -48,18 +48,19 @@ export function StepBasket({ products, items, onChange, onNext }: Props) {
 
   return (
     <div className="flex flex-col">
-      {/* Progress within this step */}
-      <div className="flex gap-1 mb-6">
-        {selectedProducts.map((_, i) => (
-          <div
-            key={i}
-            className={cn(
-              "h-1 flex-1 rounded-full transition-colors",
-              i <= productIndex ? "bg-primary" : "bg-muted"
-            )}
-          />
-        ))}
-      </div>
+      {selectedProducts.length > 1 && (
+        <div className="flex gap-1 mb-6">
+          {selectedProducts.map((_, i) => (
+            <div
+              key={i}
+              className={cn(
+                "h-1 flex-1 rounded-full transition-colors",
+                i <= productIndex ? "bg-primary" : "bg-muted"
+              )}
+            />
+          ))}
+        </div>
+      )}
 
       <p className="text-xs text-muted-foreground mb-1">
         Produto {productIndex + 1} de {selectedProducts.length}
