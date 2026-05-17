@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "~/components/ui/button"
 import { cn } from "~/lib/utils"
 import { calculatePricing, formatPrice } from "./pricing"
@@ -8,13 +9,6 @@ import type { CycleDiscountRule, Product, SavedCard } from "./types"
 const FIRST_SLIDE = 0
 const LAST_SLIDE = 3
 const SLIDE_DOTS = [0, 1, 2, 3] as const
-
-const FLEXIBILITY_ITEMS = [
-  "Troque qualquer produto da cesta quando quiser",
-  "Adie ou pule uma entrega se não puder receber",
-  "Altere os dias e horários a qualquer momento",
-  "Cancele a renovação a qualquer momento — sem multa",
-] as const
 
 // Apple web easing — moderate start, gradual organic deceleration (reverse-engineered from apple.com CSS).
 const TRANSITION = "transition-all duration-500 [transition-timing-function:cubic-bezier(0.4,0.01,0.165,0.99)]"
@@ -87,12 +81,6 @@ function useReveal(slide: number): number {
   return revealed
 }
 
-function formatCard(card: SavedCard): string {
-  const brand = card.brand.charAt(0).toUpperCase() + card.brand.slice(1)
-  const exp = `${String(card.expMonth).padStart(2, "0")}/${String(card.expYear).slice(-2)}`
-  return `${brand} •••• ${card.last4} · ${exp}`
-}
-
 export function StepConfirm({
   data,
   products,
@@ -104,8 +92,11 @@ export function StepConfirm({
   onPayWithNewCard,
   onBack,
 }: StepConfirmProps) {
+  const { t } = useTranslation()
   const [slide, setSlide] = useState(FIRST_SLIDE)
   const revealed = useReveal(slide)
+
+  const flexibilityItems = t("subscription.confirm.flexibility.items", { returnObjects: true }) as readonly string[]
 
   const pricing = calculatePricing(data.items, products, data.totalCycles, cycleDiscountRules)
   const total = pricing.paymentAmount * data.totalCycles
@@ -115,8 +106,10 @@ export function StepConfirm({
     day: "numeric",
     month: "long",
   })
-  const deliveryLabel = `${data.totalCycles} ${data.totalCycles === 1 ? "entrega" : "entregas"}`
-  const confirmLabel = isSubmitting ? "Processando…" : "Confirmar assinatura"
+  const deliveryLabel = data.totalCycles === 1
+    ? t("subscription.confirm.deliveryOne", { count: data.totalCycles })
+    : t("subscription.confirm.deliveryMany", { count: data.totalCycles })
+  const confirmLabel = isSubmitting ? t("subscription.confirm.processing") : t("subscription.confirm.confirm")
   const isLastSlide = slide === LAST_SLIDE
 
   function handleBack() {
@@ -137,7 +130,7 @@ export function StepConfirm({
     }
     return (
       <Button className="w-full" onClick={() => setSlide((s) => s + 1)}>
-        Continuar
+        {t("subscription.confirm.continue")}
       </Button>
     )
   }
@@ -149,7 +142,7 @@ export function StepConfirm({
           {data.user.phone && (
             <div className={revealCn(1, revealed)}>
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                contato para entrega
+                {t("subscription.confirm.contactLabel")}
               </p>
               <p className="text-base font-medium">{formatPhone(data.user.phone)}</p>
             </div>
@@ -157,7 +150,7 @@ export function StepConfirm({
 
           <div className={revealCn(2, revealed)}>
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">
-              será cobrado em
+              {t("subscription.confirm.chargedTo")}
             </p>
             <div className="flex items-center justify-between rounded-2xl border border-border bg-muted/40 px-4 py-3">
               <div className="flex items-center gap-3">
@@ -177,7 +170,7 @@ export function StepConfirm({
                 disabled={isSubmitting}
                 className="text-xs text-primary hover:text-primary/80 transition-colors font-medium shrink-0 ml-4"
               >
-                Trocar
+                {t("subscription.confirm.changeCard")}
               </button>
             </div>
           </div>
@@ -198,7 +191,7 @@ export function StepConfirm({
         {data.user.phone && (
           <div className={revealCn(1, revealed)}>
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-              contato para entrega
+              {t("subscription.confirm.contactLabel")}
             </p>
             <p className="text-base font-medium">{formatPhone(data.user.phone)}</p>
           </div>
@@ -206,11 +199,11 @@ export function StepConfirm({
 
         <div className={revealCn(2, revealed, "space-y-1")}>
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-            forma de pagamento
+            {t("subscription.confirm.paymentMethod")}
           </p>
-          <p className="text-2xl font-semibold leading-snug">Novo cartão</p>
+          <p className="text-2xl font-semibold leading-snug">{t("subscription.confirm.newCard")}</p>
           <p className="text-base text-muted-foreground">
-            Você vai cadastrar um cartão na próxima etapa.
+            {t("subscription.confirm.newCardHint")}
           </p>
         </div>
 
@@ -232,13 +225,13 @@ export function StepConfirm({
       return (
         <div className="space-y-6">
           <p className={revealCn(1, revealed, "text-xs text-muted-foreground uppercase tracking-wide")}>
-            primeira entrega
+            {t("subscription.confirm.firstDelivery")}
           </p>
           <h2 className={revealCn(2, revealed, "text-4xl font-bold font-display leading-tight capitalize")}>
             {firstDeliveryLabel}
           </h2>
           <p className={revealCn(3, revealed, "text-base text-muted-foreground leading-relaxed")}>
-            E depois, toda semana nos mesmos dias que você escolheu.
+            {t("subscription.confirm.weeklyHint")}
           </p>
         </div>
       )
@@ -248,7 +241,7 @@ export function StepConfirm({
       return (
         <div className="space-y-3">
           <p className={revealCn(1, revealed, "text-xs text-muted-foreground uppercase tracking-wide")}>
-            você está levando
+            {t("subscription.confirm.youAreTaking")}
           </p>
           <h2 className={revealCn(2, revealed, "text-5xl font-bold font-display text-primary leading-none")}>
             {deliveryLabel}
@@ -258,11 +251,11 @@ export function StepConfirm({
           </p>
           <div className={revealCn(4, revealed)}>
             <p className="text-sm text-muted-foreground">
-              {formatPrice(pricing.paymentAmount)} por entrega
+              {t("subscription.confirm.pricePerDelivery", { price: formatPrice(pricing.paymentAmount) })}
             </p>
             {pricing.totalDiscount > 0 && (
               <p className="text-sm font-medium text-primary pt-2">
-                💰 Economia de {formatPrice(pricing.totalDiscount * data.totalCycles)} no total
+                {t("subscription.confirm.savings", { amount: formatPrice(pricing.totalDiscount * data.totalCycles) })}
               </p>
             )}
           </div>
@@ -274,12 +267,12 @@ export function StepConfirm({
       <div className="space-y-8">
         <div className={revealCn(1, revealed, "space-y-2")}>
           <h2 className="text-4xl font-bold font-display leading-tight">
-            Você está no controle.
+            {t("subscription.confirm.flexibility.title")}
           </h2>
-          <p className="text-base text-muted-foreground">Sua cesta, do seu jeito.</p>
+          <p className="text-base text-muted-foreground">{t("subscription.confirm.flexibility.subtitle")}</p>
         </div>
         <ul className="space-y-5">
-          {FLEXIBILITY_ITEMS.map((item, index) => (
+          {flexibilityItems.map((item, index) => (
             <li key={item} className={revealCn(index + 2, revealed, "flex items-start gap-3")}>
               <span className="text-primary font-bold text-lg leading-none mt-0.5">✓</span>
               <span className="text-base">{item}</span>

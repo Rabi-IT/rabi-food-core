@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import { Button } from "~/components/ui/button"
 import { formatPrice } from "./pricing"
 import { cn } from "~/lib/utils"
@@ -11,6 +12,7 @@ type Props = {
 }
 
 export function StepProducts({ products, items, onChange, onNext }: Props) {
+  const { t } = useTranslation()
   const selectedIds = new Set(items.map((i) => i.productId))
 
   function toggle(productId: string) {
@@ -26,7 +28,7 @@ export function StepProducts({ products, items, onChange, onNext }: Props) {
   return (
     <div className="flex flex-col">
       <p className="text-sm text-muted-foreground mb-6">
-        Escolha os produtos que farão parte da sua cesta recorrente.
+        {t("subscription.products.hint")}
       </p>
 
       <div className="space-y-3">
@@ -50,7 +52,7 @@ export function StepProducts({ products, items, onChange, onNext }: Props) {
                 />
               ) : (
                 <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                  <span className="text-xs text-muted-foreground">Foto</span>
+                  <span className="text-xs text-muted-foreground">{t("subscription.product.photoPlaceholder")}</span>
                 </div>
               )}
 
@@ -58,11 +60,11 @@ export function StepProducts({ products, items, onChange, onNext }: Props) {
                 <p className="text-sm font-medium leading-snug line-clamp-1">{product.name}</p>
                 <p className="text-sm font-semibold text-primary">{formatPrice(product.price)}</p>
                 {product.unit && (
-                  <p className="text-xs text-muted-foreground">por {product.unit}</p>
+                  <p className="text-xs text-muted-foreground">{t("subscription.product.perUnit", { unit: product.unit })}</p>
                 )}
                 {product.discountRules && product.discountRules.length > 0 && (
                   <p className="text-xs text-primary mt-0.5">
-                    Desconto por quantidade disponível
+                    {t("subscription.products.quantityDiscountAvailable")}
                   </p>
                 )}
               </div>
@@ -83,11 +85,13 @@ export function StepProducts({ products, items, onChange, onNext }: Props) {
       <div className="sticky bottom-0 border-t bg-background p-4 space-y-2">
         {hasItems && (
           <p className="text-center text-sm text-muted-foreground">
-            {items.length} {items.length === 1 ? "produto selecionado" : "produtos selecionados"}
+            {items.length === 1
+              ? t("subscription.products.selectedOne")
+              : t("subscription.products.selectedMany", { count: items.length })}
           </p>
         )}
         <Button className="w-full" disabled={!hasItems} onClick={onNext}>
-          {hasItems ? "Continuar" : "Selecione ao menos um produto"}
+          {hasItems ? t("subscription.products.continue") : t("subscription.products.selectAtLeastOne")}
         </Button>
       </div>
     </div>

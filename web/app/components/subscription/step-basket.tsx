@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "~/components/ui/button"
 import { formatPrice } from "./pricing"
 import { cn } from "~/lib/utils"
@@ -12,6 +13,7 @@ type Props = {
 }
 
 export function StepBasket({ products, items, onChange, onNext }: Props) {
+  const { t } = useTranslation()
   const [productIndex, setProductIndex] = useState(0)
 
   const selectedProducts = items
@@ -63,7 +65,7 @@ export function StepBasket({ products, items, onChange, onNext }: Props) {
       )}
 
       <p className="text-xs text-muted-foreground mb-1">
-        Produto {productIndex + 1} de {selectedProducts.length}
+        {t("subscription.basket.productOf", { current: productIndex + 1, total: selectedProducts.length })}
       </p>
 
       {/* Product card */}
@@ -73,7 +75,7 @@ export function StepBasket({ products, items, onChange, onNext }: Props) {
             <img src={product.photo} alt={product.name} className="w-20 h-20 rounded-lg object-cover shrink-0" />
           ) : (
             <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center shrink-0">
-              <span className="text-xs text-muted-foreground">Foto</span>
+              <span className="text-xs text-muted-foreground">{t("subscription.product.photoPlaceholder")}</span>
             </div>
           )}
           <div className="flex-1 min-w-0">
@@ -82,13 +84,13 @@ export function StepBasket({ products, items, onChange, onNext }: Props) {
               <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.description}</p>
             )}
             <p className="text-sm font-semibold text-primary mt-1">{formatPrice(product.price)}</p>
-            {product.unit && <p className="text-xs text-muted-foreground">por {product.unit}</p>}
+            {product.unit && <p className="text-xs text-muted-foreground">{t("subscription.product.perUnit", { unit: product.unit })}</p>}
           </div>
         </div>
 
         {/* Quantity selector */}
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">Quantidade</p>
+          <p className="text-sm text-muted-foreground">{t("subscription.basket.quantity")}</p>
           <div className="flex items-center gap-4">
             <button
               type="button"
@@ -111,7 +113,7 @@ export function StepBasket({ products, items, onChange, onNext }: Props) {
 
         {/* Subtotal */}
         <div className="mt-3 flex items-baseline justify-between">
-          <p className="text-sm text-muted-foreground">Subtotal</p>
+          <p className="text-sm text-muted-foreground">{t("subscription.basket.subtotal")}</p>
           <div className="text-right">
             {discountAmount > 0 && (
               <p className="text-xs text-muted-foreground line-through">{formatPrice(subtotal)}</p>
@@ -124,7 +126,7 @@ export function StepBasket({ products, items, onChange, onNext }: Props) {
       {/* Discount tiers */}
       {rules.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm font-medium">Descontos por quantidade</p>
+          <p className="text-sm font-medium">{t("subscription.basket.quantityDiscounts")}</p>
           {rules.map((rule) => {
             const isActive = activeRule?.quantityThreshold === rule.quantityThreshold
             const nextUnlocked = rules.find((r) => r.quantityThreshold > qty)
@@ -146,11 +148,11 @@ export function StepBasket({ products, items, onChange, onNext }: Props) {
                     <span className="w-5 h-5 rounded-full border-2 border-muted-foreground/30 shrink-0" />
                   )}
                   <span className={cn("font-medium", isActive ? "text-primary" : "text-foreground")}>
-                    {rule.quantityThreshold}+ {product.unit ?? "unidades"}
+                    {rule.quantityThreshold}+ {product.unit ?? t("subscription.basket.defaultUnit")}
                   </span>
                   {nextUnlocked?.quantityThreshold === rule.quantityThreshold && (
                     <span className="text-xs text-muted-foreground">
-                      (mais {rule.quantityThreshold - qty} para desbloquear)
+                      {t("subscription.basket.toUnlock", { count: rule.quantityThreshold - qty })}
                     </span>
                   )}
                 </div>
@@ -165,7 +167,7 @@ export function StepBasket({ products, items, onChange, onNext }: Props) {
 
       <div className="sticky bottom-0 border-t bg-background p-4">
         <Button className="w-full" onClick={handleNext}>
-          {isLast ? "Continuar" : "Próximo produto"}
+          {isLast ? t("subscription.basket.continue") : t("subscription.basket.nextProduct")}
         </Button>
       </div>
     </div>

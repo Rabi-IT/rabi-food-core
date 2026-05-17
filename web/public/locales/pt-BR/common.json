@@ -87,6 +87,84 @@
       "saving": "Salvando…",
       "continue": "Continuar",
       "notYou": "Não é você?"
+    },
+    "product": {
+      "photoPlaceholder": "Foto",
+      "perUnit": "por {{unit}}"
+    },
+    "products": {
+      "hint": "Escolha os produtos que farão parte da sua cesta recorrente.",
+      "quantityDiscountAvailable": "Desconto por quantidade disponível",
+      "selectedOne": "1 produto selecionado",
+      "selectedMany": "{{count}} produtos selecionados",
+      "continue": "Continuar",
+      "selectAtLeastOne": "Selecione ao menos um produto"
+    },
+    "basket": {
+      "productOf": "Produto {{current}} de {{total}}",
+      "quantity": "Quantidade",
+      "subtotal": "Subtotal",
+      "quantityDiscounts": "Descontos por quantidade",
+      "toUnlock": "(mais {{count}} para desbloquear)",
+      "defaultUnit": "unidades",
+      "continue": "Continuar",
+      "nextProduct": "Próximo produto"
+    },
+    "delivery": {
+      "hint": "Escolha os dias da semana em que deseja receber suas entregas.",
+      "timeHint": "Escolha o horário preferido para cada dia.",
+      "nextDelivery": "Próxima entrega:",
+      "today": "hoje",
+      "tomorrow": "amanhã",
+      "continue": "Continuar",
+      "selectAtLeastOne": "Selecione ao menos um dia",
+      "weekdays": ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
+      "weekdaysFull": ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"],
+      "morning": { "label": "Manhã", "description": "8h – 12h" },
+      "afternoon": { "label": "Tarde", "description": "12h – 18h" },
+      "allDay": { "label": "Dia todo", "description": "8h – 18h" }
+    },
+    "plan": {
+      "hint": "🛒 Cada entrega é uma cesta no dia combinado. Mais entregas, mais desconto — escolha o que faz sentido pra você.",
+      "deliveryOne": "{{count}} entrega",
+      "deliveryMany": "{{count}} entregas",
+      "deliveryOneBasket": "{{count}} entrega da sua cesta",
+      "deliveryManyBasket": "{{count}} entregas da sua cesta",
+      "discount": "−{{percent}}% de desconto",
+      "selected": "✓ Selecionado",
+      "youAreTaking": "📦 Você está levando",
+      "perDelivery": "{{price}}/entrega",
+      "perDeliveryLabel": "por entrega",
+      "savings": "💰 Você economiza {{amount}} no total",
+      "continue": "Continuar"
+    },
+    "confirm": {
+      "flexibility": {
+        "title": "Você está no controle.",
+        "subtitle": "Sua cesta, do seu jeito.",
+        "items": [
+          "Troque qualquer produto da cesta quando quiser",
+          "Adie ou pule uma entrega se não puder receber",
+          "Altere os dias e horários a qualquer momento",
+          "Cancele a renovação a qualquer momento — sem multa"
+        ]
+      },
+      "deliveryOne": "{{count}} entrega",
+      "deliveryMany": "{{count}} entregas",
+      "pricePerDelivery": "{{price}} por entrega",
+      "savings": "💰 Economia de {{amount}} no total",
+      "firstDelivery": "primeira entrega",
+      "weeklyHint": "E depois, toda semana nos mesmos dias que você escolheu.",
+      "youAreTaking": "você está levando",
+      "contactLabel": "contato para entrega",
+      "chargedTo": "será cobrado em",
+      "changeCard": "Trocar",
+      "paymentMethod": "forma de pagamento",
+      "newCard": "Novo cartão",
+      "newCardHint": "Você vai cadastrar um cartão na próxima etapa.",
+      "continue": "Continuar",
+      "processing": "Processando…",
+      "confirm": "Confirmar assinatura"
     }
   },
   "payment": {

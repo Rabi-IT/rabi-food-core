@@ -1,16 +1,14 @@
+import { useTranslation } from "react-i18next"
 import { Button } from "~/components/ui/button"
 import { cn } from "~/lib/utils"
 
-const WEEKDAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"] as const
-const WEEKDAYS_FULL = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"] as const
-
-const TIME_WINDOWS = [
-  { label: "Manhã", description: "8h – 12h", startHour: 8, endHour: 12 },
-  { label: "Tarde", description: "12h – 18h", startHour: 12, endHour: 18 },
-  { label: "Dia todo", description: "8h – 18h", startHour: 8, endHour: 18 },
+const TIME_WINDOW_IDS = [
+  { id: "morning", startHour: 8, endHour: 12 },
+  { id: "afternoon", startHour: 12, endHour: 18 },
+  { id: "allDay", startHour: 8, endHour: 18 },
 ] as const
 
-type TimeWindow = typeof TIME_WINDOWS[number]
+type TimeWindowId = typeof TIME_WINDOW_IDS[number]["id"]
 type DeliveryDay = { weekday: number; startHour: number; endHour: number }
 
 type Props = {
@@ -40,18 +38,23 @@ function getNextDeliveryDate(weekday: number, startHour: number, orderLeadMinute
   return cursor
 }
 
-function formatNextDelivery(date: Date): string {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const tomorrow = new Date(today)
-  tomorrow.setDate(today.getDate() + 1)
-
-  if (date.getTime() === today.getTime()) return "hoje"
-  if (date.getTime() === tomorrow.getTime()) return "amanhã"
-  return date.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })
-}
-
 export function StepDelivery({ deliveryDays, orderLeadMinutes, onChange, onNext }: Props) {
+  const { t } = useTranslation()
+
+  const weekdays = t("subscription.delivery.weekdays", { returnObjects: true }) as readonly string[]
+  const weekdaysFull = t("subscription.delivery.weekdaysFull", { returnObjects: true }) as readonly string[]
+
+  function formatNextDelivery(date: Date): string {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const tomorrow = new Date(today)
+    tomorrow.setDate(today.getDate() + 1)
+
+    if (date.getTime() === today.getTime()) return t("subscription.delivery.today")
+    if (date.getTime() === tomorrow.getTime()) return t("subscription.delivery.tomorrow")
+    return date.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })
+  }
+
   function toggle(weekday: number) {
     const exists = deliveryDays.find((d) => d.weekday === weekday)
     if (exists) {
@@ -74,10 +77,10 @@ export function StepDelivery({ deliveryDays, orderLeadMinutes, onChange, onNext 
     <div className="flex flex-col space-y-6">
       <div>
         <p className="text-sm text-muted-foreground mb-4">
-          Escolha os dias da semana em que deseja receber suas entregas.
+          {t("subscription.delivery.hint")}
         </p>
         <div className="grid grid-cols-7 gap-2">
-          {WEEKDAYS.map((label, weekday) => (
+          {weekdays.map((label, weekday) => (
             <button
               key={weekday}
               type="button"
@@ -98,12 +101,12 @@ export function StepDelivery({ deliveryDays, orderLeadMinutes, onChange, onNext 
       {hasSelection && (
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Escolha o horário preferido para cada dia.
+            {t("subscription.delivery.timeHint")}
           </p>
           {sorted.map((day) => {
-            const active = TIME_WINDOWS.find(
+            const active = TIME_WINDOW_IDS.find(
               (w) => w.startHour === day.startHour && w.endHour === day.endHour
-            ) as TimeWindow | undefined
+            )
 
             const nextDelivery = getNextDeliveryDate(day.weekday, day.startHour, orderLeadMinutes)
             const nextLabel = formatNextDelivery(nextDelivery)
@@ -111,19 +114,20 @@ export function StepDelivery({ deliveryDays, orderLeadMinutes, onChange, onNext 
             return (
               <div key={day.weekday} className="space-y-2">
                 <div className="flex items-baseline justify-between">
-                  <p className="text-sm font-medium">{WEEKDAYS_FULL[day.weekday]}</p>
+                  <p className="text-sm font-medium">{weekdaysFull[day.weekday]}</p>
                   {active && (
                     <p className="text-xs text-muted-foreground">
-                      Próxima entrega: <span className="font-medium text-foreground">{nextLabel}</span>
+                      {t("subscription.delivery.nextDelivery")} <span className="font-medium text-foreground">{nextLabel}</span>
                     </p>
                   )}
                 </div>
                 <div className="grid grid-cols-3 gap-2">
-                  {TIME_WINDOWS.map((w) => {
-                    const isActive = active?.label === w.label
+                  {TIME_WINDOW_IDS.map((w) => {
+                    const isActive = active?.id === w.id
+                    const windowId = w.id as TimeWindowId
                     return (
                       <button
-                        key={w.label}
+                        key={w.id}
                         type="button"
                         onClick={() => setWindow(day.weekday, w.startHour, w.endHour)}
                         className={cn(
@@ -133,8 +137,8 @@ export function StepDelivery({ deliveryDays, orderLeadMinutes, onChange, onNext 
                             : "border-border bg-card hover:bg-muted"
                         )}
                       >
-                        <p className="font-medium">{w.label}</p>
-                        <p className="text-muted-foreground">{w.description}</p>
+                        <p className="font-medium">{t(`subscription.delivery.${windowId}.label`)}</p>
+                        <p className="text-muted-foreground">{t(`subscription.delivery.${windowId}.description`)}</p>
                       </button>
                     )
                   })}
@@ -147,7 +151,7 @@ export function StepDelivery({ deliveryDays, orderLeadMinutes, onChange, onNext 
 
       <div className="sticky bottom-0 border-t bg-background p-4">
         <Button className="w-full" disabled={!hasSelection || !allConfigured} onClick={onNext}>
-          {hasSelection ? "Continuar" : "Selecione ao menos um dia"}
+          {hasSelection ? t("subscription.delivery.continue") : t("subscription.delivery.selectAtLeastOne")}
         </Button>
       </div>
     </div>

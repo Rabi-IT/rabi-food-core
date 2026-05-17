@@ -87,6 +87,84 @@
       "saving": "Saving…",
       "continue": "Continue",
       "notYou": "Not you?"
+    },
+    "product": {
+      "photoPlaceholder": "Photo",
+      "perUnit": "per {{unit}}"
+    },
+    "products": {
+      "hint": "Choose the products for your recurring basket.",
+      "quantityDiscountAvailable": "Quantity discount available",
+      "selectedOne": "1 product selected",
+      "selectedMany": "{{count}} products selected",
+      "continue": "Continue",
+      "selectAtLeastOne": "Select at least one product"
+    },
+    "basket": {
+      "productOf": "Product {{current}} of {{total}}",
+      "quantity": "Quantity",
+      "subtotal": "Subtotal",
+      "quantityDiscounts": "Quantity discounts",
+      "toUnlock": "({{count}} more to unlock)",
+      "defaultUnit": "units",
+      "continue": "Continue",
+      "nextProduct": "Next product"
+    },
+    "delivery": {
+      "hint": "Choose the weekdays you'd like to receive your deliveries.",
+      "timeHint": "Choose your preferred time window for each day.",
+      "nextDelivery": "Next delivery:",
+      "today": "today",
+      "tomorrow": "tomorrow",
+      "continue": "Continue",
+      "selectAtLeastOne": "Select at least one day",
+      "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      "weekdaysFull": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      "morning": { "label": "Morning", "description": "8am – 12pm" },
+      "afternoon": { "label": "Afternoon", "description": "12pm – 6pm" },
+      "allDay": { "label": "All day", "description": "8am – 6pm" }
+    },
+    "plan": {
+      "hint": "🛒 Each delivery is a basket on the agreed day. More deliveries, bigger discount — choose what works for you.",
+      "deliveryOne": "{{count}} delivery",
+      "deliveryMany": "{{count}} deliveries",
+      "deliveryOneBasket": "{{count}} delivery of your basket",
+      "deliveryManyBasket": "{{count}} deliveries of your basket",
+      "discount": "−{{percent}}% discount",
+      "selected": "✓ Selected",
+      "youAreTaking": "📦 You are taking",
+      "perDelivery": "{{price}}/delivery",
+      "perDeliveryLabel": "per delivery",
+      "savings": "💰 You save {{amount}} in total",
+      "continue": "Continue"
+    },
+    "confirm": {
+      "flexibility": {
+        "title": "You are in control.",
+        "subtitle": "Your basket, your way.",
+        "items": [
+          "Swap any product in your basket whenever you want",
+          "Postpone or skip a delivery if you can't receive it",
+          "Change days and times at any time",
+          "Cancel renewal whenever you want — no penalty"
+        ]
+      },
+      "deliveryOne": "{{count}} delivery",
+      "deliveryMany": "{{count}} deliveries",
+      "pricePerDelivery": "{{price}} per delivery",
+      "savings": "💰 Savings of {{amount}} in total",
+      "firstDelivery": "first delivery",
+      "weeklyHint": "And then, every week on the same days you chose.",
+      "youAreTaking": "you are taking",
+      "contactLabel": "delivery contact",
+      "chargedTo": "will be charged to",
+      "changeCard": "Change",
+      "paymentMethod": "payment method",
+      "newCard": "New card",
+      "newCardHint": "You'll add a card in the next step.",
+      "continue": "Continue",
+      "processing": "Processing…",
+      "confirm": "Confirm subscription"
     }
   },
   "payment": {
