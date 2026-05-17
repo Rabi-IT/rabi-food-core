@@ -7,6 +7,25 @@
     "empty": "Nenhum produto disponível"
   },
   "subscription": {
+    "drawer": {
+      "stepProgress": "Etapa {{step}} de {{total}}",
+      "closed": "As assinaturas estão temporariamente indisponíveis. Tente novamente mais tarde.",
+      "success": {
+        "title": "Assinatura confirmada!",
+        "description": "Sua cesta recorrente está ativa. Em breve você receberá um e-mail de confirmação.",
+        "close": "Fechar"
+      },
+      "steps": {
+        "products": "Escolha os produtos",
+        "basket": "Quantidades",
+        "delivery": "Dias de entrega",
+        "plan": "Seu plano",
+        "identity": "Identificação",
+        "address": "Endereço de entrega",
+        "summary": "Resumo",
+        "payment": "Pagamento"
+      }
+    },
     "user": {
       "step": "Etapa {{current}} de {{total}}",
       "title": "Quem é você?",
@@ -22,6 +41,9 @@
       "phone": "Telefone",
       "phoneInvalid": "Telefone inválido",
       "otpHint": "Vamos enviar um código para confirmar seu e-mail.",
+      "identifiedAs": "Você está identificado como",
+      "continueAsExisting": "Sim, sou eu — continuar",
+      "orChangeIdentity": "ou identificar-se de outra forma",
       "backToSelection": "Voltar à seleção",
       "send": "Enviar código",
       "sending": "Enviando…",
@@ -63,7 +85,21 @@
       "statePlaceholder": "SP",
       "stateRequired": "Estado obrigatório",
       "saving": "Salvando…",
-      "continue": "Continuar"
+      "continue": "Continuar",
+      "notYou": "Não é você?"
     }
+  },
+  "payment": {
+    "title": "Pagamento",
+    "cardLabel": "Dados do cartão",
+    "cardholderName": "Nome impresso no cartão",
+    "cardholderNamePlaceholder": "Como aparece no cartão",
+    "confirm": "Confirmar pagamento",
+    "confirming": "Processando…",
+    "back": "Voltar",
+    "processing": "Processando pagamento…",
+    "processingHint": "Isso pode levar alguns segundos.",
+    "errorGeneric": "Não foi possível processar o pagamento. Tente novamente.",
+    "requires3ds": "Seu banco solicitou verificação adicional."
   }
 }

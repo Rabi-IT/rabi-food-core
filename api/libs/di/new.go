@@ -16,6 +16,9 @@ import (
 	product_controller "github.com/Rabi-IT/rabi-food-core/features/product/controller"
 	product_gateway "github.com/Rabi-IT/rabi-food-core/features/product/gateway"
 	product_case "github.com/Rabi-IT/rabi-food-core/features/product/usecases"
+	payment_controller "github.com/Rabi-IT/rabi-food-core/features/payment/controller"
+	payment_gateway "github.com/Rabi-IT/rabi-food-core/features/payment/gateway"
+	payment_case "github.com/Rabi-IT/rabi-food-core/features/payment/usecases"
 	subscription_controller "github.com/Rabi-IT/rabi-food-core/features/subscription/controller"
 	subscription_gateway "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
 	subscription_case "github.com/Rabi-IT/rabi-food-core/features/subscription/usecases"
@@ -59,6 +62,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		categoryController := do.MustInvoke[*category_controller.CategoryController](i)
 		orderController := do.MustInvoke[*order_controller.OrderController](i)
 		subscriptionController := do.MustInvoke[*subscription_controller.SubscriptionController](i)
+		paymentController := do.MustInvoke[*payment_controller.PaymentController](i)
 
 		if config.ApiPort == "" {
 			return nil, ErrHTTPPortNotConfigured
@@ -72,6 +76,7 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 			categoryController,
 			orderController,
 			subscriptionController,
+			paymentController,
 		), nil
 	})
 
@@ -172,6 +177,31 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 		return usecases.New(gw, productCase), nil
 	})
 
+	// Payment dependencies
+	do.Provide(injector, func(_ *do.Injector) (payment_gateway.StripeGateway, error) {
+		return payment_gateway.NewStripe(), nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (payment_gateway.StripeCustomerGateway, error) {
+		db := do.MustInvoke[*database.PgxAdapter](i)
+
+		return &payment_gateway.PgxStripeCustomerAdapter{DB: db}, nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (*payment_case.PaymentCase, error) {
+		stripe := do.MustInvoke[payment_gateway.StripeGateway](i)
+		customer := do.MustInvoke[payment_gateway.StripeCustomerGateway](i)
+		subCase := do.MustInvoke[*subscription_case.SubscriptionCase](i)
+
+		return payment_case.New(stripe, customer, subCase), nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (*payment_controller.PaymentController, error) {
+		c := do.MustInvoke[*payment_case.PaymentCase](i)
+
+		return payment_controller.New(c), nil
+	})
+
 	// Subscription dependencies
 	do.Provide(injector, func(i *do.Injector) (*subscription_controller.SubscriptionController, error) {
 		c := do.MustInvoke[*subscription_case.SubscriptionCase](i)
@@ -188,8 +218,9 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	do.Provide(injector, func(i *do.Injector) (*subscription_case.SubscriptionCase, error) {
 		gw := do.MustInvoke[subscription_gateway.SubscriptionGateway](i)
 		productCase := do.MustInvoke[*product_case.ProductCase](i)
+		stripe := do.MustInvoke[payment_gateway.StripeGateway](i)
 
-		return subscription_case.New(gw, productCase), nil
+		return subscription_case.New(gw, productCase, stripe), nil
 	})
 
 	return injector

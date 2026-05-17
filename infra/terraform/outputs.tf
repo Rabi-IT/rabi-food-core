@@ -22,3 +22,9 @@ output "db_host" {
   description = "RDS endpoint (use as DATABASE_HOST)"
   value       = aws_db_instance.postgres.address
 }
+
+output "stripe_webhook_secret" {
+  description = "Stripe webhook signing secret — use as STRIPE_WEBHOOK_SECRET on API"
+  value       = stripe_webhook_endpoint.subscription.secret
+  sensitive   = true
+}

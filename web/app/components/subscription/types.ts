@@ -1,5 +1,22 @@
+export type UserProfile = {
+  readonly street: string
+  readonly complement: string
+  readonly neighborhood: string
+  readonly city: string
+  readonly state: string
+  readonly zip: string
+  readonly phone: string
+}
+
 export type ProductDiscountRule = { quantityThreshold: number; discount: number }
 export type CycleDiscountRule = { cyclesThreshold: number; discount: number }
+
+export type SavedCard = {
+  readonly brand: string
+  readonly last4: string
+  readonly expMonth: number
+  readonly expYear: number
+}
 
 
 export type Product = {

@@ -15,13 +15,13 @@ func (g *PgxSubscriptionGatewayAdapter) BulkCreate(ctx context.Context, inputs [
 	qb := sq.
 		Insert("subscription.subscriptions").
 		Columns(
-			"id", "root_subscription_id", "subscription_group_id",
+			"id", "root_subscription_id",
 			"tenant_id", "user_id", "product_id", "quantity", "unit_price",
 			"status", "delivery_days", "delivery_weekdays_mask", "notes",
 			"total_cycles", "remaining_cycles", "cycle_discount", "cutoff_offset_minutes",
 			"auto_renew", "max_attempts_per_order",
 			"items_total", "items_discount", "payment_amount", "payment_status",
-			"external_payment_id", "created_at", "updated_at",
+			"created_at", "updated_at",
 		)
 
 	for _, input := range inputs {
@@ -34,13 +34,13 @@ func (g *PgxSubscriptionGatewayAdapter) BulkCreate(ctx context.Context, inputs [
 		}
 
 		qb = qb.Values(
-			id, input.RootID, input.SubscriptionGroupID,
+			id, input.RootID,
 			input.TenantID, input.UserID, input.ProductID, input.Quantity, input.UnitPrice,
 			input.Status, input.DeliveryDays, weekdaysMask, input.Notes,
 			input.TotalCycles, input.RemainingCycles, input.CycleDiscount, input.CutoffOffsetMinutes,
 			input.AutoRenew, input.MaxAttemptsPerOrder,
 			input.ItemsTotal, input.ItemsDiscount, input.PaymentAmount, input.PaymentStatus,
-			input.ExternalPaymentID, now, now,
+			now, now,
 		)
 	}
 

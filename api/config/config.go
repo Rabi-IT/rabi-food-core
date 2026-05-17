@@ -3,12 +3,15 @@ package config
 import "os"
 
 var (
-	ApiPort            = os.Getenv("API_PORT")
-	ApiVersion         = os.Getenv("API_VERSION")
-	AuthSecret         = os.Getenv("AUTH_SECRET")
-	Env                = environment(os.Getenv("ENV"))
-	GoTrueURL          = os.Getenv("GOTRUE_URL")
-	GoTrueServiceKey   = os.Getenv("GOTRUE_SERVICE_KEY")
+	ApiPort               = os.Getenv("API_PORT")
+	ApiVersion            = os.Getenv("API_VERSION")
+	AuthSecret            = os.Getenv("AUTH_SECRET")
+	Env                   = environment(os.Getenv("ENV"))
+	GoTrueURL             = os.Getenv("GOTRUE_URL")
+	GoTrueServiceKey      = os.Getenv("GOTRUE_SERVICE_KEY")
+	StripeSecretKey       = os.Getenv("STRIPE_SECRET_KEY")
+	StripePublishableKey  = os.Getenv("STRIPE_PUBLISHABLE_KEY")
+	StripeWebhookSecret   = os.Getenv("STRIPE_WEBHOOK_SECRET")
 	ProductionDatabase = &DatabaseConfig{
 		Host:         os.Getenv("DATABASE_HOST"),
 		DatabaseName: os.Getenv("DATABASE_NAME"),

@@ -6,9 +6,11 @@ import (
 )
 
 var (
-	ErrDuplicateProduct                = newErr("DUPLICATE_PRODUCT", http.StatusBadRequest)
-	ErrDuplicateDeliveryWeekday        = newErr("DUPLICATE_DELIVERY_WEEKDAY", http.StatusBadRequest)
-	ErrTenantSubscriptionNotConfigured = newErr("TENANT_SUBSCRIPTION_NOT_CONFIGURED", http.StatusInternalServerError)
+	ErrDuplicateProduct                    = newErr("DUPLICATE_PRODUCT", http.StatusBadRequest)
+	ErrDuplicateDeliveryWeekday            = newErr("DUPLICATE_DELIVERY_WEEKDAY", http.StatusBadRequest)
+	ErrTenantSubscriptionNotConfigured     = newErr("TENANT_SUBSCRIPTION_NOT_CONFIGURED", http.StatusInternalServerError)
+	ErrSubscriptionNotFound                = newErr("SUBSCRIPTION_NOT_FOUND", http.StatusNotFound)
+	ErrSubscriptionStateVerificationFailed = newErr("SUBSCRIPTION_STATE_VERIFICATION_FAILED", http.StatusInternalServerError)
 )
 
 func DuplicateProduct(productID string) *ApiError {

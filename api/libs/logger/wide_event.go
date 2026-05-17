@@ -40,6 +40,8 @@ type WideEvent struct {
 	externalPaymentID         string
 	originalExternalPaymentID string
 	paymentIdempotencyHit     *bool
+	paymentProvider           string
+	paymentAmountCents        *int64
 
 	// Delivery Scheduling
 	deliverySchedulingDate     string
@@ -93,6 +95,15 @@ func (w *WideEvent) TrackOrderPayment(orderID, externalPaymentID string) {
 	w.mu.Lock()
 	w.orderID = orderID
 	w.externalPaymentID = externalPaymentID
+	w.mu.Unlock()
+}
+
+func (w *WideEvent) TrackSubscriptionPayment(subscriptionID, externalPaymentID, provider string, amountCents int64) {
+	w.mu.Lock()
+	w.subscriptionID = subscriptionID
+	w.externalPaymentID = externalPaymentID
+	w.paymentProvider = provider
+	w.paymentAmountCents = &amountCents
 	w.mu.Unlock()
 }
 
@@ -180,6 +191,8 @@ func (w *WideEvent) reset() {
 	w.externalPaymentID = ""
 	w.originalExternalPaymentID = ""
 	w.paymentIdempotencyHit = nil
+	w.paymentProvider = ""
+	w.paymentAmountCents = nil
 
 	w.deliverySchedulingDate = ""
 	w.deliverySchedulingWeekday = ""
@@ -232,6 +245,12 @@ func (w *WideEvent) MarshalZerologObject(e *zerolog.Event) {
 	}
 	if w.paymentIdempotencyHit != nil {
 		e.Bool("payment.idempotency_hit", *w.paymentIdempotencyHit)
+	}
+	if w.paymentProvider != "" {
+		e.Str("payment.provider", w.paymentProvider)
+	}
+	if w.paymentAmountCents != nil {
+		e.Int64("payment.amount_cents", *w.paymentAmountCents)
 	}
 
 	if w.deliverySchedulingDate != "" {

@@ -10,6 +10,10 @@ terraform {
       source  = "grafana/grafana"
       version = "~> 3.0"
     }
+    stripe = {
+      source  = "lukasaron/stripe"
+      version = "~> 1.0"
+    }
   }
 
   # Uncomment to store state remotely
@@ -22,6 +26,10 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
+}
+
+provider "stripe" {
+  api_key = var.stripe_secret_key
 }
 
 provider "grafana" {

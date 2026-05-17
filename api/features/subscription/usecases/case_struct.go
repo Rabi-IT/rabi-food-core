@@ -7,11 +7,12 @@ import (
 
 // SubscriptionCase encapsulates the business logic related to subscriptions.
 type SubscriptionCase struct {
-	gateway     g.SubscriptionGateway
-	productCase *pc.ProductCase
+	gateway         g.SubscriptionGateway
+	productCase     *pc.ProductCase
+	paymentRefunder PaymentRefunder
 }
 
 // New creates a new instance of SubscriptionCase.
-func New(gateway g.SubscriptionGateway, productCase *pc.ProductCase) *SubscriptionCase {
-	return &SubscriptionCase{gateway, productCase}
+func New(gateway g.SubscriptionGateway, productCase *pc.ProductCase, paymentRefunder PaymentRefunder) *SubscriptionCase {
+	return &SubscriptionCase{gateway, productCase, paymentRefunder}
 }

@@ -14,6 +14,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/zerolog v1.31.0
 	github.com/samber/do v1.6.0
+	github.com/stripe/stripe-go/v82 v82.5.1
 	golang.org/x/sync v0.19.0
 )
 

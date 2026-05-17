@@ -6,12 +6,14 @@ import (
 	category_controller "github.com/Rabi-IT/rabi-food-core/features/category/controller"
 	order_controller "github.com/Rabi-IT/rabi-food-core/features/order/controller"
 	product_controller "github.com/Rabi-IT/rabi-food-core/features/product/controller"
+	payment_controller "github.com/Rabi-IT/rabi-food-core/features/payment/controller"
 	subscription_controller "github.com/Rabi-IT/rabi-food-core/features/subscription/controller"
 	tenant_controller "github.com/Rabi-IT/rabi-food-core/features/tenant/controller"
 
 	auth_routes "github.com/Rabi-IT/rabi-food-core/features/auth/routes"
 	category_routes "github.com/Rabi-IT/rabi-food-core/features/category/routes"
 	order_routes "github.com/Rabi-IT/rabi-food-core/features/order/routes"
+	payment_routes "github.com/Rabi-IT/rabi-food-core/features/payment/routes"
 	product_routes "github.com/Rabi-IT/rabi-food-core/features/product/routes"
 	subscription_routes "github.com/Rabi-IT/rabi-food-core/features/subscription/routes"
 	tenant_routes "github.com/Rabi-IT/rabi-food-core/features/tenant/routes"
@@ -38,6 +40,7 @@ func New(
 	categoryController *category_controller.CategoryController,
 	orderController *order_controller.OrderController,
 	subscriptionController *subscription_controller.SubscriptionController,
+	paymentController *payment_controller.PaymentController,
 ) HTTPServer {
 	api := fiber.New(fiber.Config{
 		Immutable:    true,
@@ -84,6 +87,7 @@ func New(
 	category_routes.CategoryProtected(api, categoryController)
 	order_routes.OrderProtected(api, orderController)
 	subscription_routes.SubscriptionProtected(api, subscriptionController)
+	payment_routes.PaymentProtected(api, paymentController)
 
 	return &fiberAdapter{
 		api:  api,

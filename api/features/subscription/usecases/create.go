@@ -10,8 +10,6 @@ import (
 	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/database/filter"
 	"github.com/Rabi-IT/rabi-food-core/libs/errs"
-	"github.com/Rabi-IT/rabi-food-core/libs/logger"
-	"github.com/google/uuid"
 )
 
 // DeliveryDayInput describes a recurring weekly delivery window provided by the caller.
@@ -57,10 +55,10 @@ func (c *CreateInput) Validate() error {
 	return nil
 }
 
-func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (string, error) {
-	err := input.Validate()
-	if err != nil {
-		return "", err
+// Create creates subscriptions atomically (one per item) and returns their IDs.
+func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) ([]string, error) {
+	if err := input.Validate(); err != nil {
+		return nil, err
 	}
 
 	productIds := make([]string, 0, len(input.Items))
@@ -74,7 +72,7 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 		TenantID: input.TenantID,
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch products: %w", err)
+		return nil, fmt.Errorf("failed to fetch products: %w", err)
 	}
 
 	if len(products) != len(input.Items) {
@@ -83,11 +81,11 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 
 	config, err := s.gateway.GetConfig(ctx, input.TenantID)
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch subscription config: %w", err)
+		return nil, fmt.Errorf("failed to fetch subscription config: %w", err)
 	}
 
 	if config == nil {
-		return "", errs.ErrTenantSubscriptionNotConfigured
+		return nil, errs.ErrTenantSubscriptionNotConfigured
 	}
 
 	price, err := buildSubscriptionPricing(
@@ -97,10 +95,8 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 		config.DiscountRules,
 	)
 	if err != nil {
-		return "", fmt.Errorf("failed to calculate price: %w", err)
+		return nil, fmt.Errorf("failed to calculate price: %w", err)
 	}
-
-	groupID := uuid.Must(uuid.NewV7()).String()
 
 	gatewayInputs := make([]g.CreateInput, 0, len(price.Products))
 	for _, p := range price.Products {
@@ -108,7 +104,6 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 			UserID:              input.UserID,
 			TenantID:            input.TenantID,
 			Status:              subscription.StatusActive,
-			SubscriptionGroupID: &groupID,
 			ProductID:           p.ProductID,
 			Quantity:            uint16(p.Quantity),
 			UnitPrice:           p.UnitPrice,
@@ -124,25 +119,17 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) (strin
 			ItemsDiscount:       p.ItemsDiscount,
 			PaymentAmount:       p.PaymentAmount(),
 			PaymentStatus:       payment_status.StatusPending,
-			ExternalPaymentID:   uuid.Must(uuid.NewV7()).String(),
 		})
 	}
 
-	_, err = s.gateway.BulkCreate(ctx, gatewayInputs)
-	if err != nil {
-		return "", err
-	}
-
-	logger.GetWideEvent(ctx).SetSubscriptionID(groupID)
-
-	return groupID, nil
+	return s.gateway.BulkCreate(ctx, gatewayInputs)
 }
 
 // handleMissingProducts returns a structured error after identifying which products are absent.
 func (s *SubscriptionCase) handleMissingProducts(
 	requestedItems []SubscriptionItemInput,
 	foundProducts []product_gateway.ListOutput,
-) (string, error) {
+) ([]string, error) {
 	foundProductIDs := make(map[string]struct{}, len(foundProducts))
 	for _, product := range foundProducts {
 		foundProductIDs[product.ID] = struct{}{}
@@ -155,5 +142,5 @@ func (s *SubscriptionCase) handleMissingProducts(
 		}
 	}
 
-	return "", errs.ProductNotFound(missingProductIDs...)
+	return nil, errs.ProductNotFound(missingProductIDs...)
 }

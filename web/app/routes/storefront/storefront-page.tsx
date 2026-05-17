@@ -51,6 +51,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     categories: catalogRes.ok ? catalogRes.data.categories : [],
     config: configRes.ok ? configRes.data : null,
     serverToken: token,
+    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY ?? "",
   }
 }
 
@@ -59,7 +60,7 @@ function formatPrice(cents: number): string {
 }
 
 export default function StorefrontHome() {
-  const { tenant, categories, products, config, serverToken } = useLoaderData<typeof loader>()
+  const { tenant, categories, products, config, serverToken, stripePublishableKey } = useLoaderData<typeof loader>()
   if (!tenant) return <InstitutionalPage />
 
   const layout = useRouteLoaderData("routes/storefront/layout") as { tenant: { name: string } }
@@ -206,6 +207,7 @@ export default function StorefrontHome() {
         products={products}
         config={config}
         serverToken={serverToken}
+        stripePublishableKey={stripePublishableKey}
       />
     </div>
   )

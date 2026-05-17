@@ -11,11 +11,12 @@ import (
 func (g *PgxSubscriptionGatewayAdapter) GetByID(ctx context.Context, filter GetByIDFilter) (*GetByIDOutput, error) {
 	b := sq.
 		Select(
-			"id", "tenant_id", "user_id", "status", "subscription_group_id",
+			"id", "tenant_id", "user_id", "status",
 			"product_id", "quantity", "unit_price",
 			"delivery_days", "notes",
 			"total_cycles", "remaining_cycles", "cycle_discount", "cutoff_offset_minutes",
-			"auto_renew", "items_total", "items_discount", "payment_amount", "created_at",
+			"auto_renew", "items_total", "items_discount", "payment_amount",
+			"payment_status", "paid_at", "created_at",
 		).
 		From("subscription.subscriptions").
 		Where(sq.Eq{"id": filter.ID}).
@@ -29,7 +30,6 @@ func (g *PgxSubscriptionGatewayAdapter) GetByID(ctx context.Context, filter GetB
 	if filter.UserID != "" {
 		b = b.Where(sq.Eq{"user_id": filter.UserID})
 	}
-
 	sql, args, err := b.ToSql()
 	if err != nil {
 		return nil, err

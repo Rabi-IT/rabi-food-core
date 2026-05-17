@@ -1,4 +1,4 @@
-import { Sheet } from "~/components/ui/sheet"
+import { Sheet, SheetContent } from "~/components/ui/sheet"
 import { formatPrice } from "./pricing"
 import type { Product } from "./types"
 
@@ -18,9 +18,10 @@ export function ProductSheet({ product, onClose, onSubscribe }: Props) {
   }
 
   return (
-    <Sheet open={product !== null} onClose={onClose} variant="full">
+    <Sheet open={product !== null} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
+      <SheetContent side="right" showCloseButton={false} className="w-full sm:max-w-md p-0 overflow-hidden">
       {product && (
-        <div className="flex flex-col h-full p-4 gap-4">
+        <div className="flex-1 flex flex-col min-h-0 p-4 gap-4">
           <div className="flex justify-end shrink-0">
             <button
               type="button"
@@ -85,6 +86,7 @@ export function ProductSheet({ product, onClose, onSubscribe }: Props) {
           </div>
         </div>
       )}
+      </SheetContent>
     </Sheet>
   )
 }

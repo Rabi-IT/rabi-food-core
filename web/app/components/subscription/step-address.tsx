@@ -26,6 +26,7 @@ type Props = {
   readonly onChangePhone: (phone: string) => void
   readonly onChangeAddress: (address: AddressData) => void
   readonly onNext: () => void
+  readonly onChangeIdentity?: () => void
   readonly isSaving: boolean
   readonly saveError?: string
 }
@@ -78,6 +79,7 @@ export function StepAddress({
   onChangePhone,
   onChangeAddress,
   onNext,
+  onChangeIdentity,
   isSaving,
   saveError,
 }: Props) {
@@ -188,6 +190,15 @@ export function StepAddress({
           >
             {t("subscription.address.updateAddress")}
           </button>
+          {onChangeIdentity && (
+            <button
+              type="button"
+              onClick={onChangeIdentity}
+              className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
+            >
+              {t("subscription.address.notYou")}
+            </button>
+          )}
         </div>
       </div>
     )
@@ -288,10 +299,19 @@ export function StepAddress({
         </p>
       )}
 
-      <div className="sticky bottom-0 border-t bg-background p-4">
+      <div className="sticky bottom-0 border-t bg-background p-4 space-y-2">
         <Button className="w-full" onClick={handleNext} disabled={isSaving || cepLoading}>
           {isSaving ? t("subscription.address.saving") : t("subscription.address.continue")}
         </Button>
+        {onChangeIdentity && (
+          <button
+            type="button"
+            onClick={onChangeIdentity}
+            className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
+          >
+            {t("subscription.address.notYou")}
+          </button>
+        )}
       </div>
     </div>
   )

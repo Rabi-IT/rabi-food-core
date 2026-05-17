@@ -12,6 +12,7 @@ import (
 type SubscriptionGateway interface {
 	BulkCreate(ctx context.Context, inputs []CreateInput) ([]string, error)
 	GetByID(ctx context.Context, filter GetByIDFilter) (*GetByIDOutput, error)
+	Patch(ctx context.Context, filter PatchFilter, values PatchValues) (bool, error)
 	Paginate(ctx context.Context, filter PaginateFilter, paginate database.PaginateInput) (PaginateOutput, error)
 	UpsertConfig(ctx context.Context, tenantID string, input UpsertConfigInput) error
 	GetConfig(ctx context.Context, tenantID string) (*GetConfigOutput, error)
@@ -26,11 +27,10 @@ type DeliveryDay struct {
 }
 
 type CreateInput struct {
-	UserID              string
-	TenantID            string
-	Status              subscription.Status
-	RootID              *string
-	SubscriptionGroupID *string
+	UserID   string
+	TenantID string
+	Status   subscription.Status
+	RootID   *string
 
 	// Product (1:1 per subscription row)
 	ProductID string
@@ -52,9 +52,6 @@ type CreateInput struct {
 	ItemsDiscount uint
 	PaymentAmount uint
 	PaymentStatus payment_status.Status
-	// ExternalPaymentID references the payment transaction in the external
-	// provider. Must be unique to ensure idempotent payment processing.
-	ExternalPaymentID string
 }
 
 type GetByIDFilter struct {
@@ -67,12 +64,10 @@ type GetByIDOutput struct {
 	ID                  string              `db:"id"                   json:"id"`
 	TenantID            string              `db:"tenant_id"            json:"tenantId"`
 	UserID              string              `db:"user_id"              json:"userId"`
-	Status              subscription.Status `db:"status"               json:"status"`
-	SubscriptionGroupID *string             `db:"subscription_group_id" json:"subscriptionGroupId,omitempty"`
-
-	ProductID string `db:"product_id" json:"productId"`
-	Quantity  uint16 `db:"quantity"   json:"quantity"`
-	UnitPrice uint   `db:"unit_price" json:"unitPrice"`
+	Status    subscription.Status `db:"status"     json:"status"`
+	ProductID string              `db:"product_id" json:"productId"`
+	Quantity  uint16              `db:"quantity"   json:"quantity"`
+	UnitPrice uint                `db:"unit_price" json:"unitPrice"`
 
 	DeliveryDays []DeliveryDay `db:"delivery_days" json:"deliveryDays"`
 	Notes        string        `db:"notes"         json:"notes"`
@@ -87,17 +82,23 @@ type GetByIDOutput struct {
 	ItemsDiscount uint `db:"items_discount" json:"itemsDiscount"`
 	PaymentAmount uint `db:"payment_amount" json:"paymentAmount"`
 
+	PaymentStatus payment_status.Status `db:"payment_status" json:"paymentStatus"`
+	PaidAt        *time.Time            `db:"paid_at"        json:"paidAt,omitempty"`
+
 	CreatedAt time.Time `db:"created_at" json:"createdAt"`
 }
 
 type PatchFilter struct {
-	ID       string
-	TenantID string
-	Statuses []subscription.Status
+	ID            string
+	TenantID      string
+	Statuses      []subscription.Status
+	PaymentStatus payment_status.Status
 }
 
 type PatchValues struct {
-	Status subscription.Status
+	Status        subscription.Status
+	PaymentStatus *payment_status.Status
+	PaidAt        *time.Time
 }
 
 type PaginateFilter struct {

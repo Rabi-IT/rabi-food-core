@@ -11,17 +11,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// Create godoc
-// @Summary Create subscription
-// @Description Create a new subscription group, one subscription per selected product
-// @Tags subscriptions
-// @Accept json
-// @Produce json
-// @Param subscription body usecases.CreateInput true "Subscription data"
-// @Success 201 {array} string "Created subscription IDs"
-// @Failure 400 {object} middlewares.ValidationErrorResponse "Validation errors"
-// @Failure 500 {string} string "Internal server error"
-// @Router /subscription/ [post].
 func (c *SubscriptionController) Create(ctx *fiber.Ctx) error {
 	data := usecases.CreateInput{}
 	err := ctx.BodyParser(&data)
@@ -40,10 +29,10 @@ func (c *SubscriptionController) Create(ctx *fiber.Ctx) error {
 	data.UserID = session.UserID
 
 	logger.GetWideEvent(uctx).Event = "create-subscription"
-	groupID, err := c.usecase.Create(uctx, data)
+	ids, err := c.usecase.Create(uctx, data)
 	if err != nil {
 		return err
 	}
 
-	return ctx.Status(http.StatusCreated).SendString(groupID)
+	return ctx.Status(http.StatusCreated).JSON(ids)
 }

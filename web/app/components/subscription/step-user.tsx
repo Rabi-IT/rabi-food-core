@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { isValidPhoneNumber } from "react-phone-number-input"
 import { Button } from "~/components/ui/button"
@@ -18,8 +18,9 @@ type Props = {
   readonly user: UserData
   readonly subStep: "identity" | "code"
   readonly initialMode?: AccountMode
+  readonly existingIdentity?: string
+  readonly onContinueAsExisting?: () => void
   readonly onChange: (user: UserData) => void
-  readonly onBack: () => void
   readonly onSendOtp: (name: string, email: string, phone: string) => void
   readonly onVerifyOtp: (email: string, code: string) => void
   readonly onResetOtp: () => void
@@ -50,8 +51,9 @@ export function StepUser({
   user,
   subStep,
   initialMode,
+  existingIdentity,
+  onContinueAsExisting,
   onChange,
-  onBack,
   onSendOtp,
   onVerifyOtp,
   onResetOtp,
@@ -67,14 +69,9 @@ export function StepUser({
 
   const errors = touched && mode ? validateIdentity(user, mode) : {}
 
-  function handleBack() {
-    if (subStep === "code") {
-      onResetOtp()
-      setCode("")
-      return
-    }
-    onBack()
-  }
+  useEffect(() => {
+    if (subStep === "identity") setCode("")
+  }, [subStep])
 
   function handleSend() {
     setTouched(true)
@@ -99,25 +96,6 @@ export function StepUser({
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center gap-3 mb-6">
-        <button
-          type="button"
-          onClick={handleBack}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          ←
-        </button>
-        <div className="flex gap-1 flex-1">
-          <div className="h-1 flex-1 rounded-full bg-primary" />
-          <div
-            className={cn(
-              "h-1 flex-1 rounded-full transition-colors",
-              subStep === "code" ? "bg-primary" : "bg-muted",
-            )}
-          />
-        </div>
-      </div>
-
       {subStep === "code" && (
         <VerifySection
           email={user.email}
@@ -140,6 +118,22 @@ export function StepUser({
             </p>
             <p className="text-sm font-medium">{t("subscription.user.title")}</p>
           </div>
+
+          {!mode && onContinueAsExisting && (
+            <div className="rounded-xl border bg-card p-4 space-y-3">
+              <p className="text-sm text-muted-foreground">{t("subscription.user.identifiedAs")}</p>
+              <p className="text-sm font-medium truncate">{existingIdentity}</p>
+              <Button className="w-full" onClick={onContinueAsExisting}>
+                {t("subscription.user.continueAsExisting")}
+              </Button>
+            </div>
+          )}
+
+          {!mode && onContinueAsExisting && (
+            <p className="text-xs text-center text-muted-foreground">
+              {t("subscription.user.orChangeIdentity")}
+            </p>
+          )}
 
           {!mode && (
             <div className="space-y-3">

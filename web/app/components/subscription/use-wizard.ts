@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react"
 
-export type WizardStep = 1 | 2 | 3 | 4 | 5 | 6 | "summary"
+export type WizardStep = 1 | 2 | 3 | 4 | 5 | 6 | "summary" | "payment"
 
 export type WizardData = {
   items: { productId: string; quantity: number }[]

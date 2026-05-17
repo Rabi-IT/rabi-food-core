@@ -2,12 +2,7 @@ import type { Route } from "./+types/subscribe"
 import { resolveTenant } from "~/lib/tenant.server"
 import { apiClient } from "~/lib/api.server"
 import type { WizardData } from "~/components/subscription/use-wizard"
-import type { Product, SubscriptionConfig } from "~/components/subscription/types"
-
-type UserProfile = {
-  street: string; complement: string; neighborhood: string
-  city: string; state: string; zip: string; phone: string
-}
+import type { Product, SubscriptionConfig, UserProfile } from "~/components/subscription/types"
 
 type OtpActionResult =
   | { intent: "send-otp"; ok: true }
@@ -15,10 +10,16 @@ type OtpActionResult =
   | { intent: "refresh"; ok: true; accessToken: string; refreshToken: string }
   | { intent: "refresh"; ok: false }
   | { intent: "get-profile"; ok: true; profile: UserProfile }
+  | { intent: "get-payment-profile"; ok: true; hasPaymentMethod: boolean; card?: { brand: string; last4: string; expMonth: number; expYear: number } }
   | { intent: "save-address"; ok: true }
   | { intent: string; error: string }
 
-type ConfirmActionResult = { ok: true } | { error: string }
+type CreateIntentResult = { intent: "create-payment-intent"; ok: true; clientSecret: string } | { intent: "create-payment-intent"; error: string }
+
+type ConfirmResult =
+  | { ok: true; subscriptionIds: readonly string[] }
+  | { ok: true; requiresAction: true; clientSecret: string }
+  | { error: string }
 
 function parseAuthCookie(request: Request): string | null {
   const cookie = request.headers.get("Cookie") ?? ""
@@ -49,7 +50,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 }
 
-export async function action({ request }: Route.ActionArgs): Promise<OtpActionResult | ConfirmActionResult | Response> {
+export async function action({ request }: Route.ActionArgs): Promise<OtpActionResult | CreateIntentResult | ConfirmResult | Response> {
   const tenant = await resolveTenant(request)
   if (!tenant) return { intent: "unknown", error: "UNKNOWN" }
 
@@ -94,6 +95,11 @@ export async function action({ request }: Route.ActionArgs): Promise<OtpActionRe
     return { intent: "get-profile", ok: true, profile }
   }
 
+  if (intent === "get-payment-profile") {
+    const result = await api.get<{ hasPaymentMethod: boolean; card?: { brand: string; last4: string; expMonth: number; expYear: number } }>("/payment/profile", undefined, body.token)
+    return { intent: "get-payment-profile", ok: true, hasPaymentMethod: result.ok ? result.data.hasPaymentMethod : false, card: result.ok ? result.data.card : undefined }
+  }
+
   if (intent === "save-address") {
     const result = await api.patch("/user/me", {
       phone: body.phone,
@@ -108,13 +114,28 @@ export async function action({ request }: Route.ActionArgs): Promise<OtpActionRe
     return { intent: "save-address", ok: true }
   }
 
-  // intent === "confirm": create subscription
-  const data = body as WizardData
-  const result = await api.post("/subscription/", {
+  if (intent === "create-payment-intent") {
+    const result = await api.post<{ clientSecret: string }>("/payment/intent", {
+      items: body.items,
+      totalCycles: body.totalCycles,
+    }, body.token)
+    if (!result.ok) return { intent: "create-payment-intent", error: result.code }
+    return { intent: "create-payment-intent", ok: true, clientSecret: result.data.clientSecret }
+  }
+
+  // intent === "confirm"
+  const data = body as WizardData & { paymentIntentId?: string }
+  const result = await api.post<{ subscriptionIds?: readonly string[]; clientSecret?: string; requiresAction?: boolean }>("/payment/confirm", {
+    paymentIntentId: data.paymentIntentId,
     items: data.items,
     deliveryDays: data.deliveryDays,
     totalCycles: data.totalCycles,
   }, data.user.token)
+
   if (!result.ok) return { error: result.code }
-  return { ok: true }
+  if (result.data.requiresAction && result.data.clientSecret) {
+    return { ok: true, requiresAction: true, clientSecret: result.data.clientSecret }
+  }
+
+  return { ok: true, subscriptionIds: result.data.subscriptionIds ?? [] }
 }

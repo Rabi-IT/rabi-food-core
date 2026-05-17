@@ -62,7 +62,7 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 			Notes:       "Notes",
 		}
 
-		groupID := ""
+		var ids []string
 		fixtures.DefaultHTTP(t.T()).
 			Request(http.MethodPost, fixtures.Subscription.URI).
 			WithHeader("Authorization", "Bearer "+userAuth.Token).
@@ -70,9 +70,9 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 			WithJSON(Body).
 			Expect().
 			Status(http.StatusCreated).
-			Body().Decode(&groupID)
+			JSON().Decode(&ids)
 
-		t.NotEmpty(groupID)
+		t.NotEmpty(ids)
 	})
 
 	t.Run("should fail if required fields are empty", func() {

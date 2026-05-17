@@ -42,3 +42,21 @@ resource "aws_secretsmanager_secret_version" "gotrue_db_url" {
   secret_id = aws_secretsmanager_secret.gotrue_db_url.id
   secret_string = "postgres://${var.db_user}:${var.db_password}@${aws_db_instance.postgres.address}:5432/${var.db_name}?search_path=auth&sslmode=require"
 }
+
+resource "aws_secretsmanager_secret" "stripe_secret_key" {
+  name = "rabi-food/stripe-secret-key"
+}
+
+resource "aws_secretsmanager_secret_version" "stripe_secret_key" {
+  secret_id     = aws_secretsmanager_secret.stripe_secret_key.id
+  secret_string = var.stripe_secret_key
+}
+
+resource "aws_secretsmanager_secret" "stripe_webhook_secret" {
+  name = "rabi-food/stripe-webhook-secret"
+}
+
+resource "aws_secretsmanager_secret_version" "stripe_webhook_secret" {
+  secret_id     = aws_secretsmanager_secret.stripe_webhook_secret.id
+  secret_string = stripe_webhook_endpoint.subscription.secret
+}

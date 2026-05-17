@@ -7,6 +7,25 @@
     "empty": "No products available"
   },
   "subscription": {
+    "drawer": {
+      "stepProgress": "Step {{step}} of {{total}}",
+      "closed": "Subscriptions are temporarily unavailable. Please try again later.",
+      "success": {
+        "title": "Subscription confirmed!",
+        "description": "Your recurring basket is active. You'll receive a confirmation e-mail shortly.",
+        "close": "Close"
+      },
+      "steps": {
+        "products": "Choose your products",
+        "basket": "Quantities",
+        "delivery": "Delivery days",
+        "plan": "Your plan",
+        "identity": "Identity",
+        "address": "Delivery address",
+        "summary": "Summary",
+        "payment": "Payment"
+      }
+    },
     "user": {
       "step": "Step {{current}} of {{total}}",
       "title": "Who are you?",
@@ -22,6 +41,9 @@
       "phone": "Phone",
       "phoneInvalid": "Invalid phone number",
       "otpHint": "We'll send a code to confirm your e-mail.",
+      "identifiedAs": "You are identified as",
+      "continueAsExisting": "Yes, that's me — continue",
+      "orChangeIdentity": "or sign in with a different account",
       "backToSelection": "Back to selection",
       "send": "Send code",
       "sending": "Sending…",
@@ -63,7 +85,21 @@
       "statePlaceholder": "SP",
       "stateRequired": "State is required",
       "saving": "Saving…",
-      "continue": "Continue"
+      "continue": "Continue",
+      "notYou": "Not you?"
     }
+  },
+  "payment": {
+    "title": "Payment",
+    "cardLabel": "Card details",
+    "cardholderName": "Name on card",
+    "cardholderNamePlaceholder": "As it appears on the card",
+    "confirm": "Confirm payment",
+    "confirming": "Processing…",
+    "back": "Back",
+    "processing": "Processing payment…",
+    "processingHint": "This may take a few seconds.",
+    "errorGeneric": "Unable to process payment. Please try again.",
+    "requires3ds": "Your bank requested additional verification."
   }
 }
