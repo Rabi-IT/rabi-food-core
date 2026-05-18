@@ -10,4 +10,6 @@ var (
 	ErrNoPaymentMethod            = newErr("NO_PAYMENT_METHOD", http.StatusPaymentRequired)
 	ErrStripeServiceFailure       = newErr("STRIPE_SERVICE_FAILURE", http.StatusBadGateway)
 	ErrPaymentRequiresAction      = newErr("PAYMENT_REQUIRES_ACTION", http.StatusPaymentRequired)
+	ErrInvalidWebhookSignature    = newErr("INVALID_WEBHOOK_SIGNATURE", http.StatusUnauthorized)
+	ErrMalformedWebhookPayload    = newErr("MALFORMED_WEBHOOK_PAYLOAD", http.StatusBadRequest)
 )
