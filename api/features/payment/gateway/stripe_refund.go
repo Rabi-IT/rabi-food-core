@@ -10,7 +10,7 @@ import (
 
 func (g *StripePaymentGatewayAdapter) Refund(ctx context.Context, paymentIntentID string) error {
 	params := &stripe.RefundCreateParams{
-		PaymentIntent: stripe.String(paymentIntentID),
+		PaymentIntent: &paymentIntentID,
 	}
 
 	_, err := g.sc.V1Refunds.Create(ctx, params)

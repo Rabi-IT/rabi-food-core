@@ -5,7 +5,7 @@ import "slices"
 // Status tracks the financial lifecycle, independent from production/delivery.
 type Status string
 
-const (
+var (
 	StatusPending    Status = "pending"    // not initiated or waiting user action
 	StatusAuthorized Status = "authorized" // auth ok, yet to capture
 	StatusPaid       Status = "paid"       // captured/settled

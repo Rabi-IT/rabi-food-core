@@ -20,28 +20,25 @@ type OnPaymentReceivedInput struct {
 
 func (c *SubscriptionCase) OnPaymentReceived(ctx context.Context, in OnPaymentReceivedInput) error {
 	wd := logger.GetWideEvent(ctx)
-	wd.Event = "subscription-on-payment-received"
+	wd.TrackSubscriptionPayment(in.SubscriptionID, in.PaymentIntentID, in.Provider, in.AmountCents)
 
 	sub, err := c.gateway.GetByID(ctx, g.GetByIDFilter{ID: in.SubscriptionID})
 	if err != nil {
 		return err
 	}
 
-	wd.TrackSubscriptionPayment(in.SubscriptionID, in.PaymentIntentID, in.Provider, in.AmountCents)
-
 	if sub == nil || int64(sub.PaymentAmount) != in.AmountCents {
 		return c.paymentGateway.Refund(ctx, in.PaymentIntentID)
 	}
-
-	paidStatus := payment_status.StatusPaid
 
 	updated, err := c.gateway.Patch(ctx, g.PatchFilter{
 		ID:            in.SubscriptionID,
 		PaymentStatus: payment_status.StatusPending,
 	}, g.PatchValues{
-		PaymentStatus: &paidStatus,
+		PaymentStatus: &payment_status.StatusPaid,
 		PaidAt:        &in.PaidAt,
 	})
+
 	if err != nil {
 		return err
 	}
@@ -50,6 +47,11 @@ func (c *SubscriptionCase) OnPaymentReceived(ctx context.Context, in OnPaymentRe
 		return nil
 	}
 
+	return c.handleNotConfirmedSubscription(ctx, in)
+}
+
+func (c *SubscriptionCase) handleNotConfirmedSubscription(ctx context.Context, in OnPaymentReceivedInput) error {
+	wd := logger.GetWideEvent(ctx)
 	found, err := c.gateway.GetByID(ctx, g.GetByIDFilter{ID: in.SubscriptionID})
 	if err != nil {
 		return err
