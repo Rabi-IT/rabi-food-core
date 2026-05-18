@@ -178,22 +178,16 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	})
 
 	// Payment dependencies
-	do.Provide(injector, func(_ *do.Injector) (payment_gateway.StripeGateway, error) {
-		return payment_gateway.NewStripe(), nil
-	})
-
-	do.Provide(injector, func(i *do.Injector) (payment_gateway.StripeCustomerGateway, error) {
+	do.Provide(injector, func(i *do.Injector) (payment_gateway.PaymentGateway, error) {
 		db := do.MustInvoke[*database.PgxAdapter](i)
-
-		return &payment_gateway.PgxStripeCustomerAdapter{DB: db}, nil
+		return payment_gateway.NewStripe(db), nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (*payment_case.PaymentCase, error) {
-		stripe := do.MustInvoke[payment_gateway.StripeGateway](i)
-		customer := do.MustInvoke[payment_gateway.StripeCustomerGateway](i)
+		payment := do.MustInvoke[payment_gateway.PaymentGateway](i)
 		subCase := do.MustInvoke[*subscription_case.SubscriptionCase](i)
 
-		return payment_case.New(stripe, customer, subCase), nil
+		return payment_case.New(payment, subCase), nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (*payment_controller.PaymentController, error) {
@@ -218,9 +212,9 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 	do.Provide(injector, func(i *do.Injector) (*subscription_case.SubscriptionCase, error) {
 		gw := do.MustInvoke[subscription_gateway.SubscriptionGateway](i)
 		productCase := do.MustInvoke[*product_case.ProductCase](i)
-		stripe := do.MustInvoke[payment_gateway.StripeGateway](i)
+		payment := do.MustInvoke[payment_gateway.PaymentGateway](i)
 
-		return subscription_case.New(gw, productCase, stripe), nil
+		return subscription_case.New(gw, productCase, payment), nil
 	})
 
 	return injector

@@ -8,7 +8,7 @@ import (
 	stripe "github.com/stripe/stripe-go/v82"
 )
 
-func (g *StripeGatewayAdapter) Refund(ctx context.Context, paymentIntentID string) error {
+func (g *StripePaymentGatewayAdapter) Refund(ctx context.Context, paymentIntentID string) error {
 	params := &stripe.RefundCreateParams{
 		PaymentIntent: stripe.String(paymentIntentID),
 	}

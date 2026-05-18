@@ -27,10 +27,11 @@ type DeliveryDay struct {
 }
 
 type CreateInput struct {
-	UserID   string
-	TenantID string
-	Status   subscription.Status
-	RootID   *string
+	UserID      string
+	TenantID    string
+	CheckoutKey string // empty for renewals; set on first-time checkout to ensure idempotency
+	Status      subscription.Status
+	RootID      *string
 
 	// Product (1:1 per subscription row)
 	ProductID string

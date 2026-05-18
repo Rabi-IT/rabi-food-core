@@ -124,9 +124,10 @@ export async function action({ request }: Route.ActionArgs): Promise<OtpActionRe
   }
 
   // intent === "confirm"
-  const data = body as WizardData & { paymentIntentId?: string }
+  const data = body as WizardData & { paymentIntentId?: string; checkoutKey?: string }
   const result = await api.post<{ subscriptionIds?: readonly string[]; clientSecret?: string; requiresAction?: boolean }>("/payment/confirm", {
     paymentIntentId: data.paymentIntentId,
+    checkoutKey: data.checkoutKey,
     items: data.items,
     deliveryDays: data.deliveryDays,
     totalCycles: data.totalCycles,

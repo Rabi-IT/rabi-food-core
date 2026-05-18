@@ -22,6 +22,7 @@ CREATE TABLE
         items_total BIGINT NOT NULL DEFAULT 0,
         items_discount BIGINT NOT NULL DEFAULT 0,
         payment_amount BIGINT NOT NULL,
+        checkout_key UUID,
         payment_status VARCHAR(20) NOT NULL,
         paid_at TIMESTAMPTZ,
         status VARCHAR(20),
@@ -59,6 +60,8 @@ COMMENT ON COLUMN SUBSCRIPTION.subscriptions.items_discount IS 'Total discount a
 
 COMMENT ON COLUMN SUBSCRIPTION.subscriptions.payment_amount IS 'Amount charged per cycle in cents.';
 
+COMMENT ON COLUMN SUBSCRIPTION.subscriptions.checkout_key IS 'Client-generated idempotency key (UUIDv7). Used with a partial unique index on (user_id, checkout_key, product_id) to deduplicate concurrent checkout attempts for the same cart.';
+
 COMMENT ON COLUMN SUBSCRIPTION.subscriptions.payment_status IS 'Financial lifecycle.';
 
 COMMENT ON COLUMN SUBSCRIPTION.subscriptions.paid_at IS 'Timestamp when the payment was confirmed by the payment provider.';
@@ -76,6 +79,10 @@ CREATE INDEX idx_subscriptions_product_id ON SUBSCRIPTION.subscriptions (product
 CREATE INDEX idx_subscriptions_delivery_weekdays_mask ON SUBSCRIPTION.subscriptions (delivery_weekdays_mask);
 
 CREATE INDEX idx_subscriptions_remaining_cycles ON SUBSCRIPTION.subscriptions (remaining_cycles);
+
+CREATE UNIQUE INDEX idx_subscriptions_checkout_key
+    ON SUBSCRIPTION.subscriptions (user_id, checkout_key, product_id)
+    WHERE checkout_key IS NOT NULL;
 
 CREATE INDEX idx_subscriptions_payment_status ON SUBSCRIPTION.subscriptions (payment_status);
 

@@ -15,31 +15,26 @@ type GetProfileOutput struct {
 }
 
 func (c *PaymentCase) GetProfile(ctx context.Context, userID string) (GetProfileOutput, error) {
-	record, err := c.customer.GetByUserID(ctx, userID)
+	profile, err := c.payment.GetPaymentProfile(ctx, userID)
 	if err != nil {
 		return GetProfileOutput{}, err
 	}
 
-	if record == nil || !record.HasPaymentMethod || record.StripePaymentMethodID == "" {
+	if !profile.HasPaymentMethod {
 		return GetProfileOutput{HasPaymentMethod: false}, nil
 	}
 
-	pm, err := c.stripe.GetPaymentMethod(ctx, record.StripePaymentMethodID)
-	if err != nil {
-		return GetProfileOutput{}, err
-	}
-
-	if pm == nil {
+	if profile.Brand == "" {
 		return GetProfileOutput{HasPaymentMethod: true}, nil
 	}
 
 	return GetProfileOutput{
 		HasPaymentMethod: true,
 		Card: &SavedCard{
-			Brand:    pm.Brand,
-			Last4:    pm.Last4,
-			ExpMonth: pm.ExpMonth,
-			ExpYear:  pm.ExpYear,
+			Brand:    profile.Brand,
+			Last4:    profile.Last4,
+			ExpMonth: profile.ExpMonth,
+			ExpYear:  profile.ExpYear,
 		},
 	}, nil
 }

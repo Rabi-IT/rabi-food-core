@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import { uuidv7 } from "uuidv7"
 import type { SavedCard } from "./types"
 import { useFetcher } from "react-router"
 import { loadStripe } from "@stripe/stripe-js"
@@ -72,6 +73,8 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
   const confirmFetcher = useFetcher<ConfirmActionResult>()
 
   const { step, setStep, data, setData, reset } = useWizard()
+  const checkoutKeyRef = useRef<string | null>(null)
+  const checkoutCartSnapshotRef = useRef<string | null>(null)
   const [otpSubStep, setOtpSubStep] = useState<"identity" | "code">("identity")
   const [forcedUserMode, setForcedUserMode] = useState<"new" | "existing" | undefined>(undefined)
   const [successVisible, setSuccessVisible] = useState(false)
@@ -104,6 +107,8 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
     setHasPaymentMethod(null)
     setSavedCard(null)
     setPaymentClientSecret(null)
+    checkoutKeyRef.current = null
+    checkoutCartSnapshotRef.current = null
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -227,6 +232,8 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
         setStep("payment")
         return
       }
+      checkoutKeyRef.current = null
+      checkoutCartSnapshotRef.current = null
       setSuccessVisible(true)
     }
   }, [confirmResult]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -295,10 +302,18 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
   async function handleConfirm(paymentIntentId?: string) {
     const token = await ensureToken()
     if (!token) return
+
+    const cartSnapshot = JSON.stringify({ items: data.items, deliveryDays: data.deliveryDays, totalCycles: data.totalCycles })
+    if (checkoutKeyRef.current === null || checkoutCartSnapshotRef.current !== cartSnapshot) {
+      checkoutKeyRef.current = uuidv7()
+      checkoutCartSnapshotRef.current = cartSnapshot
+    }
+
     confirmFetcher.submit(
       {
         intent: "confirm",
         paymentIntentId: paymentIntentId ?? "",
+        checkoutKey: checkoutKeyRef.current,
         items: data.items,
         deliveryDays: data.deliveryDays,
         totalCycles: data.totalCycles,

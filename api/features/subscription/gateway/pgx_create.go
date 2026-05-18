@@ -9,7 +9,10 @@ import (
 )
 
 func (g *PgxSubscriptionGatewayAdapter) BulkCreate(ctx context.Context, inputs []CreateInput) ([]string, error) {
-	ids := make([]string, 0, len(inputs))
+	if len(inputs) == 0 {
+		return nil, nil
+	}
+
 	now := time.Now().UTC()
 
 	qb := sq.
@@ -21,12 +24,13 @@ func (g *PgxSubscriptionGatewayAdapter) BulkCreate(ctx context.Context, inputs [
 			"total_cycles", "remaining_cycles", "cycle_discount", "cutoff_offset_minutes",
 			"auto_renew", "max_attempts_per_order",
 			"items_total", "items_discount", "payment_amount", "payment_status",
+			"checkout_key",
 			"created_at", "updated_at",
-		)
+		).
+		Suffix("ON CONFLICT (user_id, checkout_key, product_id) WHERE checkout_key IS NOT NULL DO UPDATE SET checkout_key = EXCLUDED.checkout_key RETURNING id")
 
 	for _, input := range inputs {
 		id := uuid.Must(uuid.NewV7()).String()
-		ids = append(ids, id)
 
 		weekdaysMask := uint8(0)
 		for _, day := range input.DeliveryDays {
@@ -40,6 +44,7 @@ func (g *PgxSubscriptionGatewayAdapter) BulkCreate(ctx context.Context, inputs [
 			input.TotalCycles, input.RemainingCycles, input.CycleDiscount, input.CutoffOffsetMinutes,
 			input.AutoRenew, input.MaxAttemptsPerOrder,
 			input.ItemsTotal, input.ItemsDiscount, input.PaymentAmount, input.PaymentStatus,
+			input.CheckoutKey,
 			now, now,
 		)
 	}
@@ -49,7 +54,20 @@ func (g *PgxSubscriptionGatewayAdapter) BulkCreate(ctx context.Context, inputs [
 		return nil, err
 	}
 
-	_, err = g.DB.Pool.Exec(context.WithoutCancel(ctx), sql, args...)
+	rows, err := g.DB.Pool.Query(context.WithoutCancel(ctx), sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-	return ids, err
+	ids := make([]string, 0, len(inputs))
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+
+	return ids, rows.Err()
 }

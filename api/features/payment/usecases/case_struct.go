@@ -6,19 +6,16 @@ import (
 )
 
 type PaymentCase struct {
-	stripe           g.StripeGateway
-	customer         g.StripeCustomerGateway
+	payment          g.PaymentGateway
 	subscriptionCase *subscription_usecases.SubscriptionCase
 }
 
 func New(
-	stripe g.StripeGateway,
-	customer g.StripeCustomerGateway,
+	payment g.PaymentGateway,
 	subscriptionCase *subscription_usecases.SubscriptionCase,
 ) *PaymentCase {
 	return &PaymentCase{
-		stripe:           stripe,
-		customer:         customer,
+		payment:          payment,
 		subscriptionCase: subscriptionCase,
 	}
 }

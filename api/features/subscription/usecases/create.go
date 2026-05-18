@@ -29,6 +29,7 @@ type SubscriptionItemInput struct {
 type CreateInput struct {
 	TenantID     string                  `json:"-"`
 	UserID       string                  `json:"-"`
+	CheckoutKey  string                  `json:"checkoutKey"`
 	Items        []SubscriptionItemInput `json:"items"        validate:"required,min=1"`
 	DeliveryDays []g.DeliveryDay         `json:"deliveryDays" validate:"required,min=1"`
 	TotalCycles  uint                    `json:"totalCycles"  validate:"required,min=1"`
@@ -103,6 +104,7 @@ func (s *SubscriptionCase) Create(ctx context.Context, input CreateInput) ([]str
 		gatewayInputs = append(gatewayInputs, g.CreateInput{
 			UserID:              input.UserID,
 			TenantID:            input.TenantID,
+			CheckoutKey:         input.CheckoutKey,
 			Status:              subscription.StatusActive,
 			ProductID:           p.ProductID,
 			Quantity:            uint16(p.Quantity),
