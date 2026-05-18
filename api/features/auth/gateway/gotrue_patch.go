@@ -1,94 +1,88 @@
 package gateway
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 )
 
-type adminUpdateUserRequest struct {
-	Email        *string        `json:"email,omitempty"`
-	UserMetadata map[string]any `json:"user_metadata,omitempty"`
-}
-
 func (g *GoTrueGatewayAdapter) Patch(ctx context.Context, id string, input PatchInput) (bool, error) {
-	meta := map[string]any{}
+	qb := sq.Update("auth.users").Where(sq.Eq{"id": id}).PlaceholderFormat(sq.Dollar)
+
+	if input.Email != nil {
+		qb = qb.Set("email", *input.Email)
+	}
+
+	appMeta := map[string]any{}
+
+	if input.StripeCustomerID != nil {
+		appMeta["stripe_customer_id"] = *input.StripeCustomerID
+	}
+	if input.StripePaymentMethodID != nil {
+		appMeta["stripe_payment_method_id"] = *input.StripePaymentMethodID
+	}
+
+	if len(appMeta) > 0 {
+		data, err := json.Marshal(appMeta)
+		if err != nil {
+			return false, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
+		}
+		qb = qb.Set("raw_app_meta_data", sq.Expr("raw_app_meta_data || ?::jsonb", string(data)))
+	}
+
+	userMeta := map[string]any{}
 
 	if input.Name != nil {
-		meta["name"] = *input.Name
+		userMeta["name"] = *input.Name
 	}
-
 	if input.Phone != nil {
-		meta["phone"] = *input.Phone
+		userMeta["phone"] = *input.Phone
 	}
-
 	if input.TaxID != nil {
-		meta["tax_id"] = *input.TaxID
+		userMeta["tax_id"] = *input.TaxID
 	}
-
 	if input.SocialID != nil {
-		meta["social_id"] = *input.SocialID
+		userMeta["social_id"] = *input.SocialID
 	}
-
 	if input.City != nil {
-		meta["city"] = *input.City
+		userMeta["city"] = *input.City
 	}
-
 	if input.State != nil {
-		meta["state"] = *input.State
+		userMeta["state"] = *input.State
 	}
-
 	if input.ZIP != nil {
-		meta["zip"] = *input.ZIP
+		userMeta["zip"] = *input.ZIP
 	}
-
 	if input.Street != nil {
-		meta["street"] = *input.Street
+		userMeta["street"] = *input.Street
 	}
-
 	if input.Complement != nil {
-		meta["complement"] = *input.Complement
+		userMeta["complement"] = *input.Complement
 	}
-
 	if input.Neighborhood != nil {
-		meta["neighborhood"] = *input.Neighborhood
+		userMeta["neighborhood"] = *input.Neighborhood
 	}
 
-	body := adminUpdateUserRequest{
-		Email:        input.Email,
-		UserMetadata: meta,
+	if len(userMeta) > 0 {
+		data, err := json.Marshal(userMeta)
+		if err != nil {
+			return false, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
+		}
+		qb = qb.Set("raw_user_meta_data", sq.Expr("raw_user_meta_data || ?::jsonb", string(data)))
 	}
 
-	raw, err := json.Marshal(body)
+	sql, args, err := qb.ToSql()
 	if err != nil {
 		return false, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, g.baseURL+"/admin/users/"+id, bytes.NewReader(raw))
+	tag, err := g.db.Pool.Exec(context.WithoutCancel(ctx), sql, args...)
 	if err != nil {
 		return false, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+g.serviceKey)
-
-	resp, err := g.httpClient.Do(req)
-	if err != nil {
-		return false, fmt.Errorf("%w: %w", errs.ErrAuthServiceFailure, err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusNotFound {
-		return false, nil
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return false, wrapResponseError(errs.ErrAuthServiceFailure, resp)
-	}
-
-	return true, nil
+	return tag.RowsAffected() > 0, nil
 }

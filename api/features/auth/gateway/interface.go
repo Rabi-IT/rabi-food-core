@@ -76,6 +76,9 @@ type UserOutput struct {
 	Complement   string `json:"complement"`
 	Neighborhood string `json:"neighborhood"`
 	Role         string `json:"role"`
+
+	StripeCustomerID      string `json:"-"`
+	StripePaymentMethodID string `json:"-"`
 }
 
 type PatchInput struct {
@@ -90,6 +93,9 @@ type PatchInput struct {
 	Street       *string
 	Complement   *string
 	Neighborhood *string
+
+	StripeCustomerID      *string
+	StripePaymentMethodID *string
 }
 
 type PaginateInput struct {

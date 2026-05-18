@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	auth_gateway "github.com/Rabi-IT/rabi-food-core/features/auth/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/errs"
 	stripe "github.com/stripe/stripe-go/v82"
 )
@@ -39,8 +40,9 @@ func (g *StripePaymentGatewayAdapter) ChargeWithToken(ctx context.Context, input
 	}
 
 	if pi.PaymentMethod != nil {
-		if err = g.saveUserMeta(ctx, input.UserID, map[string]string{
-			"stripe_payment_method_id": pi.PaymentMethod.ID,
+		pmID := pi.PaymentMethod.ID
+		if _, err = g.auth.Patch(ctx, input.UserID, auth_gateway.PatchInput{
+			StripePaymentMethodID: &pmID,
 		}); err != nil {
 			return ChargeOutput{}, fmt.Errorf("failed to save payment method: %w", err)
 		}
@@ -53,13 +55,13 @@ func (g *StripePaymentGatewayAdapter) ChargeWithToken(ctx context.Context, input
 }
 
 func (g *StripePaymentGatewayAdapter) ensureCustomer(ctx context.Context, userID, email, name string) (string, error) {
-	meta, err := g.getUserMeta(ctx, userID)
+	user, err := g.auth.GetByID(ctx, userID)
 	if err != nil {
 		return "", fmt.Errorf("failed to look up customer: %w", err)
 	}
 
-	if meta.StripeCustomerID != "" {
-		return meta.StripeCustomerID, nil
+	if user != nil && user.StripeCustomerID != "" {
+		return user.StripeCustomerID, nil
 	}
 
 	params := &stripe.CustomerCreateParams{
@@ -76,8 +78,8 @@ func (g *StripePaymentGatewayAdapter) ensureCustomer(ctx context.Context, userID
 		return "", fmt.Errorf("%w: %w", errs.ErrStripeServiceFailure, err)
 	}
 
-	if err = g.saveUserMeta(ctx, userID, map[string]string{
-		"stripe_customer_id": stripeCustomer.ID,
+	if _, err = g.auth.Patch(ctx, userID, auth_gateway.PatchInput{
+		StripeCustomerID: &stripeCustomer.ID,
 	}); err != nil {
 		return "", fmt.Errorf("failed to save customer: %w", err)
 	}

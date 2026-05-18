@@ -179,8 +179,8 @@ func newInjector(dbConfig *config.DatabaseConfig) *do.Injector {
 
 	// Payment dependencies
 	do.Provide(injector, func(i *do.Injector) (payment_gateway.PaymentGateway, error) {
-		db := do.MustInvoke[*database.PgxAdapter](i)
-		return payment_gateway.NewStripe(db), nil
+		auth := do.MustInvoke[auth_gateway.AuthGateway](i)
+		return payment_gateway.NewStripe(auth), nil
 	})
 
 	do.Provide(injector, func(i *do.Injector) (*payment_case.PaymentCase, error) {

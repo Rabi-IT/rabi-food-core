@@ -18,19 +18,21 @@ type adminUserResponse struct {
 
 func (u *adminUserResponse) toUserOutput() *UserOutput {
 	return &UserOutput{
-		ID:           u.ID,
-		Email:        u.Email,
-		Name:         stringVal(u.UserMetadata, "name"),
-		Phone:        stringVal(u.UserMetadata, "phone"),
-		TaxID:        stringVal(u.UserMetadata, "tax_id"),
-		SocialID:     stringVal(u.UserMetadata, "social_id"),
-		City:         stringVal(u.UserMetadata, "city"),
-		State:        stringVal(u.UserMetadata, "state"),
-		ZIP:          stringVal(u.UserMetadata, "zip"),
-		Street:       stringVal(u.UserMetadata, "street"),
-		Complement:   stringVal(u.UserMetadata, "complement"),
-		Neighborhood: stringVal(u.UserMetadata, "neighborhood"),
-		Role:         stringVal(u.AppMetadata, "role"),
+		ID:                    u.ID,
+		Email:                 u.Email,
+		Name:                  stringVal(u.UserMetadata, "name"),
+		Phone:                 stringVal(u.UserMetadata, "phone"),
+		TaxID:                 stringVal(u.UserMetadata, "tax_id"),
+		SocialID:              stringVal(u.UserMetadata, "social_id"),
+		City:                  stringVal(u.UserMetadata, "city"),
+		State:                 stringVal(u.UserMetadata, "state"),
+		ZIP:                   stringVal(u.UserMetadata, "zip"),
+		Street:                stringVal(u.UserMetadata, "street"),
+		Complement:            stringVal(u.UserMetadata, "complement"),
+		Neighborhood:          stringVal(u.UserMetadata, "neighborhood"),
+		Role:                  stringVal(u.AppMetadata, "role"),
+		StripeCustomerID:      stringVal(u.AppMetadata, "stripe_customer_id"),
+		StripePaymentMethodID: stringVal(u.AppMetadata, "stripe_payment_method_id"),
 	}
 }
 

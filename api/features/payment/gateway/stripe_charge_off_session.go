@@ -9,20 +9,20 @@ import (
 )
 
 func (g *StripePaymentGatewayAdapter) ChargeOffSession(ctx context.Context, input ChargeOffSessionInput) (ChargeOutput, error) {
-	meta, err := g.getUserMeta(ctx, input.UserID)
+	user, err := g.auth.GetByID(ctx, input.UserID)
 	if err != nil {
 		return ChargeOutput{}, fmt.Errorf("failed to look up customer: %w", err)
 	}
 
-	if meta.StripeCustomerID == "" || meta.StripePaymentMethodID == "" {
+	if user == nil || user.StripeCustomerID == "" || user.StripePaymentMethodID == "" {
 		return ChargeOutput{}, errs.ErrNoPaymentMethod
 	}
 
 	params := &stripe.PaymentIntentCreateParams{
 		Amount:        stripe.Int64(input.AmountCents),
 		Currency:      stripe.String(input.Currency),
-		Customer:      stripe.String(meta.StripeCustomerID),
-		PaymentMethod: stripe.String(meta.StripePaymentMethodID),
+		Customer:      stripe.String(user.StripeCustomerID),
+		PaymentMethod: stripe.String(user.StripePaymentMethodID),
 		Confirm:       stripe.Bool(true),
 		OffSession:    stripe.Bool(true),
 		PaymentMethodTypes: []*string{

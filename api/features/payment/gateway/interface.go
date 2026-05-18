@@ -5,7 +5,7 @@ import "context"
 type PaymentGateway interface {
 	ChargeWithToken(ctx context.Context, input ChargeWithTokenInput) (ChargeOutput, error)
 	ChargeOffSession(ctx context.Context, input ChargeOffSessionInput) (ChargeOutput, error)
-	GetPaymentProfile(ctx context.Context, userID string) (*PaymentProfileOutput, error)
+	GetProfile(ctx context.Context, userID string) (*GetProfileOutput, error)
 	Refund(ctx context.Context, paymentIntentID string) error
 }
 
@@ -34,7 +34,7 @@ type ChargeOutput struct {
 	ClientSecret    string // non-empty when requires_action
 }
 
-type PaymentProfileOutput struct {
+type GetProfileOutput struct {
 	HasPaymentMethod bool
 	Brand            string
 	Last4            string
