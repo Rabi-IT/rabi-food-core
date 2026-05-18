@@ -13,7 +13,7 @@ import (
 	"github.com/stripe/stripe-go/v82/webhook"
 )
 
-func (c *SubscriptionController) ConfirmPayment(ctx *fiber.Ctx) error {
+func (c *SubscriptionController) OnPaymentReceived(ctx *fiber.Ctx) error {
 	sig := ctx.Get("Stripe-Signature")
 	body := ctx.Body()
 
@@ -37,14 +37,12 @@ func (c *SubscriptionController) ConfirmPayment(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusBadRequest).SendString("invalid amount")
 	}
 
-	paymentIntentID := event.GetObjectValue("id")
-
 	uctx := ctx.UserContext()
-	logger.GetWideEvent(uctx).Event = "subscription-confirm-payment"
+	logger.GetWideEvent(uctx).Event = "subscription-payment-received"
 
-	err = c.usecase.HandlePaymentConfirmation(uctx, usecases.HandlePaymentConfirmationInput{
+	err = c.usecase.OnPaymentReceived(uctx, usecases.OnPaymentReceivedInput{
 		SubscriptionID:  subscriptionID,
-		PaymentIntentID: paymentIntentID,
+		PaymentIntentID: event.GetObjectValue("id"),
 		AmountCents:     amountCents,
 		Provider:        "stripe",
 		PaidAt:          time.Now().UTC(),

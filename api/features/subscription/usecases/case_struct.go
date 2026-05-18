@@ -1,18 +1,17 @@
 package usecases
 
 import (
+	payment_gateway "github.com/Rabi-IT/rabi-food-core/features/payment/gateway"
 	pc "github.com/Rabi-IT/rabi-food-core/features/product/usecases"
 	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
 )
 
-// SubscriptionCase encapsulates the business logic related to subscriptions.
 type SubscriptionCase struct {
-	gateway         g.SubscriptionGateway
-	productCase     *pc.ProductCase
-	paymentRefunder PaymentRefunder
+	gateway        g.SubscriptionGateway
+	productCase    *pc.ProductCase
+	paymentGateway payment_gateway.PaymentGateway
 }
 
-// New creates a new instance of SubscriptionCase.
-func New(gateway g.SubscriptionGateway, productCase *pc.ProductCase, paymentRefunder PaymentRefunder) *SubscriptionCase {
-	return &SubscriptionCase{gateway, productCase, paymentRefunder}
+func New(gateway g.SubscriptionGateway, productCase *pc.ProductCase, paymentGateway payment_gateway.PaymentGateway) *SubscriptionCase {
+	return &SubscriptionCase{gateway, productCase, paymentGateway}
 }

@@ -12,7 +12,7 @@ func Subscription(app *fiber.App, c *controller.SubscriptionController) {
 	route := app.Group("/subscription", middlewares.RequireTenantID)
 	route.Get("/config", c.GetConfig)
 
-	app.Post("/subscription/confirm-payment", c.ConfirmPayment)
+	app.Post("/subscription/webhook/payment-received", c.OnPaymentReceived)
 }
 
 // SubscriptionProtected registers subscription routes that require a valid JWT.
