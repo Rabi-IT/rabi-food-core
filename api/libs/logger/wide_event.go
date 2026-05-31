@@ -42,6 +42,9 @@ type WideEvent struct {
 	paymentIdempotencyHit     *bool
 	paymentProvider           string
 	paymentAmountCents        *int64
+	paymentChargeType         string
+	paymentStatus             string
+	paymentRequiresAction     *bool
 
 	// Delivery Scheduling
 	deliverySchedulingDate     string
@@ -111,6 +114,14 @@ func (w *WideEvent) MarkPaymentIdempotent() {
 	w.mu.Lock()
 	v := true
 	w.paymentIdempotencyHit = &v
+	w.mu.Unlock()
+}
+
+func (w *WideEvent) TrackCharge(chargeType, status string, requiresAction bool) {
+	w.mu.Lock()
+	w.paymentChargeType = chargeType
+	w.paymentStatus = status
+	w.paymentRequiresAction = &requiresAction
 	w.mu.Unlock()
 }
 
@@ -193,6 +204,9 @@ func (w *WideEvent) reset() {
 	w.paymentIdempotencyHit = nil
 	w.paymentProvider = ""
 	w.paymentAmountCents = nil
+	w.paymentChargeType = ""
+	w.paymentStatus = ""
+	w.paymentRequiresAction = nil
 
 	w.deliverySchedulingDate = ""
 	w.deliverySchedulingWeekday = ""
@@ -251,6 +265,15 @@ func (w *WideEvent) MarshalZerologObject(e *zerolog.Event) {
 	}
 	if w.paymentAmountCents != nil {
 		e.Int64("payment.amount_cents", *w.paymentAmountCents)
+	}
+	if w.paymentChargeType != "" {
+		e.Str("payment.charge_type", w.paymentChargeType)
+	}
+	if w.paymentStatus != "" {
+		e.Str("payment.status", w.paymentStatus)
+	}
+	if w.paymentRequiresAction != nil {
+		e.Bool("payment.requires_action", *w.paymentRequiresAction)
 	}
 
 	if w.deliverySchedulingDate != "" {

@@ -8,6 +8,8 @@ import (
 	stripe "github.com/stripe/stripe-go/v82"
 )
 
+var card = "card"
+
 func (g *StripePaymentGatewayAdapter) ChargeOffSession(ctx context.Context, input ChargeOffSessionInput) (ChargeOutput, error) {
 	user, err := g.auth.GetByID(ctx, input.UserID)
 	if err != nil {
@@ -19,17 +21,21 @@ func (g *StripePaymentGatewayAdapter) ChargeOffSession(ctx context.Context, inpu
 	}
 
 	params := &stripe.PaymentIntentCreateParams{
-		Amount:        stripe.Int64(input.AmountCents),
-		Currency:      stripe.String(input.Currency),
-		Customer:      stripe.String(user.StripeCustomerID),
-		PaymentMethod: stripe.String(user.StripePaymentMethodID),
-		Confirm:       stripe.Bool(true),
-		OffSession:    stripe.Bool(true),
+		Amount:        new(int64(input.AmountCents)),
+		Currency:      &input.Currency,
+		Customer:      &user.StripeCustomerID,
+		PaymentMethod: &user.StripePaymentMethodID,
+		Confirm:       new(true),
+		OffSession:    new(true),
 		PaymentMethodTypes: []*string{
-			stripe.String("card"),
+			&card,
 		},
-		Metadata: input.Metadata,
+		Metadata: map[string]string{
+			"subscription_id": input.SubscriptionID,
+			"tenant_id":       input.TenantID,
+		},
 	}
+
 	params.SetIdempotencyKey(input.IdempotencyKey)
 
 	pi, err := g.sc.V1PaymentIntents.Create(ctx, params)

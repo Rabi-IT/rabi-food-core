@@ -7,6 +7,7 @@ import (
 	g "github.com/Rabi-IT/rabi-food-core/features/payment/gateway"
 	subscription_gateway "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
 	"github.com/Rabi-IT/rabi-food-core/libs/errs"
+	"github.com/Rabi-IT/rabi-food-core/libs/logger"
 )
 
 const paymentCurrency = "brl"
@@ -39,31 +40,34 @@ func (c *PaymentCase) Charge(ctx context.Context, input ChargeInput) (ChargeOutp
 		return ChargeOutput{}, errs.ErrPaymentAlreadyProcessed
 	}
 
-	metadata := map[string]string{
-		"subscription_id": input.SubscriptionID,
-		"tenant_id":       input.TenantID,
-	}
 	idempotencyKey := "charge-" + input.SubscriptionID
 
-	var result g.ChargeOutput
+	var (
+		result     g.ChargeOutput
+		chargeType string
+	)
 
 	if input.PaymentToken != "" {
+		chargeType = "token"
 		result, err = c.payment.ChargeWithToken(ctx, g.ChargeWithTokenInput{
 			UserID:         input.UserID,
 			UserEmail:      input.UserEmail,
 			UserName:       input.UserName,
 			PaymentToken:   input.PaymentToken,
-			AmountCents:    int64(sub.PaymentAmount),
+			SubscriptionID: input.SubscriptionID,
+			TenantID:       input.TenantID,
+			AmountCents:    sub.PaymentAmount,
 			Currency:       paymentCurrency,
-			Metadata:       metadata,
 			IdempotencyKey: idempotencyKey,
 		})
 	} else {
+		chargeType = "off_session"
 		result, err = c.payment.ChargeOffSession(ctx, g.ChargeOffSessionInput{
 			UserID:         input.UserID,
-			AmountCents:    int64(sub.PaymentAmount),
+			SubscriptionID: input.SubscriptionID,
+			TenantID:       input.TenantID,
+			AmountCents:    sub.PaymentAmount,
 			Currency:       paymentCurrency,
-			Metadata:       metadata,
 			IdempotencyKey: idempotencyKey,
 		})
 	}
@@ -72,7 +76,10 @@ func (c *PaymentCase) Charge(ctx context.Context, input ChargeInput) (ChargeOutp
 		return ChargeOutput{}, err
 	}
 
-	if result.Status == "requires_action" {
+	requiresAction := result.Status == "requires_action"
+	logger.GetWideEvent(ctx).TrackCharge(chargeType, result.Status, requiresAction)
+
+	if requiresAction {
 		return ChargeOutput{RequiresAction: true, ClientSecret: result.ClientSecret}, errs.ErrPaymentRequiresAction
 	}
 
