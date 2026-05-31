@@ -41,6 +41,9 @@ func (c *PaymentCase) Charge(ctx context.Context, input ChargeInput) (ChargeOutp
 	}
 
 	idempotencyKey := "charge-" + input.SubscriptionID
+	if input.PaymentToken != "" {
+		idempotencyKey = "charge1-" + input.SubscriptionID + "-" + input.PaymentToken
+	}
 
 	var (
 		result     g.ChargeOutput

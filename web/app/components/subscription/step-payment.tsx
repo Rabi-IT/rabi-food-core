@@ -4,48 +4,56 @@ import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import { Button } from "~/components/ui/button"
 
 type StepPaymentProps = {
-  readonly clientSecret: string
-  readonly isConfirming: boolean
+  readonly isProcessing: boolean
   readonly error?: string
-  readonly onSuccess: (paymentIntentId: string) => void
+  readonly onSuccess: (confirmationToken: string) => void
   readonly onBack: () => void
 }
 
-export function StepPayment({ clientSecret, isConfirming, error, onSuccess, onBack }: StepPaymentProps) {
+export function StepPayment({ isProcessing, error, onSuccess, onBack }: StepPaymentProps) {
   const { t } = useTranslation()
   const stripe = useStripe()
   const elements = useElements()
   const [cardError, setCardError] = useState<string | undefined>(undefined)
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [isCollecting, setIsCollecting] = useState(false)
   const [isReady, setIsReady] = useState(false)
 
-  const isBusy = isProcessing || isConfirming
+  const isBusy = isCollecting || isProcessing
   const displayError = cardError ?? error
 
   async function handleConfirm() {
     if (!stripe || !elements) return
     setCardError(undefined)
-    setIsProcessing(true)
+    setIsCollecting(true)
 
-    const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: { return_url: window.location.href },
-      redirect: "if_required",
-    })
+    try {
+      const { error: submitError } = await elements.submit()
+      if (submitError) {
+        setCardError(submitError.message ?? t("payment.errorGeneric"))
+        return
+      }
 
-    if (stripeError) {
-      setCardError(stripeError.message ?? t("payment.errorGeneric"))
-      setIsProcessing(false)
-      return
+      const { error: stripeError, confirmationToken } = await stripe.createConfirmationToken({
+        elements,
+        params: {
+          setup_future_usage: "off_session",
+          payment_method_data: {
+            billing_details: { address: { country: "BR" } },
+          },
+        },
+      })
+
+      if (stripeError) {
+        setCardError(stripeError.message ?? t("payment.errorGeneric"))
+        return
+      }
+
+      onSuccess(confirmationToken.id)
+    } catch {
+      setCardError(t("payment.errorGeneric"))
+    } finally {
+      setIsCollecting(false)
     }
-
-    if (paymentIntent?.status === "succeeded") {
-      onSuccess(paymentIntent.id)
-      return
-    }
-
-    setCardError(t("payment.errorGeneric"))
-    setIsProcessing(false)
   }
 
   return (

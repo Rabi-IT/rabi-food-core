@@ -14,9 +14,7 @@ type OtpActionResult =
   | { intent: "save-address"; ok: true }
   | { intent: string; error: string }
 
-type CreateIntentResult = { intent: "create-payment-intent"; ok: true; clientSecret: string } | { intent: "create-payment-intent"; error: string }
-
-type ConfirmResult =
+type SubscribeAndChargeResult =
   | { ok: true; subscriptionIds: readonly string[] }
   | { ok: true; requiresAction: true; clientSecret: string }
   | { error: string }
@@ -50,7 +48,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 }
 
-export async function action({ request }: Route.ActionArgs): Promise<OtpActionResult | CreateIntentResult | ConfirmResult | Response> {
+export async function action({ request }: Route.ActionArgs): Promise<OtpActionResult | SubscribeAndChargeResult | Response> {
   const tenant = await resolveTenant(request)
   if (!tenant) return { intent: "unknown", error: "UNKNOWN" }
 
@@ -114,29 +112,31 @@ export async function action({ request }: Route.ActionArgs): Promise<OtpActionRe
     return { intent: "save-address", ok: true }
   }
 
-  if (intent === "create-payment-intent") {
-    const result = await api.post<{ clientSecret: string }>("/payment/intent", {
-      items: body.items,
-      totalCycles: body.totalCycles,
-    }, body.token)
-    if (!result.ok) return { intent: "create-payment-intent", error: result.code }
-    return { intent: "create-payment-intent", ok: true, clientSecret: result.data.clientSecret }
-  }
+  // intent === "subscribe-and-charge"
+  const data = body as WizardData & { checkoutKey: string; paymentToken?: string }
 
-  // intent === "confirm"
-  const data = body as WizardData & { paymentIntentId?: string; checkoutKey?: string }
-  const result = await api.post<{ subscriptionIds?: readonly string[]; clientSecret?: string; requiresAction?: boolean }>("/payment/confirm", {
-    paymentIntentId: data.paymentIntentId,
+  const subResult = await api.post<readonly string[]>("/subscription/", {
     checkoutKey: data.checkoutKey,
     items: data.items,
     deliveryDays: data.deliveryDays,
     totalCycles: data.totalCycles,
   }, data.user.token)
 
-  if (!result.ok) return { error: result.code }
-  if (result.data.requiresAction && result.data.clientSecret) {
-    return { ok: true, requiresAction: true, clientSecret: result.data.clientSecret }
+  if (!subResult.ok) return { error: subResult.code }
+
+  const paymentToken = data.paymentToken ?? ""
+
+  for (const subscriptionId of subResult.data) {
+    const chargeResult = await api.post<{ requiresAction?: boolean; clientSecret?: string } | null>(
+      "/payment/charge",
+      { subscriptionId, paymentToken },
+      data.user.token,
+    )
+    if (!chargeResult.ok) return { error: chargeResult.code }
+    if (chargeResult.data?.requiresAction && chargeResult.data?.clientSecret) {
+      return { ok: true, requiresAction: true, clientSecret: chargeResult.data.clientSecret }
+    }
   }
 
-  return { ok: true, subscriptionIds: result.data.subscriptionIds ?? [] }
+  return { ok: true, subscriptionIds: subResult.data }
 }

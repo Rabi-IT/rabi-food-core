@@ -24,6 +24,10 @@ func (g *StripePaymentGatewayAdapter) ChargeWithToken(ctx context.Context, input
 		ConfirmationToken: &input.PaymentToken,
 		Confirm:           new(true),
 		SetupFutureUsage:  &offSession,
+		AutomaticPaymentMethods: &stripe.PaymentIntentCreateAutomaticPaymentMethodsParams{
+			Enabled:        new(true),
+			AllowRedirects: stripe.String("never"),
+		},
 		Metadata: map[string]string{
 			"subscription_id": input.SubscriptionID,
 			"tenant_id":       input.TenantID,

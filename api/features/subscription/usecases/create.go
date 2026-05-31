@@ -29,7 +29,7 @@ type SubscriptionItemInput struct {
 type CreateInput struct {
 	TenantID     string                  `json:"-"`
 	UserID       string                  `json:"-"`
-	CheckoutKey  string                  `json:"checkoutKey"`
+	CheckoutKey  string                  `json:"checkoutKey"  validate:"required,uuid"`
 	Items        []SubscriptionItemInput `json:"items"        validate:"required,min=1"`
 	DeliveryDays []g.DeliveryDay         `json:"deliveryDays" validate:"required,min=1"`
 	TotalCycles  uint                    `json:"totalCycles"  validate:"required,min=1"`

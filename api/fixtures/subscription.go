@@ -6,7 +6,7 @@ import (
 
 	g "github.com/Rabi-IT/rabi-food-core/features/subscription/gateway"
 	c "github.com/Rabi-IT/rabi-food-core/features/subscription/usecases"
-
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -73,6 +73,7 @@ func (subscriptionFixture) Create(t *testing.T, input *c.CreateInput, auth Reque
 	Body := input
 	if Body == nil {
 		Body = &c.CreateInput{
+			CheckoutKey: uuid.Must(uuid.NewV7()).String(),
 			Items: []c.SubscriptionItemInput{
 				{
 					ProductID: Product.Create(t, nil, auth),

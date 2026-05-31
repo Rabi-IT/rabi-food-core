@@ -45,6 +45,7 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 		fixtures.Subscription.UpsertConfig(t.T(), nil, userAuth)
 
 		Body := &usecases.CreateInput{
+			CheckoutKey: uuid.Must(uuid.NewV7()).String(),
 			Items: []usecases.SubscriptionItemInput{
 				{
 					ProductID: fixtures.Product.Create(t.T(), nil, tenantAuth),
@@ -95,8 +96,8 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 			Status(http.StatusBadRequest).
 			JSON().Decode(&response)
 
-		t.Len(response.Errors, 3)
-		requiredFields := []string{"items", "deliveryDays", "totalCycles"}
+		t.Len(response.Errors, 4)
+		requiredFields := []string{"items", "deliveryDays", "totalCycles", "checkoutKey"}
 		for i := range response.Errors {
 			t.Contains(requiredFields, response.Errors[i].Field)
 			t.Equal("required", response.Errors[i].Tag)
@@ -110,6 +111,7 @@ func (t *TestSuite) Test_SubscriptionIntegration_Create() {
 		fixtures.Subscription.UpsertConfig(t.T(), nil, userAuth)
 
 		Body := map[string]any{
+			"checkoutKey": uuid.Must(uuid.NewV7()).String(),
 			"items": []usecases.SubscriptionItemInput{
 				{
 					ProductID: fixtures.Product.Create(t.T(), nil, tenantAuth),

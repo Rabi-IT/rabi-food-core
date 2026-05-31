@@ -788,7 +788,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_Rabi-IT_rabi-food-core_features_order_usecases.ConfirmPaymentInput"
+                            "$ref": "#/definitions/usecases.ConfirmPaymentInput"
                         }
                     }
                 ],
@@ -1493,7 +1493,7 @@
                     "type": "string"
                 },
                 "paymentStatus": {
-                    "$ref": "#/definitions/payment_status.Status"
+                    "type": "string"
                 },
                 "tenantId": {
                     "type": "string"
@@ -1525,7 +1525,7 @@
                     "type": "string"
                 },
                 "paymentStatus": {
-                    "$ref": "#/definitions/payment_status.Status"
+                    "type": "string"
                 },
                 "tenantId": {
                     "type": "string"
@@ -1546,28 +1546,6 @@
                 },
                 "maxPages": {
                     "type": "integer"
-                }
-            }
-        },
-        "github_com_Rabi-IT_rabi-food-core_features_order_usecases.ConfirmPaymentInput": {
-            "type": "object",
-            "required": [
-                "externalPaymentId",
-                "paidAt",
-                "provider"
-            ],
-            "properties": {
-                "externalPaymentId": {
-                    "type": "string"
-                },
-                "orderID": {
-                    "type": "string"
-                },
-                "paidAt": {
-                    "type": "string"
-                },
-                "provider": {
-                    "type": "string"
                 }
             }
         },
@@ -1781,41 +1759,6 @@
                 }
             }
         },
-        "payment_status.Status": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "authorized",
-                "paid",
-                "failed",
-                "cancelled",
-                "refunded"
-            ],
-            "x-enum-comments": {
-                "StatusAuthorized": "auth ok, yet to capture",
-                "StatusCancelled": "voided before capture",
-                "StatusFailed": "attempt failed",
-                "StatusPaid": "captured/settled",
-                "StatusPending": "not initiated or waiting user action",
-                "StatusRefunded": "refunded after capture"
-            },
-            "x-enum-descriptions": [
-                "not initiated or waiting user action",
-                "auth ok, yet to capture",
-                "captured/settled",
-                "attempt failed",
-                "voided before capture",
-                "refunded after capture"
-            ],
-            "x-enum-varnames": [
-                "StatusPending",
-                "StatusAuthorized",
-                "StatusPaid",
-                "StatusFailed",
-                "StatusCancelled",
-                "StatusRefunded"
-            ]
-        },
         "subscription.Status": {
             "type": "string",
             "enum": [
@@ -1911,7 +1854,7 @@
                     "type": "integer"
                 },
                 "paymentStatus": {
-                    "$ref": "#/definitions/payment_status.Status"
+                    "type": "string"
                 },
                 "productId": {
                     "type": "string"
@@ -2034,6 +1977,28 @@
                 "orderLeadMinutes": {
                     "type": "integer",
                     "format": "int32"
+                }
+            }
+        },
+        "usecases.ConfirmPaymentInput": {
+            "type": "object",
+            "required": [
+                "externalPaymentId",
+                "paidAt",
+                "provider"
+            ],
+            "properties": {
+                "externalPaymentId": {
+                    "type": "string"
+                },
+                "orderID": {
+                    "type": "string"
+                },
+                "paidAt": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
                 }
             }
         },

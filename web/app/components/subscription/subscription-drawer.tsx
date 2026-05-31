@@ -18,6 +18,7 @@ import { StepAddress } from "./step-address"
 import { StepConfirm } from "./step-confirm"
 import { StepPayment } from "./step-payment"
 import type { Product, SubscriptionConfig, UserProfile } from "./types"
+import { calculatePricing } from "./pricing"
 
 type OtpActionResult =
   | { intent: "send-otp"; ok: true }
@@ -29,11 +30,7 @@ type OtpActionResult =
   | { intent: "save-address"; ok: true }
   | { intent: string; error: string }
 
-type CreateIntentResult =
-  | { intent: "create-payment-intent"; ok: true; clientSecret: string }
-  | { intent: "create-payment-intent"; error: string }
-
-type ConfirmActionResult =
+type SubscribeAndChargeResult =
   | { ok: true; subscriptionIds: readonly string[] }
   | { ok: true; requiresAction: true; clientSecret: string }
   | { error: string }
@@ -69,8 +66,7 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
   const addressFetcher = useFetcher<OtpActionResult>()
   const profileFetcher = useFetcher<OtpActionResult>()
   const paymentProfileFetcher = useFetcher<OtpActionResult>()
-  const intentFetcher = useFetcher<CreateIntentResult>()
-  const confirmFetcher = useFetcher<ConfirmActionResult>()
+  const checkoutFetcher = useFetcher<SubscribeAndChargeResult>()
 
   const { step, setStep, data, setData, reset } = useWizard()
   const checkoutKeyRef = useRef<string | null>(null)
@@ -80,12 +76,18 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
   const [successVisible, setSuccessVisible] = useState(false)
   const [hasPaymentMethod, setHasPaymentMethod] = useState<boolean | null>(null)
   const [savedCard, setSavedCard] = useState<SavedCard | null>(null)
-  const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null)
+  const [checkoutError, setCheckoutError] = useState<string | undefined>(undefined)
+  const [threeDSClientSecret, setThreeDSClientSecret] = useState<string | null>(null)
   const refreshInProgressRef = useRef(false)
 
   const stripePromise = useMemo(
     () => (stripePublishableKey ? loadStripe(stripePublishableKey) : null),
     [stripePublishableKey],
+  )
+
+  const paymentAmount = useMemo(
+    () => calculatePricing(data.items, products, data.totalCycles, config?.discountRules ?? []).paymentAmount,
+    [data.items, data.totalCycles, products, config],
   )
 
   useEffect(() => {
@@ -106,7 +108,8 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
     setOtpSubStep("identity")
     setHasPaymentMethod(null)
     setSavedCard(null)
-    setPaymentClientSecret(null)
+    setCheckoutError(undefined)
+    setThreeDSClientSecret(null)
     checkoutKeyRef.current = null
     checkoutCartSnapshotRef.current = null
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -210,33 +213,50 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
     }
   }, [paymentProfileFetcher.data]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handle create-payment-intent response
+  const checkoutResult = checkoutFetcher.data as SubscribeAndChargeResult | undefined
   useEffect(() => {
-    if (!intentFetcher.data) return
-    if ("error" in intentFetcher.data) return
-    if (intentFetcher.data.intent === "create-payment-intent" && "clientSecret" in intentFetcher.data) {
-      if (!stripePromise) return
-      setPaymentClientSecret(intentFetcher.data.clientSecret)
-      setStep("payment")
+    if (!checkoutResult) return
+    if ("error" in checkoutResult) {
+      setCheckoutError(checkoutResult.error)
+      return
     }
-  }, [intentFetcher.data, stripePromise]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Handle confirm response
-  const confirmResult = confirmFetcher.data as ConfirmActionResult | undefined
-  useEffect(() => {
-    if (!confirmResult) return
-    if ("ok" in confirmResult && confirmResult.ok) {
-      if ("requiresAction" in confirmResult && confirmResult.requiresAction) {
-        // 3DS required on saved card — switch to payment step with new clientSecret
-        setPaymentClientSecret(confirmResult.clientSecret)
-        setStep("payment")
-        return
-      }
+    if ("requiresAction" in checkoutResult && checkoutResult.requiresAction) {
+      setThreeDSClientSecret(checkoutResult.clientSecret)
+      return
+    }
+    if ("ok" in checkoutResult && checkoutResult.ok) {
       checkoutKeyRef.current = null
       checkoutCartSnapshotRef.current = null
       setSuccessVisible(true)
     }
-  }, [confirmResult]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [checkoutResult]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Handle 3DS challenge — runs outside of Elements since stripe is accessed via the promise directly
+  useEffect(() => {
+    if (!threeDSClientSecret || !stripePromise) return
+
+    stripePromise
+      .then(async (stripe) => {
+        if (!stripe) {
+          setThreeDSClientSecret(null)
+          setCheckoutError("UNKNOWN")
+          return
+        }
+        const { error } = await stripe.handleNextAction({ clientSecret: threeDSClientSecret })
+        setThreeDSClientSecret(null)
+        if (error) {
+          setCheckoutError(error.message ?? "UNKNOWN")
+        } else {
+          checkoutKeyRef.current = null
+          checkoutCartSnapshotRef.current = null
+          setSuccessVisible(true)
+        }
+      })
+      .catch(() => {
+        setThreeDSClientSecret(null)
+        setCheckoutError("UNKNOWN")
+      })
+  }, [threeDSClientSecret, stripePromise]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function ensureToken(): Promise<string | null> {
     const { token } = data.user
@@ -299,9 +319,11 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
     )
   }
 
-  async function handleConfirm(paymentIntentId?: string) {
+  async function handleCheckout(paymentMethodId?: string) {
     const token = await ensureToken()
     if (!token) return
+
+    setCheckoutError(undefined)
 
     const cartSnapshot = JSON.stringify({ items: data.items, deliveryDays: data.deliveryDays, totalCycles: data.totalCycles })
     if (checkoutKeyRef.current === null || checkoutCartSnapshotRef.current !== cartSnapshot) {
@@ -309,11 +331,11 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
       checkoutCartSnapshotRef.current = cartSnapshot
     }
 
-    confirmFetcher.submit(
+    checkoutFetcher.submit(
       {
-        intent: "confirm",
-        paymentIntentId: paymentIntentId ?? "",
+        intent: "subscribe-and-charge",
         checkoutKey: checkoutKeyRef.current,
+        paymentToken: paymentMethodId ?? "",
         items: data.items,
         deliveryDays: data.deliveryDays,
         totalCycles: data.totalCycles,
@@ -324,26 +346,16 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
     )
   }
 
-  async function handleConfirmFromSummary() {
+  function handleConfirmFromSummary() {
     if (hasPaymentMethod) {
-      handleConfirm()
+      handleCheckout()
       return
     }
-    handlePayWithNewCard()
+    setStep("payment")
   }
 
-  async function handlePayWithNewCard() {
-    const token = await ensureToken()
-    if (!token) return
-    intentFetcher.submit(
-      {
-        intent: "create-payment-intent",
-        token,
-        items: data.items,
-        totalCycles: data.totalCycles,
-      },
-      { method: "post", action: "/subscribe", encType: "application/json" },
-    )
+  function handlePayWithNewCard() {
+    setStep("payment")
   }
 
   function renderStepCaption() {
@@ -375,12 +387,7 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
     )
   }
 
-  const isSubmitting = confirmFetcher.state !== "idle"
-  const isLoadingIntent = intentFetcher.state !== "idle"
-  const confirmError = confirmResult && "error" in confirmResult ? confirmResult.error : undefined
-  const intentError = intentFetcher.data && "error" in intentFetcher.data ? intentFetcher.data.error : undefined
-  const summaryError = confirmError ?? intentError
-
+  const isSubmitting = checkoutFetcher.state !== "idle" || !!threeDSClientSecret
   const isConfirmStep = step === "summary"
   const isPaymentStep = step === "payment"
   const isSheetHidden = isConfirmStep || isPaymentStep || successVisible
@@ -518,28 +525,37 @@ export default function SubscriptionDrawer({ open, onClose, initialProductId, pr
           products={products}
           cycleDiscountRules={config?.discountRules ?? []}
           savedCard={savedCard}
-          error={summaryError}
-          isSubmitting={isSubmitting || isLoadingIntent}
+          error={checkoutError}
+          isSubmitting={isSubmitting}
           onConfirm={handleConfirmFromSummary}
           onPayWithNewCard={handlePayWithNewCard}
           onBack={() => setStep(6)}
         />
       )}
 
-      {open && isPaymentStep && !successVisible && paymentClientSecret && stripePromise && (
-        <Elements stripe={stripePromise} options={{ clientSecret: paymentClientSecret, locale: "pt-BR", appearance: { theme: "flat", variables: { borderRadius: "12px", fontSizeBase: "16px" } } }}>
+      {open && isPaymentStep && !successVisible && stripePromise && (
+        <Elements
+          stripe={stripePromise}
+          options={{
+            mode: "payment",
+            amount: paymentAmount,
+            currency: "brl",
+            locale: "pt-BR",
+            setup_future_usage: "off_session",
+            appearance: { theme: "flat", variables: { borderRadius: "12px", fontSizeBase: "16px" } },
+          }}
+        >
           <StepPayment
-            clientSecret={paymentClientSecret}
-            isConfirming={isSubmitting}
-            error={confirmError}
-            onSuccess={(paymentIntentId) => handleConfirm(paymentIntentId)}
+            isProcessing={isSubmitting}
+            error={checkoutError}
+            onSuccess={(confirmationToken) => handleCheckout(confirmationToken)}
             onBack={() => setStep("summary")}
           />
         </Elements>
       )}
 
-      {open && isSubmitting && !successVisible && (isConfirmStep || !paymentClientSecret) && (
-        <div className="fixed inset-0 z-[60] bg-background flex flex-col items-center justify-center px-6 text-center animate-in fade-in-0 duration-200">
+      {open && isSubmitting && !successVisible && (isConfirmStep || isPaymentStep) && (
+        <div className="fixed inset-0 z-60 bg-background flex flex-col items-center justify-center px-6 text-center animate-in fade-in-0 duration-200">
           <div className="text-4xl mb-6 animate-pulse">⏳</div>
           <p className="text-lg font-medium mb-2">{t("payment.processing")}</p>
           <p className="text-sm text-muted-foreground">{t("payment.processingHint")}</p>
